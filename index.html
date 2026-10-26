@@ -33,7 +33,8 @@ body.theme-burgundy{--gold:var(--cine-accent);--line:#50303b;--panel:#21151a;--p
 body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme-burgundy .stat{background:var(--panel)}
 .film[draggable="true"]{cursor:grab}.film.dragging{opacity:.45;outline:2px dashed var(--gold)}
 @media(min-width:1051px){.grid{grid-template-columns:repeat(var(--cine-columns,5),minmax(0,1fr))}}
-\n@media(max-width:1050px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:760px){.shell{padding-top:14px}.hero-mark{display:none}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.toolbar select{flex:1;min-width:125px}.topbar .btn{padding:9px 10px}.filmcontent{padding:9px}.film h4{font-size:12px}.meta{font-size:10px}.modalbody{grid-template-columns:1fr 1fr}}@media(max-width:460px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brandmark{width:40px;height:40px}.sub{font-size:10px}.modalbody{grid-template-columns:1fr}.field.full{grid-column:auto}.topbar{align-items:flex-start}.topbar .btn{font-size:12px}}
+
+@media(max-width:1050px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:760px){.shell{padding-top:14px}.hero-mark{display:none}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.toolbar select{flex:1;min-width:125px}.topbar .btn{padding:9px 10px}.filmcontent{padding:9px}.film h4{font-size:12px}.meta{font-size:10px}.modalbody{grid-template-columns:1fr 1fr}}@media(max-width:460px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brandmark{width:40px;height:40px}.sub{font-size:10px}.modalbody{grid-template-columns:1fr}.field.full{grid-column:auto}.topbar{align-items:flex-start}.topbar .btn{font-size:12px}}
 </style>
 </head>
 <body>
@@ -93,7 +94,8 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
   <div class="modalfoot"><button type="button" class="btn" id="resetSettings">Restaurar padrão</button><button type="submit" class="btn primary">Aplicar e salvar</button></div>
  </form>
 </dialog>
-\n<dialog id="filmDialog">
+
+<dialog id="filmDialog">
  <form id="filmForm">
   <div class="modalhead"><h3 id="dialogTitle">Adicionar filme</h3><button type="button" class="btn" id="closeDialog">✕</button></div>
   <div class="modalbody">
@@ -116,7 +118,7 @@ const SUPABASE_URL='https://ajfqoixqewykognhzgls.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ouAeLEXS702j-jK8GMGMNg_58w1-DFo';
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let films=[],activeFormat='Todos',editId=null,currentUser=null;
-const $=id=>document.getElementById(id);\n
+const $=id=>document.getElementById(id);
 const SETTINGS_KEY='cineprimeVisualSettingsV1';
 const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',order:[]};
 function readSettings(){try{return {...DEFAULT_SETTINGS,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}}catch{return {...DEFAULT_SETTINGS}}}
