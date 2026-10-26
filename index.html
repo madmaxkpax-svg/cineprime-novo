@@ -225,6 +225,7 @@ function render(){
  if(sort==='title')arr.sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
  else if(sort==='year')arr.sort((a,b)=>(a.year||9999)-(b.year||9999));
  else if(sort==='newest')arr.sort((a,b)=>(b.added||0)-(a.added||0));
+ else if(sort==='custom'){const positions=new Map(customOrder.map((id,index)=>[String(id),index]));arr.sort((a,b)=>(positions.get(String(a.id))??Number.MAX_SAFE_INTEGER)-(positions.get(String(b.id))??Number.MAX_SAFE_INTEGER));}
  else if(sort==='saga')arr.sort((a,b)=>{
   const sagaA=norm(a.saga),sagaB=norm(b.saga);
   if(!sagaA&&sagaB)return 1;
@@ -238,6 +239,7 @@ function render(){
  $('resultCount').textContent=arr.length+' '+(arr.length===1?'título':'títulos');$('listTitle').textContent=activeFormat==='Todos'?'Minha coleção':'Minha coleção · '+activeFormat;
  $('grid').innerHTML=arr.length?arr.map(f=>`<article class="film" data-film-id="${escAttr(f.id)}"><div class="poster">${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div><div class="filmactions"><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div></div></article>`).join(''):`<div class="empty"><b>${films.length?'Nenhum título encontrado':'Sua coleção começa aqui'}</b>${films.length?'Tente alterar a busca ou os filtros.':'Adicione DVDs, Blu-rays ou filmes digitais para montar seu catálogo.'}<div style="margin-top:15px"><button class="btn primary" onclick="openAdd()">＋ Cadastrar filme</button></div></div>`;
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.format===activeFormat));
+ enableFilmDragging();
 }
 function openAdd(){editId=null;$('filmForm').reset();$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('format').value='DVD';$('dialogTitle').textContent='Adicionar filme';$('filmDialog').showModal()}
 function editFilm(id){const f=films.find(x=>Number(x.id)===Number(id));if(!f)return;editId=f.id;$('dialogTitle').textContent='Editar filme';for(const k of ['title','year','format','genre','saga','cover','notes'])$(k).value=f[k]??'';$('coverSearchTitle').value=f.title||'';$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('filmDialog').showModal()}
