@@ -197,17 +197,20 @@ $('grid').addEventListener('dragover',e=>{
  const after=(e.clientY-r.top)>r.height/2;
  target.parentNode.insertBefore(dragging,after?target.nextSibling:target);
 });
-$('grid').addEventListener('drop',async e=>{
+$('grid').addEventListener('drop',e=>{
  if($('sort').value!=='custom')return;
  e.preventDefault();
- customOrder=[...$('grid').querySelectorAll('.film')].map(card=>String(card.dataset.filmId));
- const visible=new Set(customOrder);
- customOrder=[...customOrder,...films.map(f=>String(f.id)).filter(id=>!visible.has(id)&&!customOrder.includes(id))];
- await saveCustomOrder();
+ // A ordem final é salva no evento dragend, depois que o navegador conclui o movimento.
 });
-$('grid').addEventListener('dragend',e=>{
+$('grid').addEventListener('dragend',async e=>{
  const card=e.target.closest('.film');
- if(card)card.classList.remove('dragging');
+ if(!card)return;
+ card.classList.remove('dragging');
+ if($('sort').value!=='custom')return;
+ const visibleOrder=[...$('grid').querySelectorAll('.film')].map(card=>String(card.dataset.filmId));
+ const visible=new Set(visibleOrder);
+ customOrder=[...visibleOrder,...films.map(f=>String(f.id)).filter(id=>!visible.has(id)&&!visibleOrder.includes(id))];
+ await saveCustomOrder();
 });
 function setAuthView(signedIn){$('authScreen').style.display=signedIn?'none':'grid';$('appShell').style.display=signedIn?'block':'none';if(signedIn)$('signedInAs').textContent=currentUser?.email||''}
 async function refreshSession(){const {data,error}=await db.auth.getSession();if(error)throw error;currentUser=data.session?.user||null;setAuthView(!!currentUser);if(currentUser){try{await loadFilms()}catch(e){console.error(e);toast('Não foi possível carregar os filmes: '+(e.message||'verifique as políticas de acesso.'))}}}
