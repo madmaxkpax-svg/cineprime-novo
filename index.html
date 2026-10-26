@@ -117,7 +117,7 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
 const SUPABASE_URL='https://ajfqoixqewykognhzgls.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ouAeLEXS702j-jK8GMGMNg_58w1-DFo';
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-let films=[],activeFormat='Todos',editId=null,currentUser=null;
+let films=[],activeFormat='Todos',editId=null,currentUser=null,customOrder=[];
 const $=id=>document.getElementById(id);
 const SETTINGS_KEY='cineprimeVisualSettingsV1';
 const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',order:[]};
@@ -154,7 +154,61 @@ function escAttr(s){return esc(s)}
 function numberFor(f){return String([...films].sort((a,b)=>(a.added||a.id||0)-(b.added||b.id||0)).findIndex(x=>x.id===f.id)+1).padStart(3,'0')}
 function rowToFilm(r){return {id:r.id,title:r.titulo||'',year:r.ano??'',format:r.formato||'DVD',genre:r.categoria||'',saga:r.saga||'',cover:r.imagem_url||'',notes:r.notas||r.descricao||'',added:r.created_at?Date.parse(r.created_at):(r.adicionado_em?Date.parse(r.adicionado_em):Number(r.id)||Date.now())}}
 function filmToRow(f){return {titulo:f.title,ano:f.year===''?null:Number(f.year)||null,formato:f.format,categoria:f.genre||null,saga:f.saga||null,imagem_url:f.cover||null,notas:f.notes||null,descricao:f.notes||null}}
-async function loadFilms(){const {data,error}=await db.from('filmes').select('*').order('id',{ascending:true});if(error)throw error;films=(data||[]).map(rowToFilm);render()}
+async function loadFilms(){
+ const {data,error}=await db.from('filmes').select('*').order('id',{ascending:true});
+ if(error)throw error;
+ films=(data||[]).map(rowToFilm);
+ customOrder=[];
+ if(currentUser){
+  try{
+   const pref=await db.from('cineprime_preferencias').select('ordem_filmes').eq('user_id',currentUser.id).maybeSingle();
+   if(!pref.error&&Array.isArray(pref.data?.ordem_filmes))customOrder=pref.data.ordem_filmes.map(String);
+  }catch(e){console.warn('Preferência de ordem não carregada:',e)}
+ }
+ render()
+}
+async function saveCustomOrder(){
+ if(!currentUser){toast('Entre na conta para salvar sua ordem personalizada.');return}
+ const {error}=await db.from('cineprime_preferencias').upsert({user_id:currentUser.id,ordem_filmes:customOrder,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+ if(error){console.error(error);toast('A ordem foi alterada nesta tela, mas não foi salva na nuvem. Execute o SQL de configuração indicado.');return}
+ toast('Ordem personalizada salva na nuvem.')
+}
+function enableFilmDragging(){
+ const grid=$('grid');
+ grid.querySelectorAll('.film').forEach(card=>{
+  card.draggable=$('sort').value==='custom';
+  card.title=card.draggable?'Arraste para mudar a posição deste filme':'Selecione “Minha ordem personalizada” para mover os cards';
+ });
+}
+$('grid').addEventListener('dragstart',e=>{
+ const card=e.target.closest('.film');
+ if(!card||$('sort').value!=='custom') {e.preventDefault();return}
+ card.classList.add('dragging');
+ e.dataTransfer.effectAllowed='move';
+ e.dataTransfer.setData('text/plain',card.dataset.filmId);
+});
+$('grid').addEventListener('dragover',e=>{
+ if($('sort').value!=='custom')return;
+ const dragging=$('grid').querySelector('.film.dragging');
+ const target=e.target.closest('.film');
+ if(!dragging||!target||dragging===target)return;
+ e.preventDefault();
+ const r=target.getBoundingClientRect();
+ const after=(e.clientY-r.top)>r.height/2;
+ target.parentNode.insertBefore(dragging,after?target.nextSibling:target);
+});
+$('grid').addEventListener('drop',async e=>{
+ if($('sort').value!=='custom')return;
+ e.preventDefault();
+ customOrder=[...$('grid').querySelectorAll('.film')].map(card=>String(card.dataset.filmId));
+ const visible=new Set(customOrder);
+ customOrder=[...customOrder,...films.map(f=>String(f.id)).filter(id=>!visible.has(id)&&!customOrder.includes(id))];
+ await saveCustomOrder();
+});
+$('grid').addEventListener('dragend',e=>{
+ const card=e.target.closest('.film');
+ if(card)card.classList.remove('dragging');
+});
 function setAuthView(signedIn){$('authScreen').style.display=signedIn?'none':'grid';$('appShell').style.display=signedIn?'block':'none';if(signedIn)$('signedInAs').textContent=currentUser?.email||''}
 async function refreshSession(){const {data,error}=await db.auth.getSession();if(error)throw error;currentUser=data.session?.user||null;setAuthView(!!currentUser);if(currentUser){try{await loadFilms()}catch(e){console.error(e);toast('Não foi possível carregar os filmes: '+(e.message||'verifique as políticas de acesso.'))}}}
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('authMessage').textContent='Entrando...';$('loginButton').disabled=true;try{const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)throw error;currentUser=data.user;setAuthView(true);$('authMessage').textContent='';await loadFilms();toast('Login realizado.')}catch(err){$('authMessage').textContent='Não foi possível entrar. Confira o e-mail e a senha. '+(err.message||'');}finally{$('loginButton').disabled=false}});
