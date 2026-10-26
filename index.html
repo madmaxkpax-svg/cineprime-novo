@@ -20,7 +20,20 @@ h1{font-size:clamp(22px,3vw,32px);margin:0;letter-spacing:.02em}.sub{color:var(-
 .sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}.sectionhead h3{margin:0;font-size:18px}.sectionhead span{color:var(--muted);font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}.film{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#141417;min-width:0;transition:transform .18s,border-color .18s}.film:hover{transform:translateY(-3px);border-color:#8f7135}.poster{aspect-ratio:2/3;background:linear-gradient(150deg,#29231a,#101013 65%);position:relative;overflow:hidden;display:grid;place-items:center}.poster img{width:100%;height:100%;object-fit:cover;display:block}.poster .placeholder{font-size:42px;color:#d6b15e70}.poster .number{position:absolute;top:9px;left:9px;background:#080809d9;border:1px solid #d6b15e80;color:var(--gold);font-size:11px;font-weight:800;padding:5px 7px;border-radius:6px}.format{position:absolute;right:8px;bottom:8px;background:#0b0b0de8;border:1px solid #ffffff2b;border-radius:6px;padding:5px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}.filmcontent{padding:12px}.film h4{margin:0 0 5px;font-size:14px;line-height:1.35}.year{font-size:12px;color:var(--gold)}.meta{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.45;min-height:30px}.filmactions{display:flex;gap:6px;margin-top:10px}.mini{font-size:11px;padding:6px 8px;border-radius:7px;flex:1}.empty{border:1px dashed #47474d;border-radius:14px;padding:42px 18px;text-align:center;color:var(--muted);grid-column:1/-1}.empty b{display:block;color:var(--text);margin-bottom:8px}.footer{border-top:1px solid var(--line);margin-top:34px;padding-top:16px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 dialog{background:#17171b;color:var(--text);border:1px solid #4b4537;border-radius:18px;width:min(600px,calc(100% - 24px));padding:0;box-shadow:0 24px 90px #000b}dialog::backdrop{background:#000b;backdrop-filter:blur(5px)}.modalhead{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modalhead h3{margin:0}.modalbody{padding:20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--muted)}.field.full{grid-column:1/-1}.modalfoot{padding:15px 22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.help{color:var(--muted);font-size:12px;line-height:1.5}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#27231a;border:1px solid #8f7135;color:#f5dfa0;border-radius:10px;padding:12px 16px;display:none;z-index:10;max-width:90vw}
-@media(max-width:1050px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:760px){.shell{padding-top:14px}.hero-mark{display:none}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.toolbar select{flex:1;min-width:125px}.topbar .btn{padding:9px 10px}.filmcontent{padding:9px}.film h4{font-size:12px}.meta{font-size:10px}.modalbody{grid-template-columns:1fr 1fr}}@media(max-width:460px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brandmark{width:40px;height:40px}.sub{font-size:10px}.modalbody{grid-template-columns:1fr}.field.full{grid-column:auto}.topbar{align-items:flex-start}.topbar .btn{font-size:12px}}
+
+/* Configurações visuais do CinePrime */
+:root{--cine-accent:var(--gold);--cine-page-bg:#0b0b0d}
+body{background:radial-gradient(ellipse at top,#202024 0,var(--cine-page-bg) 48%)}
+body.bg-solid{background:var(--cine-page-bg)}
+body.bg-texture{background-image:repeating-linear-gradient(135deg,transparent 0,transparent 18px,#ffffff04 18px,#ffffff04 19px),radial-gradient(ellipse at top,#202024 0,var(--cine-page-bg) 58%)}
+body.theme-light{--bg:#f1eee8;--panel:#fffdfa;--panel2:#eee9df;--line:#d7d0c3;--gold:var(--cine-accent);--text:#28231d;--muted:#6f685f;--good:#347a51;background:radial-gradient(ellipse at top,#fffdfa 0,var(--cine-page-bg) 70%);color:var(--text)}
+body.theme-light .stat,body.theme-light .film,body.theme-light input,body.theme-light select,body.theme-light textarea,body.theme-light .tab{background:#fffdfa;color:var(--text)}
+body.theme-blue{--gold:var(--cine-accent);--line:#29394c;--panel:#111c2b;--panel2:#18283b;--text:#edf4fc;--muted:#a9b9cb}
+body.theme-burgundy{--gold:var(--cine-accent);--line:#50303b;--panel:#21151a;--panel2:#302027;--text:#f8edf0;--muted:#c6aeb5}
+body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme-burgundy .stat{background:var(--panel)}
+.film[draggable="true"]{cursor:grab}.film.dragging{opacity:.45;outline:2px dashed var(--gold)}
+@media(min-width:1051px){.grid{grid-template-columns:repeat(var(--cine-columns,5),minmax(0,1fr))}}
+\n@media(max-width:1050px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:760px){.shell{padding-top:14px}.hero-mark{display:none}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.toolbar select{flex:1;min-width:125px}.topbar .btn{padding:9px 10px}.filmcontent{padding:9px}.film h4{font-size:12px}.meta{font-size:10px}.modalbody{grid-template-columns:1fr 1fr}}@media(max-width:460px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.brandmark{width:40px;height:40px}.sub{font-size:10px}.modalbody{grid-template-columns:1fr}.field.full{grid-column:auto}.topbar{align-items:flex-start}.topbar .btn{font-size:12px}}
 </style>
 </head>
 <body>
@@ -42,7 +55,7 @@ dialog{background:#17171b;color:var(--text);border:1px solid #4b4537;border-radi
 <div class="shell" id="appShell" style="display:none">
 <header class="topbar">
  <div class="brand"><div class="brandmark">✦</div><div><h1><span style="color:var(--gold)">CINEPRIME</span></h1><div class="sub">Arquivo pessoal de cinema</div></div></div>
- <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
+ <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
 </header>
 <section class="hero"><div><div class="eyebrow">Sua coleção. Sua história.</div><h2>Todos os seus filmes,<br><span style="color:var(--gold)">em um só lugar.</span></h2><p>Organize DVDs, Blu-rays e títulos digitais. Catalogue capas, sagas, gêneros e anos — sem duplicar seus registros.</p></div><div class="hero-mark">✦</div></section>
 <section class="stats">
@@ -55,7 +68,7 @@ dialog{background:#17171b;color:var(--text);border:1px solid #4b4537;border-radi
  <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
- <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option></select>
+ <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada</option></select>
 </div>
 <nav class="tabs" aria-label="Formato">
  <button class="tab active" data-format="Todos">Todos os formatos</button><button class="tab" data-format="DVD">DVD</button><button class="tab" data-format="Blu-ray">Blu-ray</button><button class="tab" data-format="Digital">Digital</button>
@@ -65,7 +78,22 @@ dialog{background:#17171b;color:var(--text);border:1px solid #4b4537;border-radi
 <footer class="footer"><span>CINEPRIME · Edição do colecionador</span><span>Seus dados ficam salvos na nuvem, na sua conta CinePrime.</span><span><button class="btn mini" id="exportBtn">Exportar backup</button> <button class="btn mini" id="importBtn">Importar backup</button></span></footer>
 <input id="importFile" type="file" accept="application/json,.json" hidden>
 </div>
-<dialog id="filmDialog">
+
+<dialog id="settingsDialog">
+ <form id="settingsForm">
+  <div class="modalhead"><h3>Configurações do CinePrime</h3><button type="button" class="btn" id="closeSettings">✕</button></div>
+  <div class="modalbody">
+   <div class="field full"><label for="themeChoice">Tema visual</label><select id="themeChoice"><option value="cinema">Cinema escuro e dourado</option><option value="light">Claro e elegante</option><option value="blue">Azul noturno</option><option value="burgundy">Vinho clássico</option></select></div>
+   <div class="field full"><label for="backgroundChoice">Fundo da página</label><select id="backgroundChoice"><option value="gradient">Degradê suave</option><option value="solid">Cor uniforme</option><option value="texture">Textura cinematográfica discreta</option></select></div>
+   <div class="field"><label for="accentChoice">Cor de destaque</label><input id="accentChoice" type="color" value="#d6b15e"></div>
+   <div class="field"><label for="backgroundColor">Cor do fundo</label><input id="backgroundColor" type="color" value="#0b0b0d"></div>
+   <div class="field full"><label for="columnsChoice">Filmes por linha (computador)</label><select id="columnsChoice"><option value="3">3 capas</option><option value="4">4 capas</option><option value="5" selected>5 capas</option><option value="6">6 capas</option></select></div>
+   <div class="field full help">Estas configurações ficam salvas neste navegador. A sincronização das preferências entre dispositivos exigirá uma pequena configuração adicional no Supabase; os filmes cadastrados não serão alterados por este painel.</div>
+  </div>
+  <div class="modalfoot"><button type="button" class="btn" id="resetSettings">Restaurar padrão</button><button type="submit" class="btn primary">Aplicar e salvar</button></div>
+ </form>
+</dialog>
+\n<dialog id="filmDialog">
  <form id="filmForm">
   <div class="modalhead"><h3 id="dialogTitle">Adicionar filme</h3><button type="button" class="btn" id="closeDialog">✕</button></div>
   <div class="modalbody">
@@ -88,7 +116,35 @@ const SUPABASE_URL='https://ajfqoixqewykognhzgls.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ouAeLEXS702j-jK8GMGMNg_58w1-DFo';
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let films=[],activeFormat='Todos',editId=null,currentUser=null;
-const $=id=>document.getElementById(id);
+const $=id=>document.getElementById(id);\n
+const SETTINGS_KEY='cineprimeVisualSettingsV1';
+const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',order:[]};
+function readSettings(){try{return {...DEFAULT_SETTINGS,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}}catch{return {...DEFAULT_SETTINGS}}}
+let visualSettings=readSettings();
+function applySettings(){
+ document.body.classList.remove('theme-light','theme-blue','theme-burgundy','bg-solid','bg-texture');
+ if(visualSettings.theme!=='cinema')document.body.classList.add('theme-'+visualSettings.theme);
+ if(visualSettings.background==='solid')document.body.classList.add('bg-solid');
+ if(visualSettings.background==='texture')document.body.classList.add('bg-texture');
+ document.documentElement.style.setProperty('--cine-accent',visualSettings.accent||DEFAULT_SETTINGS.accent);
+ document.documentElement.style.setProperty('--cine-page-bg',visualSettings.page||DEFAULT_SETTINGS.page);
+ document.documentElement.style.setProperty('--cine-columns',String(Math.min(6,Math.max(3,Number(visualSettings.columns)||5))));
+}
+function saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings()}
+function openSettings(){
+ $('themeChoice').value=visualSettings.theme;$('backgroundChoice').value=visualSettings.background;
+ $('accentChoice').value=visualSettings.accent;$('backgroundColor').value=visualSettings.page;
+ $('columnsChoice').value=visualSettings.columns;$('settingsDialog').showModal();
+}
+$('settingsBtn').addEventListener('click',openSettings);
+$('closeSettings').onclick=()=>$('settingsDialog').close();
+$('resetSettings').onclick=()=>{visualSettings={...DEFAULT_SETTINGS,order:[]};saveSettings();openSettings();toast('Configurações padrão restauradas.')};
+$('settingsForm').addEventListener('submit',e=>{
+ e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value};
+ saveSettings();render();$('settingsDialog').close();toast('Aparência salva neste navegador.');
+});
+applySettings();
+
 const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,' ');
 function toast(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').style.display='none',2600)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -124,7 +180,7 @@ function render(){
  });
  else arr.sort((a,b)=>numberFor(a).localeCompare(numberFor(b)));
  $('resultCount').textContent=arr.length+' '+(arr.length===1?'título':'títulos');$('listTitle').textContent=activeFormat==='Todos'?'Minha coleção':'Minha coleção · '+activeFormat;
- $('grid').innerHTML=arr.length?arr.map(f=>`<article class="film"><div class="poster">${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div><div class="filmactions"><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div></div></article>`).join(''):`<div class="empty"><b>${films.length?'Nenhum título encontrado':'Sua coleção começa aqui'}</b>${films.length?'Tente alterar a busca ou os filtros.':'Adicione DVDs, Blu-rays ou filmes digitais para montar seu catálogo.'}<div style="margin-top:15px"><button class="btn primary" onclick="openAdd()">＋ Cadastrar filme</button></div></div>`;
+ $('grid').innerHTML=arr.length?arr.map(f=>`<article class="film" data-film-id="${escAttr(f.id)}"><div class="poster">${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div><div class="filmactions"><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div></div></article>`).join(''):`<div class="empty"><b>${films.length?'Nenhum título encontrado':'Sua coleção começa aqui'}</b>${films.length?'Tente alterar a busca ou os filtros.':'Adicione DVDs, Blu-rays ou filmes digitais para montar seu catálogo.'}<div style="margin-top:15px"><button class="btn primary" onclick="openAdd()">＋ Cadastrar filme</button></div></div>`;
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.format===activeFormat));
 }
 function openAdd(){editId=null;$('filmForm').reset();$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('format').value='DVD';$('dialogTitle').textContent='Adicionar filme';$('filmDialog').showModal()}
