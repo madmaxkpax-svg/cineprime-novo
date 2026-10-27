@@ -139,6 +139,20 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
 @media(max-width:460px){
   .topbar{background-size:auto 210% !important;}
 }
+
+/* CinePrime Neon — moldura neon por gênero, com animação leve */
+.film{--led-color:#35a7ff;position:relative;isolation:isolate;overflow:visible;border-color:color-mix(in srgb,var(--led-color) 45%,#303035);}
+.film::before{content:"";position:absolute;inset:0;border:2px solid var(--led-color);border-radius:13px;pointer-events:none;z-index:3;opacity:0;box-shadow:0 0 5px var(--led-color),0 0 13px var(--led-color),inset 0 0 8px color-mix(in srgb,var(--led-color) 45%,transparent);transition:opacity .25s;}
+.film::after{content:"";position:absolute;inset:4px;border-radius:9px;pointer-events:none;z-index:3;opacity:0;background:radial-gradient(circle at 0 0,#fff 0 2px,var(--led-color) 2.5px 4px,transparent 5px),radial-gradient(circle at 100% 0,#fff 0 2px,var(--led-color) 2.5px 4px,transparent 5px),radial-gradient(circle at 100% 100%,#fff 0 2px,var(--led-color) 2.5px 4px,transparent 5px),radial-gradient(circle at 0 100%,#fff 0 2px,var(--led-color) 2.5px 4px,transparent 5px);filter:drop-shadow(0 0 4px var(--led-color));}
+body.cine-leds-on .film::before{opacity:1;animation:neonPulse 2.8s ease-in-out infinite;}
+body.cine-leds-on .film::after{opacity:.95;animation:neonDots 3.8s linear infinite;}
+body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18px var(--led-color),0 0 28px color-mix(in srgb,var(--led-color) 60%,transparent),inset 0 0 10px color-mix(in srgb,var(--led-color) 50%,transparent);}
+@keyframes neonPulse{0%,100%{filter:brightness(.85);box-shadow:0 0 5px var(--led-color),0 0 12px var(--led-color),inset 0 0 7px color-mix(in srgb,var(--led-color) 40%,transparent)}50%{filter:brightness(1.3);box-shadow:0 0 7px var(--led-color),0 0 18px var(--led-color),0 0 26px color-mix(in srgb,var(--led-color) 45%,transparent),inset 0 0 10px color-mix(in srgb,var(--led-color) 55%,transparent)}}
+@keyframes neonDots{0%{background-position:0 0,100% 0,100% 100%,0 100%;filter:drop-shadow(0 0 3px var(--led-color))}50%{filter:drop-shadow(0 0 7px var(--led-color))}100%{background-position:0 0,100% 0,100% 100%,0 100%;filter:drop-shadow(0 0 3px var(--led-color))}}
+#ledToggle[aria-pressed="true"]{border-color:#35a7ff;color:#fff;box-shadow:0 0 10px #35a7ff55}
+@media(prefers-reduced-motion:reduce){body.cine-leds-on .film::before,body.cine-leds-on .film::after{animation:none!important}}
+@supports not (color:color-mix(in srgb,red,blue)){.film::before{box-shadow:0 0 7px var(--led-color),0 0 16px var(--led-color)}}
+
 </style>
 </head>
 <body>
@@ -172,6 +186,7 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
 </section>
 </div><!-- /.cinema-intro -->
 <div class="toolbar">
+ <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs: desligados</button>
  <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
@@ -334,6 +349,12 @@ async function refreshSession(){const {data,error}=await db.auth.getSession();if
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('authMessage').textContent='Entrando...';$('loginButton').disabled=true;try{const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)throw error;currentUser=data.user;setAuthView(true);$('authMessage').textContent='';await loadFilms();toast('Login realizado.')}catch(err){$('authMessage').textContent='Não foi possível entrar. Confira o e-mail e a senha. '+(err.message||'');}finally{$('loginButton').disabled=false}});
 $('resetPassword').addEventListener('click',async()=>{const email=$('loginEmail').value.trim();if(!email){$('authMessage').textContent='Informe seu e-mail acima para receber o link de redefinição.';return}const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});$('authMessage').textContent=error?'Não foi possível solicitar a redefinição: '+error.message:'Se esse e-mail estiver cadastrado, você receberá instruções para redefinir a senha.'});
 $('logoutBtn').addEventListener('click',async()=>{const {error}=await db.auth.signOut();if(error){toast('Não foi possível sair: '+error.message);return}currentUser=null;films=[];setAuthView(false);$('loginPassword').value='';toast('Você saiu do CinePrime.')});
+const LED_KEY='cineprimeLedEffectsV2';
+function ledColorForGenre(genre){const n=norm(String(genre||''));if(n.includes('terror'))return '#d946ef';if(n.includes('acao')||n.includes('ação'))return '#ff244f';if(n.includes('ficcao')||n.includes('ficção')||n.includes('cient'))return '#168bff';if(n.includes('suspense')||n.includes('thriller')||n.includes('crime'))return '#ff7a18';if(n.includes('drama'))return '#ffd166';if(n.includes('comedia')||n.includes('comédia'))return '#39e58c';if(n.includes('aventura'))return '#00e5ff';if(n.includes('romance'))return '#ff65a3';if(n.includes('anim'))return '#a78bfa';if(n.includes('faroeste')||n.includes('western'))return '#f59e0b';if(n.includes('document'))return '#e5e7eb';if(n.includes('classico')||n.includes('clássico'))return '#e8d9a8';return '#a855f7'}
+function applyLedPreference(){const on=localStorage.getItem(LED_KEY)==='on';document.body.classList.toggle('cine-leds-on',on);const b=document.getElementById('ledToggle');if(b){b.setAttribute('aria-pressed',String(on));b.textContent=on?'✦ LEDs: ligados':'✦ LEDs: desligados'}}
+const ledButton=document.getElementById('ledToggle');if(ledButton)ledButton.addEventListener('click',()=>{localStorage.setItem(LED_KEY,document.body.classList.contains('cine-leds-on')?'off':'on');applyLedPreference()});
+applyLedPreference();
+
 function render(){
  $('total').textContent=films.length;$('dvds').textContent=films.filter(f=>f.format==='DVD').length;$('blurays').textContent=films.filter(f=>f.format==='Blu-ray').length;$('digital').textContent=films.filter(f=>f.format==='Digital').length;
  const oldG=$('genreFilter').value,oldS=$('sagaFilter').value;
@@ -357,7 +378,7 @@ function render(){
  });
  else arr.sort((a,b)=>numberFor(a).localeCompare(numberFor(b)));
  $('resultCount').textContent=arr.length+' '+(arr.length===1?'título':'títulos');$('listTitle').textContent=activeFormat==='Todos'?'Minha coleção':'Minha coleção · '+activeFormat;
- const filmCard=f=>`<article class="film" data-film-id="${escAttr(f.id)}"><div class="poster">${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div><div class="filmactions"><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div></div></article>`;
+ const filmCard=f=>`<article class="film" data-film-id="${escAttr(f.id)}" data-genre="${escAttr(f.genre||'')}" style="--led-color:${ledColorForGenre(f.genre)}"><div class="poster">${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div><div class="filmactions"><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div></div></article>`;
  const genreIcon=name=>{const n=norm(name);if(n.includes('terror'))return '☠';if(n.includes('acao')||n.includes('ação'))return '⚔';if(n.includes('aventura'))return '⌖';if(n.includes('ficcao')||n.includes('ficção')||n.includes('cient'))return '✦';if(n.includes('drama'))return '◈';if(n.includes('faroeste')||n.includes('western'))return '♜';if(n.includes('suspense')||n.includes('thriller'))return '◉';if(n.includes('comedia')||n.includes('comédia'))return '☻';if(n.includes('anim'))return '✿';if(n.includes('romance'))return '♡';if(n.includes('document'))return '▤';return '✦'};
  if(!arr.length){$('grid').innerHTML=`<div class="empty"><b>${films.length?'Nenhum título encontrado':'Sua coleção começa aqui'}</b>${films.length?'Tente alterar a busca ou os filtros.':'Adicione DVDs, Blu-rays ou filmes digitais para montar seu catálogo.'}<div style="margin-top:15px"><button class="btn primary" onclick="openAdd()">＋ Cadastrar filme</button></div></div>`}
  else if(g||q||s){$('grid').innerHTML=`<div class="genre-gallery-grid">${arr.map(filmCard).join('')}</div>`}
