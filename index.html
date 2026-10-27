@@ -80,6 +80,65 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
   .topbar .btn{font-size:12px;padding:9px 10px}
 }
 
+
+/* Fundo cinematográfico unificado: cabeçalho + apresentação + indicadores */
+.cinema-intro{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border:1px solid #b99a5866;
+  border-radius:20px;
+  padding:10px 16px 8px;
+  margin:0 0 24px;
+  background-color:#111216;
+  background-position:center 38%;
+  background-size:cover;
+  background-repeat:no-repeat;
+  box-shadow:0 16px 42px #0005;
+}
+.cinema-intro:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(180deg,#0b0b0d50 0%,#101116a8 58%,#0b0b0df0 100%);
+}
+.cinema-intro .topbar{
+  background-image:none !important;
+  background-color:transparent;
+  box-shadow:none;
+  margin-top:0;
+}
+.cinema-intro .topbar:before{background:linear-gradient(90deg,#10151b65 0%,#10151b25 65%,#10151b20 100%)}
+.cinema-intro .hero{position:relative;padding-top:30px;padding-bottom:22px}
+.cinema-intro .stats{position:relative;margin-bottom:0}
+.cinema-intro .stat{background:#171318d9;backdrop-filter:blur(3px)}
+@media(max-width:760px){
+  .cinema-intro{padding:8px 10px 10px;border-radius:16px;background-position:center center}
+  .cinema-intro .topbar{border-radius:12px}
+  .cinema-intro .hero{padding-top:24px}
+  .cinema-intro .stats{margin-top:8px;gap:8px}
+}
+
+/* Correção visual v2: ampliar o enquadramento da imagem do cabeçalho e clareá-la */
+.topbar{
+  min-height:210px;
+  background-size:150% auto !important;
+  background-position:center 44% !important;
+  padding-top:38px;
+  padding-bottom:38px;
+}
+.topbar:before{
+  background:linear-gradient(90deg,#10151b78 0%,#10151b48 55%,#10151b38 100%);
+}
+@media(max-width:760px){
+  .topbar{min-height:190px;background-size:auto 230% !important;background-position:center 44% !important;padding-top:24px;padding-bottom:24px}
+  .topbar:before{background:linear-gradient(90deg,#10151b80 0%,#10151b55 100%)}
+}
+@media(max-width:460px){
+  .topbar{background-size:auto 210% !important;}
+}
 </style>
 </head>
 <body>
@@ -99,6 +158,7 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
 </section>
 
 <div class="shell" id="appShell" style="display:none">
+<div class="cinema-intro">
 <header class="topbar">
  <div class="brand"><div class="brandmark">✦</div><div><h1><span style="color:var(--gold)">CINEPRIME</span></h1><div class="sub">Arquivo pessoal de cinema</div></div></div>
  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
@@ -110,6 +170,7 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
  <div class="stat"><div class="num" id="blurays">0</div><div class="label">Blu-rays</div></div>
  <div class="stat"><div class="num" id="digital">0</div><div class="label">Digitais</div></div>
 </section>
+</div><!-- /.cinema-intro -->
 <div class="toolbar">
  <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
@@ -184,7 +245,7 @@ function applySettings(){
  document.documentElement.style.setProperty('--genre-frame-border',visualSettings.frameBorderColor||DEFAULT_SETTINGS.frameBorderColor);
  document.documentElement.style.setProperty('--genre-frame-text',visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor);
  document.documentElement.style.setProperty('--genre-frame-bg',visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor);
- const topbar=document.querySelector('.topbar'); if(topbar){const u=(visualSettings.wallpaperUrl||'').trim();topbar.style.backgroundImage=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:'';}
+ const intro=document.querySelector('.cinema-intro'); const topbar=document.querySelector('.topbar'); const u=(visualSettings.wallpaperUrl||'').trim(); const wallpaper=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:''; if(intro)intro.style.backgroundImage=wallpaper; if(topbar)topbar.style.backgroundImage='none';
 }
 function saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings()}
 function openSettings(){
