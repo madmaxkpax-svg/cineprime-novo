@@ -6,6 +6,9 @@
 <meta name="theme-color" content="#111113">
 <meta name="description" content="CinePrime — catálogo pessoal de filmes">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Creepster&display=swap" rel="stylesheet">
 <title>CinePrime</title>
 <style>
 :root{--bg:#0b0b0d;--panel:#151518;--panel2:#1d1d21;--line:#303035;--gold:#d6b15e;--red:#a9272d;--text:#f4f0e8;--muted:#aaa6a0;--good:#6fb58a}
@@ -81,7 +84,8 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
 }
 
 
-.cinema-quote{margin:10px 0 8px;color:var(--cine-quote-color,#fff);font-family:var(--cine-quote-font,Georgia,serif);font-size:var(--cine-quote-size,clamp(16px,2.1vw,24px));font-weight:600;line-height:1.4;text-shadow:0 2px 8px #000b;max-width:900px;white-space:pre-line;overflow-wrap:anywhere}
+.cinema-quote{position:absolute;z-index:5;left:9%;right:9%;bottom:3%;margin:0;padding:9px 14px;color:var(--cine-quote-color,#fff);font-family:var(--cine-quote-font,Georgia,serif);font-size:var(--cine-quote-size,clamp(16px,2.1vw,24px));font-weight:600;line-height:1.4;text-shadow:0 2px 8px #000b;overflow:hidden;white-space:nowrap;border-top:1px solid #d6b15e80;border-bottom:1px solid #d6b15e80;background:linear-gradient(90deg,#08090bbd,#121318a8 50%,#08090bbd);backdrop-filter:blur(3px);mask-image:linear-gradient(90deg,transparent 0,#000 2%,#000 98%,transparent 100%)}
+.cinema-quote[hidden]{display:none}.cinema-quote__track{display:flex;width:max-content;align-items:center;gap:4rem;white-space:nowrap;will-change:transform;animation:cineQuoteScroll var(--cine-quote-duration,34s) linear infinite}.cinema-quote__item{display:block;flex:0 0 auto;white-space:nowrap;padding:.12em 0}.cinema-quote:hover .cinema-quote__track{animation-play-state:paused}@keyframes cineQuoteScroll{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 2rem))}}
 /* Fundo cinematográfico unificado: cabeçalho + apresentação + indicadores */
 .cinema-intro{
   position:relative;
@@ -102,7 +106,7 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
   content:"";
   position:absolute;
   inset:0;
-  z-index:-1;
+  z-index:0;
   pointer-events:none;
   background:linear-gradient(180deg,#0b0b0d25 0%,#10111665 48%,#0b0b0da8 100%);
 }
@@ -160,6 +164,21 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 @media(prefers-reduced-motion:reduce){body.cine-leds-on .film::before,body.cine-leds-on .film::after{animation:none!important}}
 @supports not (color:color-mix(in srgb,red,blue)){.film::before{box-shadow:0 0 7px var(--led-color),0 0 16px var(--led-color)}}
 
+/* Refletores CinePrime: camada independente aplicada sobre qualquer capa. */
+.cinema-intro>.topbar,.cinema-intro>.hero{position:relative;z-index:4}
+.searchlight-overlay{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
+.searchlight-overlay__fixture{position:absolute;bottom:0;width:4.5%;height:9%;background-image:url("assets/cineprime-searchlights-overlay-v1.png?v=6");background-repeat:no-repeat;background-size:556% 100%;z-index:3;will-change:transform;opacity:.9}
+.searchlight-overlay__fixture--left{left:0;background-position:left bottom;transform-origin:8% 100%;animation:cineFixtureLeft 3.8s ease-in-out infinite alternate}
+.searchlight-overlay__fixture--right{right:0;background-position:right bottom;transform-origin:92% 100%;animation:cineFixtureRight 4.2s ease-in-out infinite alternate}
+.searchlight-overlay__beam{position:absolute;bottom:4%;width:62%;height:68%;opacity:.38;filter:blur(7px);mix-blend-mode:screen;z-index:1;will-change:transform,opacity;mask-image:linear-gradient(90deg,transparent 0%,#000 24%,#000 76%,transparent 100%)}
+.searchlight-overlay__beam:after{content:none}
+.searchlight-overlay__beam:before{content:none}
+.searchlight-overlay__beam--left{left:0;clip-path:polygon(8% 100%,20% 100%,78% 0%,52% 0%);transform-origin:14% 100%;background:linear-gradient(0deg,#ffe5a84d 0%,#fff5d932 44%,transparent 100%)}
+.searchlight-overlay__beam--right{right:0;clip-path:polygon(80% 100%,92% 100%,48% 0%,22% 0%);transform-origin:86% 100%;background:linear-gradient(0deg,#ffe5a84d 0%,#fff5d932 44%,transparent 100%)}
+.searchlight-overlay__glow{position:absolute;bottom:1%;width:clamp(7px,.8vw,11px);height:clamp(7px,.8vw,11px);border-radius:50%;background:radial-gradient(circle,#fffdf1 0%,#ffc044e8 30%,transparent 72%);filter:blur(2px);z-index:2;transform:scale(.9);opacity:.72}
+.searchlight-overlay__glow--left{left:2.8%}.searchlight-overlay__glow--right{right:2.8%}
+@media(max-width:640px){.searchlight-overlay__fixture{width:6%;height:7%;background-size:455% 100%}.searchlight-overlay__beam{width:64%;height:52%;bottom:5%}}
+
 </style>
 </head>
 <body>
@@ -180,11 +199,20 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 
 <div class="shell" id="appShell" style="display:none">
 <div class="cinema-intro">
+<div class="searchlight-overlay" aria-hidden="true">
+ <div class="searchlight-overlay__beam searchlight-overlay__beam--left"></div>
+ <div class="searchlight-overlay__beam searchlight-overlay__beam--right"></div>
+ <div class="searchlight-overlay__glow searchlight-overlay__glow--left"></div>
+ <div class="searchlight-overlay__glow searchlight-overlay__glow--right"></div>
+ <div class="searchlight-overlay__fixture searchlight-overlay__fixture--left"></div>
+ <div class="searchlight-overlay__fixture searchlight-overlay__fixture--right"></div>
+</div>
 <header class="topbar">
  <div class="brand"><div class="brandmark">✦</div><div><h1><span style="color:var(--gold)">CINEPRIME</span></h1><div class="sub">Arquivo pessoal de cinema</div></div></div>
  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
 </header>
-<section class="hero"><div><div class="eyebrow">SUA COLEÇÃO. SUA HISTÓRIA.</div><p id="cinemaQuote" class="cinema-quote"></p></div></section>
+<section class="hero"><div><div class="eyebrow">SUA COLEÇÃO. SUA HISTÓRIA.</div></div></section>
+<div id="cinemaQuote" class="cinema-quote" aria-label="Frase de impacto" hidden><div class="cinema-quote__track"><span class="cinema-quote__item"></span><span class="cinema-quote__item" aria-hidden="true"></span></div></div>
 
 </div><!-- /.cinema-intro -->
 <div class="toolbar">
@@ -219,7 +247,7 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
    <div class="field"><label for="backgroundColor">Cor do fundo</label><input id="backgroundColor" type="color" value="#0b0b0d"></div>
    <div class="field full"><label for="wallpaperUrl">Imagem de fundo atrás do título CinePrime (URL da imagem)</label><input id="wallpaperUrl" type="url" placeholder="https://.../imagem.jpg"><div class="help">Você pode trocar a imagem quando quiser. Ex.: uma imagem temática inspirada em O Iluminado, Scarface ou Poltergeist. Use um endereço direto de imagem.</div></div>
    <div class="field full"><label for="quoteText">Frase de impacto (máximo de 350 caracteres)</label><textarea id="quoteText" maxlength="350" rows="4" placeholder="Digite sua frase. Use Enter para quebrar as linhas e ajustar a apresentação."></textarea><div class="help"><span id="quoteCount">0</span>/350 caracteres. Quebras de linha serão mantidas no cabeçalho.</div></div>
-   <div class="field"><label for="quoteFont">Formato da letra</label><select id="quoteFont"><option value="Georgia,serif">Clássica (serifada)</option><option value="Arial,Helvetica,sans-serif">Moderna (sem serifa)</option><option value="'Courier New',monospace">Máquina de escrever</option><option value="cursive">Manuscrita</option><option value="system-ui,sans-serif">Padrão do sistema</option></select></div>
+   <div class="field"><label for="quoteFont">Formato da letra</label><select id="quoteFont"><option value="'Cinzel',Georgia,serif">Cinema clássico (Cinzel)</option><option value="'Creepster',cursive">Terror (Creepster)</option><option value="Georgia,serif">Clássica (serifada)</option><option value="Arial,Helvetica,sans-serif">Moderna (sem serifa)</option><option value="'Courier New',monospace">Máquina de escrever</option><option value="cursive">Manuscrita</option><option value="system-ui,sans-serif">Padrão do sistema</option></select></div>
    <div class="field"><label for="quoteColor">Cor da frase</label><input id="quoteColor" type="color" value="#ffffff"></div>
    <div class="field full"><label for="quoteSize">Tamanho da letra</label><select id="quoteSize"><option value="16px">Pequeno</option><option value="20px">Médio</option><option value="24px">Grande</option><option value="30px">Extra grande</option></select></div>
    <div class="field full"><label for="wallpaperX">Mover imagem para esquerda/direita</label><input id="wallpaperX" type="range" min="0" max="100" value="50"><div class="help">Esquerda ← · centro · direita →</div></div>
@@ -262,7 +290,7 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let films=[],activeFormat='Todos',editId=null,currentUser=null,customOrder=[];
 const $=id=>document.getElementById(id);
 const SETTINGS_KEY='cineprimeVisualSettingsV1';
-const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',wallpaperUrl:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=2000&q=85',frameBorderColor:'#b99a58',frameTextColor:'#3b3020',frameBgColor:'#f3eee3',genrePrefix:'',order:[],quoteText:'',quoteFont:'Georgia,serif',quoteColor:'#ffffff',quoteSize:'24px',wallpaperX:50,wallpaperY:38,wallpaperZoom:100,statOpacity:48};
+const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',wallpaperUrl:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=2000&q=85',frameBorderColor:'#b99a58',frameTextColor:'#3b3020',frameBgColor:'#f3eee3',genrePrefix:'',order:[],quoteText:'',quoteFont:"'Cinzel',Georgia,serif",quoteColor:'#ffffff',quoteSize:'24px',wallpaperX:50,wallpaperY:38,wallpaperZoom:100,statOpacity:48};
 function readSettings(){try{return {...DEFAULT_SETTINGS,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}}catch{return {...DEFAULT_SETTINGS}}}
 let visualSettings=readSettings();
 function applySettings(){
@@ -277,7 +305,7 @@ function applySettings(){
  document.documentElement.style.setProperty('--genre-frame-text',visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor);
  document.documentElement.style.setProperty('--genre-frame-bg',visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor);
  document.documentElement.style.setProperty('--cine-stat-opacity',String(Math.max(0.15,Math.min(0.9,(Number(visualSettings.statOpacity??48))/100))));
- const intro=document.querySelector('.cinema-intro'); const topbar=document.querySelector('.topbar'); const u=(visualSettings.wallpaperUrl||'').trim(); const wallpaper=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:''; if(intro){intro.style.backgroundImage=wallpaper;intro.style.backgroundPosition=`${Number(visualSettings.wallpaperX??50)}% ${Number(visualSettings.wallpaperY??38)}%`;intro.style.backgroundSize=`${Math.max(100,Math.min(220,Number(visualSettings.wallpaperZoom)||100))}% auto`;} if(topbar)topbar.style.backgroundImage='none'; const q=document.getElementById('cinemaQuote');if(q){q.textContent=visualSettings.quoteText||'';q.style.setProperty('--cine-quote-font',visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont);q.style.setProperty('--cine-quote-color',visualSettings.quoteColor||'#ffffff');q.style.setProperty('--cine-quote-size',visualSettings.quoteSize||'24px');}
+ const intro=document.querySelector('.cinema-intro'); const topbar=document.querySelector('.topbar'); const u=(visualSettings.wallpaperUrl||'').trim(); const wallpaper=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:''; if(intro){intro.style.backgroundImage=wallpaper;intro.style.backgroundPosition=`${Number(visualSettings.wallpaperX??50)}% ${Number(visualSettings.wallpaperY??38)}%`;intro.style.backgroundSize=`${Math.max(100,Math.min(220,Number(visualSettings.wallpaperZoom)||100))}% auto`;} if(topbar)topbar.style.backgroundImage='none'; setCinemaQuote(visualSettings.quoteText||'',visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont,visualSettings.quoteColor||'#ffffff',visualSettings.quoteSize||'24px');
 }
 async function saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();if(currentUser){const {error}=await db.from('cineprime_configuracoes_visuais').upsert({user_id:currentUser.id,configuracoes:visualSettings,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error){console.warn('Preferências visuais não sincronizadas; configure a tabela no Supabase:',error.message);return false;}return true;}return false}
 async function loadVisualSettings(){if(!currentUser)return;const {data,error}=await db.from('cineprime_configuracoes_visuais').select('configuracoes').eq('user_id',currentUser.id).maybeSingle();if(!error&&data?.configuracoes&&typeof data.configuracoes==='object'){visualSettings={...DEFAULT_SETTINGS,...data.configuracoes};localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();}else if(error)console.warn('Preferências visuais da nuvem indisponíveis até configurar a tabela:',error.message)}
@@ -297,6 +325,7 @@ applySettings();
 $('quoteText').addEventListener('input',()=> $('quoteCount').textContent=$('quoteText').value.length);['quoteFont','quoteColor','quoteSize'].forEach(id=>$(id).addEventListener('change',()=>{const q=$('cinemaQuote');if(q){q.style.setProperty('--cine-quote-font',$('quoteFont').value);q.style.setProperty('--cine-quote-color',$('quoteColor').value);q.style.setProperty('--cine-quote-size',$('quoteSize').value)}}));$('wallpaperZoom').addEventListener('input',()=> $('zoomCount').textContent=$('wallpaperZoom').value);$('statOpacity').addEventListener('input',()=>{$('opacityCount').textContent=$('statOpacity').value;document.documentElement.style.setProperty('--cine-stat-opacity',String(Number($('statOpacity').value)/100))});
 
 const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,' ');
+function setCinemaQuote(text,font,color,size){const q=document.getElementById('cinemaQuote');if(!q)return;const message=String(text||'').replace(/\s+/g,' ').trim();q.hidden=!message;if(!message)return;const items=q.querySelectorAll('.cinema-quote__item');items.forEach(item=>item.textContent=message);q.setAttribute('aria-label',message);q.style.setProperty('--cine-quote-font',font);q.style.setProperty('--cine-quote-color',color);q.style.setProperty('--cine-quote-size',size);q.style.setProperty('--cine-quote-duration',`${Math.max(18,Math.min(72,Math.ceil(message.length*.16)))}s`)}
 function toast(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').style.display='none',2600)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function escAttr(s){return esc(s)}
@@ -373,6 +402,32 @@ function ledColorForGenre(genre){const n=norm(String(genre||''));if(n.includes('
 function applyLedPreference(){const on=localStorage.getItem(LED_KEY)==='on';document.body.classList.toggle('cine-leds-on',on);const b=document.getElementById('ledToggle');if(b){b.setAttribute('aria-pressed',String(on));b.textContent=on?'✦ LEDs ON':'✦ LEDs OFF'}}
 const ledButton=document.getElementById('ledToggle');if(ledButton)ledButton.addEventListener('click',()=>{localStorage.setItem(LED_KEY,document.body.classList.contains('cine-leds-on')?'off':'on');applyLedPreference()});
 applyLedPreference();
+
+// Animate os refletores no próprio elemento, sem depender das animações CSS do navegador.
+const searchlightOverlay=document.querySelector('.searchlight-overlay');
+if(searchlightOverlay){
+ const leftBeam=searchlightOverlay.querySelector('.searchlight-overlay__beam--left');
+ const rightBeam=searchlightOverlay.querySelector('.searchlight-overlay__beam--right');
+ const leftFixture=searchlightOverlay.querySelector('.searchlight-overlay__fixture--left');
+ const rightFixture=searchlightOverlay.querySelector('.searchlight-overlay__fixture--right');
+ const leftGlow=searchlightOverlay.querySelector('.searchlight-overlay__glow--left');
+ const rightGlow=searchlightOverlay.querySelector('.searchlight-overlay__glow--right');
+ const animateLights=time=>{
+  const a=Math.sin(time/620),b=Math.sin(time/790+1.4),pulse=(Math.sin(time/430)+1)/2;
+  leftBeam.style.transform=`translateY(${-4-a*16}px) rotate(${-12+a*6}deg)`;
+  rightBeam.style.transform=`translateY(${-4-b*16}px) rotate(${12+b*6}deg)`;
+  leftBeam.style.opacity=String(.28+pulse*.3);
+  rightBeam.style.opacity=String(.28+((Math.sin(time/430+1.2)+1)/2)*.3);
+  leftFixture.style.transform=`rotate(${a*2.5}deg)`;
+  rightFixture.style.transform=`rotate(${-b*2.5}deg)`;
+  leftGlow.style.transform=`scale(${.75+pulse*.65})`;
+  rightGlow.style.transform=`scale(${.75+((Math.sin(time/430+1.2)+1)/2)*.65})`;
+  leftGlow.style.opacity=String(.4+pulse*.58);
+  rightGlow.style.opacity=String(.4+((Math.sin(time/430+1.2)+1)/2)*.58);
+  requestAnimationFrame(animateLights);
+ };
+ requestAnimationFrame(animateLights);
+}
 
 function render(){
  $('total').textContent=films.length;$('dvds').textContent=films.filter(f=>f.format==='DVD').length;$('blurays').textContent=films.filter(f=>f.format==='Blu-ray').length;$('digital').textContent=films.filter(f=>f.format==='Digital').length;
