@@ -43,8 +43,8 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
   margin-top:12px;
   padding:34px 26px 30px;
   gap:24px;
-  border:1px solid #c9a85c88;
-  border-bottom:1px solid #d6b15e99;
+  border:0 !important; /* remove a linha/moldura interna solicitada */
+  border-bottom:0 !important;
   border-radius:18px;
   background-position:center 42%;
   box-shadow:0 14px 38px #0005, inset 0 1px 0 #ffffff20;
@@ -81,14 +81,16 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
 }
 
 
+.cinema-quote{margin:10px 0 8px;color:var(--cine-quote-color,#fff);font-family:var(--cine-quote-font,Georgia,serif);font-size:var(--cine-quote-size,clamp(16px,2.1vw,24px));font-weight:600;line-height:1.4;text-shadow:0 2px 8px #000b;max-width:900px;white-space:pre-line;overflow-wrap:anywhere}
 /* Fundo cinematográfico unificado: cabeçalho + apresentação + indicadores */
 .cinema-intro{
   position:relative;
   isolation:isolate;
   overflow:hidden;
-  border:1px solid #b99a5866;
+  border:0; /* remove a linha interna do cabeçalho */
   border-radius:20px;
-  padding:10px 16px 8px;
+  padding:18px 20px 14px;
+  min-height:650px; /* mais espaço vertical para a imagem cinematográfica */
   margin:0 0 24px;
   background-color:#111216;
   background-position:center 38%;
@@ -102,7 +104,7 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
   inset:0;
   z-index:-1;
   pointer-events:none;
-  background:linear-gradient(180deg,#0b0b0d50 0%,#101116a8 58%,#0b0b0df0 100%);
+  background:linear-gradient(180deg,#0b0b0d25 0%,#10111665 48%,#0b0b0da8 100%);
 }
 .cinema-intro .topbar{
   background-image:none !important;
@@ -111,19 +113,19 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
   margin-top:0;
 }
 .cinema-intro .topbar:before{background:linear-gradient(90deg,#10151b65 0%,#10151b25 65%,#10151b20 100%)}
-.cinema-intro .hero{position:relative;padding-top:30px;padding-bottom:22px}
-.cinema-intro .stats{position:relative;margin-bottom:0}
-.cinema-intro .stat{background:#171318d9;backdrop-filter:blur(3px)}
+.cinema-intro .hero{position:relative;padding-top:78px;padding-bottom:48px;min-height:165px}
+.cinema-intro .stat{background:rgba(18,20,27,var(--cine-stat-opacity,.38));backdrop-filter:blur(5px);border-color:#ffffff35;box-shadow:0 8px 24px #0003}
 @media(max-width:760px){
-  .cinema-intro{padding:8px 10px 10px;border-radius:16px;background-position:center center}
+  .cinema-intro{padding:10px 10px 16px;border-radius:16px;background-position:center center;min-height:560px}
   .cinema-intro .topbar{border-radius:12px}
-  .cinema-intro .hero{padding-top:24px}
-  .cinema-intro .stats{margin-top:8px;gap:8px}
+  .cinema-intro .hero{padding-top:48px;padding-bottom:28px;min-height:120px}
 }
 
 /* Correção visual v2: ampliar o enquadramento da imagem do cabeçalho e clareá-la */
 .topbar{
   min-height:210px;
+  border:0 !important;
+  border-bottom:0 !important;
   background-size:150% auto !important;
   background-position:center 44% !important;
   padding-top:38px;
@@ -137,9 +139,14 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
   .topbar:before{background:linear-gradient(90deg,#10151b80 0%,#10151b55 100%)}
 }
 @media(max-width:460px){
-  .topbar{background-size:auto 210% !important;}
+  .topbar{background-size:auto 210% !important;border:0 !important;border-bottom:0 !important;}
+  .cinema-intro{min-height:520px}
+  .cinema-intro .hero{padding-top:36px;padding-bottom:24px}
 }
 
+.stats.stats-below{position:relative;margin:22px 0 26px;gap:14px}
+.stats.stats-below .stat{background:rgba(18,20,27,var(--cine-stat-opacity,.38));backdrop-filter:blur(5px);border-color:#ffffff35;box-shadow:0 8px 24px #0003}
+@media(max-width:760px){.stats.stats-below{margin:18px 0 22px;gap:8px}}
 /* CinePrime Neon — moldura neon por gênero, com animação leve */
 .film{--led-color:#35a7ff;position:relative;isolation:isolate;overflow:visible;border-color:color-mix(in srgb,var(--led-color) 45%,#303035);}
 .film::before{content:"";position:absolute;inset:0;border:2px solid var(--led-color);border-radius:13px;pointer-events:none;z-index:3;opacity:0;box-shadow:0 0 5px var(--led-color),0 0 13px var(--led-color),inset 0 0 8px color-mix(in srgb,var(--led-color) 45%,transparent);transition:opacity .25s;}
@@ -177,16 +184,11 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
  <div class="brand"><div class="brandmark">✦</div><div><h1><span style="color:var(--gold)">CINEPRIME</span></h1><div class="sub">Arquivo pessoal de cinema</div></div></div>
  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
 </header>
-<section class="hero"><div><div class="eyebrow">Sua coleção. Sua história.</div><h2>Todos os seus filmes,<br><span style="color:var(--gold)">em um só lugar.</span></h2><p>Organize DVDs, Blu-rays e títulos digitais. Catalogue capas, sagas, gêneros e anos — sem duplicar seus registros.</p></div><div class="hero-mark">✦</div></section>
-<section class="stats">
- <div class="stat"><div class="num" id="total">0</div><div class="label">Filmes cadastrados</div></div>
- <div class="stat"><div class="num" id="dvds">0</div><div class="label">DVDs</div></div>
- <div class="stat"><div class="num" id="blurays">0</div><div class="label">Blu-rays</div></div>
- <div class="stat"><div class="num" id="digital">0</div><div class="label">Digitais</div></div>
-</section>
+<section class="hero"><div><div class="eyebrow">SUA COLEÇÃO. SUA HISTÓRIA.</div><p id="cinemaQuote" class="cinema-quote"></p></div></section>
+
 </div><!-- /.cinema-intro -->
 <div class="toolbar">
- <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs: desligados</button>
+ <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs OFF</button>
  <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
@@ -195,6 +197,12 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 <nav class="tabs" aria-label="Formato">
  <button class="tab active" data-format="Todos">Todos os formatos</button><button class="tab" data-format="DVD">DVD</button><button class="tab" data-format="Blu-ray">Blu-ray</button><button class="tab" data-format="Digital">Digital</button>
 </nav>
+<section class="stats stats-below">
+ <div class="stat"><div class="num" id="total">0</div><div class="label">Filmes cadastrados</div></div>
+ <div class="stat"><div class="num" id="dvds">0</div><div class="label">DVDs</div></div>
+ <div class="stat"><div class="num" id="blurays">0</div><div class="label">Blu-rays</div></div>
+ <div class="stat"><div class="num" id="digital">0</div><div class="label">Digitais</div></div>
+</section>
 <div class="sectionhead"><h3 id="listTitle">Minha coleção</h3><span id="resultCount">0 títulos</span></div>
 <section class="grid" id="grid"></section>
 <footer class="footer"><span>CINEPRIME · Edição do colecionador</span><span>Seus dados ficam salvos na nuvem, na sua conta CinePrime.</span><span><button class="btn mini" id="exportBtn">Exportar backup</button> <button class="btn mini" id="importBtn">Importar backup</button></span></footer>
@@ -210,6 +218,14 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
    <div class="field"><label for="accentChoice">Cor de destaque</label><input id="accentChoice" type="color" value="#d6b15e"></div>
    <div class="field"><label for="backgroundColor">Cor do fundo</label><input id="backgroundColor" type="color" value="#0b0b0d"></div>
    <div class="field full"><label for="wallpaperUrl">Imagem de fundo atrás do título CinePrime (URL da imagem)</label><input id="wallpaperUrl" type="url" placeholder="https://.../imagem.jpg"><div class="help">Você pode trocar a imagem quando quiser. Ex.: uma imagem temática inspirada em O Iluminado, Scarface ou Poltergeist. Use um endereço direto de imagem.</div></div>
+   <div class="field full"><label for="quoteText">Frase de impacto (máximo de 350 caracteres)</label><textarea id="quoteText" maxlength="350" rows="4" placeholder="Digite sua frase. Use Enter para quebrar as linhas e ajustar a apresentação."></textarea><div class="help"><span id="quoteCount">0</span>/350 caracteres. Quebras de linha serão mantidas no cabeçalho.</div></div>
+   <div class="field"><label for="quoteFont">Formato da letra</label><select id="quoteFont"><option value="Georgia,serif">Clássica (serifada)</option><option value="Arial,Helvetica,sans-serif">Moderna (sem serifa)</option><option value="'Courier New',monospace">Máquina de escrever</option><option value="cursive">Manuscrita</option><option value="system-ui,sans-serif">Padrão do sistema</option></select></div>
+   <div class="field"><label for="quoteColor">Cor da frase</label><input id="quoteColor" type="color" value="#ffffff"></div>
+   <div class="field full"><label for="quoteSize">Tamanho da letra</label><select id="quoteSize"><option value="16px">Pequeno</option><option value="20px">Médio</option><option value="24px">Grande</option><option value="30px">Extra grande</option></select></div>
+   <div class="field full"><label for="wallpaperX">Mover imagem para esquerda/direita</label><input id="wallpaperX" type="range" min="0" max="100" value="50"><div class="help">Esquerda ← · centro · direita →</div></div>
+   <div class="field full"><label for="wallpaperY">Mover imagem para cima/baixo</label><input id="wallpaperY" type="range" min="0" max="100" value="38"><div class="help">Topo ↑ · centro · base ↓</div></div>
+   <div class="field full"><label for="wallpaperZoom">Zoom do papel de parede</label><input id="wallpaperZoom" type="range" min="100" max="220" value="100"><div class="help">Zoom: <span id="zoomCount">100</span>%</div></div>
+   <div class="field full"><label for="statOpacity">Transparência dos cartões de quantidade</label><input id="statOpacity" type="range" min="15" max="90" value="48"><div class="help">Mais transparente = imagem mais visível · <span id="opacityCount">48</span>% de opacidade</div></div>
    <div class="field"><label for="frameBorderColor">Cor da moldura dos gêneros</label><input id="frameBorderColor" type="color" value="#b99a58"></div>
    <div class="field"><label for="frameTextColor">Cor das letras</label><input id="frameTextColor" type="color" value="#3b3020"></div>
    <div class="field"><label for="frameBgColor">Cor de fundo da moldura</label><input id="frameBgColor" type="color" value="#f3eee3"></div>
@@ -246,7 +262,7 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let films=[],activeFormat='Todos',editId=null,currentUser=null,customOrder=[];
 const $=id=>document.getElementById(id);
 const SETTINGS_KEY='cineprimeVisualSettingsV1';
-const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',wallpaperUrl:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=2000&q=85',frameBorderColor:'#b99a58',frameTextColor:'#3b3020',frameBgColor:'#f3eee3',genrePrefix:'',order:[]};
+const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',wallpaperUrl:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=2000&q=85',frameBorderColor:'#b99a58',frameTextColor:'#3b3020',frameBgColor:'#f3eee3',genrePrefix:'',order:[],quoteText:'',quoteFont:'Georgia,serif',quoteColor:'#ffffff',quoteSize:'24px',wallpaperX:50,wallpaperY:38,wallpaperZoom:100,statOpacity:48};
 function readSettings(){try{return {...DEFAULT_SETTINGS,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}}catch{return {...DEFAULT_SETTINGS}}}
 let visualSettings=readSettings();
 function applySettings(){
@@ -260,22 +276,25 @@ function applySettings(){
  document.documentElement.style.setProperty('--genre-frame-border',visualSettings.frameBorderColor||DEFAULT_SETTINGS.frameBorderColor);
  document.documentElement.style.setProperty('--genre-frame-text',visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor);
  document.documentElement.style.setProperty('--genre-frame-bg',visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor);
- const intro=document.querySelector('.cinema-intro'); const topbar=document.querySelector('.topbar'); const u=(visualSettings.wallpaperUrl||'').trim(); const wallpaper=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:''; if(intro)intro.style.backgroundImage=wallpaper; if(topbar)topbar.style.backgroundImage='none';
+ document.documentElement.style.setProperty('--cine-stat-opacity',String(Math.max(0.15,Math.min(0.9,(Number(visualSettings.statOpacity??48))/100))));
+ const intro=document.querySelector('.cinema-intro'); const topbar=document.querySelector('.topbar'); const u=(visualSettings.wallpaperUrl||'').trim(); const wallpaper=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:''; if(intro){intro.style.backgroundImage=wallpaper;intro.style.backgroundPosition=`${Number(visualSettings.wallpaperX??50)}% ${Number(visualSettings.wallpaperY??38)}%`;intro.style.backgroundSize=`${Math.max(100,Math.min(220,Number(visualSettings.wallpaperZoom)||100))}% auto`;} if(topbar)topbar.style.backgroundImage='none'; const q=document.getElementById('cinemaQuote');if(q){q.textContent=visualSettings.quoteText||'';q.style.setProperty('--cine-quote-font',visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont);q.style.setProperty('--cine-quote-color',visualSettings.quoteColor||'#ffffff');q.style.setProperty('--cine-quote-size',visualSettings.quoteSize||'24px');}
 }
-function saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings()}
+async function saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();if(currentUser){const {error}=await db.from('cineprime_configuracoes_visuais').upsert({user_id:currentUser.id,configuracoes:visualSettings,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error){console.warn('Preferências visuais não sincronizadas; configure a tabela no Supabase:',error.message);return false;}return true;}return false}
+async function loadVisualSettings(){if(!currentUser)return;const {data,error}=await db.from('cineprime_configuracoes_visuais').select('configuracoes').eq('user_id',currentUser.id).maybeSingle();if(!error&&data?.configuracoes&&typeof data.configuracoes==='object'){visualSettings={...DEFAULT_SETTINGS,...data.configuracoes};localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();}else if(error)console.warn('Preferências visuais da nuvem indisponíveis até configurar a tabela:',error.message)}
 function openSettings(){
  $('themeChoice').value=visualSettings.theme;$('backgroundChoice').value=visualSettings.background;
  $('accentChoice').value=visualSettings.accent;$('backgroundColor').value=visualSettings.page;
- $('columnsChoice').value=visualSettings.columns;$('wallpaperUrl').value=visualSettings.wallpaperUrl||'';$('frameBorderColor').value=visualSettings.frameBorderColor||DEFAULT_SETTINGS.frameBorderColor;$('frameTextColor').value=visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor;$('frameBgColor').value=visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor;$('genrePrefix').value=visualSettings.genrePrefix||'';$('settingsDialog').showModal();
+ $('columnsChoice').value=visualSettings.columns;$('wallpaperUrl').value=visualSettings.wallpaperUrl||'';$('quoteText').value=visualSettings.quoteText||'';$('quoteFont').value=visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont;$('quoteColor').value=visualSettings.quoteColor||'#ffffff';$('quoteSize').value=visualSettings.quoteSize||'24px';$('wallpaperX').value=visualSettings.wallpaperX??50;$('wallpaperY').value=visualSettings.wallpaperY??38;$('wallpaperZoom').value=visualSettings.wallpaperZoom??100;$('statOpacity').value=visualSettings.statOpacity??48;$('opacityCount').textContent=$('statOpacity').value;$('quoteCount').textContent=$('quoteText').value.length;$('zoomCount').textContent=$('wallpaperZoom').value;$('frameBorderColor').value=visualSettings.frameBorderColor||DEFAULT_SETTINGS.frameBorderColor;$('frameTextColor').value=visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor;$('frameBgColor').value=visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor;$('genrePrefix').value=visualSettings.genrePrefix||'';$('settingsDialog').showModal();
 }
 $('settingsBtn').addEventListener('click',openSettings);
 $('closeSettings').onclick=()=>$('settingsDialog').close();
-$('resetSettings').onclick=()=>{visualSettings={...DEFAULT_SETTINGS,order:[]};saveSettings();openSettings();toast('Configurações padrão restauradas.')};
-$('settingsForm').addEventListener('submit',e=>{
- e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value,wallpaperUrl:$('wallpaperUrl').value.trim(),frameBorderColor:$('frameBorderColor').value,frameTextColor:$('frameTextColor').value,frameBgColor:$('frameBgColor').value,genrePrefix:$('genrePrefix').value.trim()};
- saveSettings();render();$('settingsDialog').close();toast('Aparência salva neste navegador.');
+$('resetSettings').onclick=async()=>{visualSettings={...DEFAULT_SETTINGS,order:[]};await saveSettings();openSettings();toast('Configurações padrão restauradas.')};
+$('settingsForm').addEventListener('submit',async e=>{
+ e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value,wallpaperUrl:$('wallpaperUrl').value.trim(),quoteText:$('quoteText').value.slice(0,350),quoteFont:$('quoteFont').value,quoteColor:$('quoteColor').value,quoteSize:$('quoteSize').value,wallpaperX:Number($('wallpaperX').value),wallpaperY:Number($('wallpaperY').value),wallpaperZoom:Number($('wallpaperZoom').value),statOpacity:Number($('statOpacity').value),frameBorderColor:$('frameBorderColor').value,frameTextColor:$('frameTextColor').value,frameBgColor:$('frameBgColor').value,genrePrefix:$('genrePrefix').value.trim()};
+ const cloudSaved=await saveSettings();render();$('settingsDialog').close();toast(cloudSaved?'Aparência salva na nuvem.':'Aparência aplicada neste navegador; configure a tabela no Supabase para sincronizar.');
 });
 applySettings();
+$('quoteText').addEventListener('input',()=> $('quoteCount').textContent=$('quoteText').value.length);['quoteFont','quoteColor','quoteSize'].forEach(id=>$(id).addEventListener('change',()=>{const q=$('cinemaQuote');if(q){q.style.setProperty('--cine-quote-font',$('quoteFont').value);q.style.setProperty('--cine-quote-color',$('quoteColor').value);q.style.setProperty('--cine-quote-size',$('quoteSize').value)}}));$('wallpaperZoom').addEventListener('input',()=> $('zoomCount').textContent=$('wallpaperZoom').value);$('statOpacity').addEventListener('input',()=>{$('opacityCount').textContent=$('statOpacity').value;document.documentElement.style.setProperty('--cine-stat-opacity',String(Number($('statOpacity').value)/100))});
 
 const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim().replace(/\s+/g,' ');
 function toast(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').style.display='none',2600)}
@@ -346,12 +365,12 @@ $('grid').addEventListener('dragend',async e=>{
 });
 function setAuthView(signedIn){$('authScreen').style.display=signedIn?'none':'grid';$('appShell').style.display=signedIn?'block':'none';if(signedIn)$('signedInAs').textContent=currentUser?.email||''}
 async function refreshSession(){const {data,error}=await db.auth.getSession();if(error)throw error;currentUser=data.session?.user||null;setAuthView(!!currentUser);if(currentUser){try{await loadFilms()}catch(e){console.error(e);toast('Não foi possível carregar os filmes: '+(e.message||'verifique as políticas de acesso.'))}}}
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('authMessage').textContent='Entrando...';$('loginButton').disabled=true;try{const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)throw error;currentUser=data.user;setAuthView(true);$('authMessage').textContent='';await loadFilms();toast('Login realizado.')}catch(err){$('authMessage').textContent='Não foi possível entrar. Confira o e-mail e a senha. '+(err.message||'');}finally{$('loginButton').disabled=false}});
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('authMessage').textContent='Entrando...';$('loginButton').disabled=true;try{const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)throw error;currentUser=data.user;setAuthView(true);$('authMessage').textContent='';await loadVisualSettings();await loadFilms();toast('Login realizado.')}catch(err){$('authMessage').textContent='Não foi possível entrar. Confira o e-mail e a senha. '+(err.message||'');}finally{$('loginButton').disabled=false}});
 $('resetPassword').addEventListener('click',async()=>{const email=$('loginEmail').value.trim();if(!email){$('authMessage').textContent='Informe seu e-mail acima para receber o link de redefinição.';return}const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});$('authMessage').textContent=error?'Não foi possível solicitar a redefinição: '+error.message:'Se esse e-mail estiver cadastrado, você receberá instruções para redefinir a senha.'});
 $('logoutBtn').addEventListener('click',async()=>{const {error}=await db.auth.signOut();if(error){toast('Não foi possível sair: '+error.message);return}currentUser=null;films=[];setAuthView(false);$('loginPassword').value='';toast('Você saiu do CinePrime.')});
 const LED_KEY='cineprimeLedEffectsV2';
 function ledColorForGenre(genre){const n=norm(String(genre||''));if(n.includes('terror'))return '#d946ef';if(n.includes('acao')||n.includes('ação'))return '#ff244f';if(n.includes('ficcao')||n.includes('ficção')||n.includes('cient'))return '#168bff';if(n.includes('suspense')||n.includes('thriller')||n.includes('crime'))return '#ff7a18';if(n.includes('drama'))return '#ffd166';if(n.includes('comedia')||n.includes('comédia'))return '#39e58c';if(n.includes('aventura'))return '#00e5ff';if(n.includes('romance'))return '#ff65a3';if(n.includes('anim'))return '#a78bfa';if(n.includes('faroeste')||n.includes('western'))return '#f59e0b';if(n.includes('document'))return '#e5e7eb';if(n.includes('classico')||n.includes('clássico'))return '#e8d9a8';return '#a855f7'}
-function applyLedPreference(){const on=localStorage.getItem(LED_KEY)==='on';document.body.classList.toggle('cine-leds-on',on);const b=document.getElementById('ledToggle');if(b){b.setAttribute('aria-pressed',String(on));b.textContent=on?'✦ LEDs: ligados':'✦ LEDs: desligados'}}
+function applyLedPreference(){const on=localStorage.getItem(LED_KEY)==='on';document.body.classList.toggle('cine-leds-on',on);const b=document.getElementById('ledToggle');if(b){b.setAttribute('aria-pressed',String(on));b.textContent=on?'✦ LEDs ON':'✦ LEDs OFF'}}
 const ledButton=document.getElementById('ledToggle');if(ledButton)ledButton.addEventListener('click',()=>{localStorage.setItem(LED_KEY,document.body.classList.contains('cine-leds-on')?'off':'on');applyLedPreference()});
 applyLedPreference();
 
