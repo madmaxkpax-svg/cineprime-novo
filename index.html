@@ -179,6 +179,21 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 .searchlight-overlay__glow--left{left:2.8%}.searchlight-overlay__glow--right{right:2.8%}
 @media(max-width:640px){.searchlight-overlay__fixture{width:6%;height:7%;background-size:455% 100%}.searchlight-overlay__beam{width:64%;height:52%;bottom:5%}}
 
+
+/* Acesso visitante: interface estritamente somente leitura. */
+body.cine-visitor #settingsBtn,
+body.cine-visitor #addTop,
+body.cine-visitor #importListBtn,
+body.cine-visitor #exportBtn,
+body.cine-visitor #importBtn,
+body.cine-visitor .filmactions,
+body.cine-visitor #sort option[value="custom"]{display:none!important}
+body.cine-visitor #logoutBtn{display:inline-flex}
+body.cine-visitor .film[draggable="true"]{cursor:default}
+.bulk-result{display:grid;grid-template-columns:22px 58px 1fr;gap:10px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:10px;background:#101013}
+.bulk-result img{width:58px;aspect-ratio:2/3;object-fit:cover;border-radius:5px}
+.bulk-result .help{margin-top:3px}
+#bulkResults:empty{display:none}
 </style>
 </head>
 <body>
@@ -193,6 +208,18 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
   <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Sua senha" style="margin-bottom:16px">
   <button id="loginButton" class="btn primary" type="submit" style="width:100%">Entrar no CinePrime</button>
   <button id="resetPassword" type="button" class="btn" style="width:100%;margin-top:10px">Esqueci minha senha</button>
+  <div style="border-top:1px solid #39332a;margin:20px 0 14px;padding-top:16px">
+   <div style="color:#d6b15e;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px">Acesso para visitantes</div>
+   <input id="visitorPassword" type="password" autocomplete="off" placeholder="Palavra-chave compartilhada" style="margin-bottom:9px">
+   <button id="visitorButton" type="button" class="btn" style="width:100%">Entrar como visitante</button>
+   <p style="color:#aaa6a0;font-size:11px;line-height:1.45;margin:8px 0 0">Acesso somente para visualizar toda a coleção. Não permite cadastrar, editar ou excluir filmes.</p>
+  </div>
+  <section id="recoveryPanel" hidden style="border-top:1px solid #39332a;margin-top:18px;padding-top:16px">
+   <div style="color:#d6b15e;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px">Criar nova senha</div>
+   <label for="newPassword" style="display:block;color:#aaa6a0;font-size:12px;margin-bottom:6px">Nova senha</label>
+   <input id="newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo de 8 caracteres" style="margin-bottom:9px">
+   <button id="saveNewPassword" type="button" class="btn primary" style="width:100%">Salvar nova senha</button>
+  </section>
   <p id="authMessage" role="status" style="color:#d6b15e;line-height:1.5;font-size:13px;margin:16px 0 0"></p>
  </form>
 </section>
@@ -209,7 +236,7 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 </div>
 <header class="topbar">
  <div class="brand"><div class="brandmark">✦</div><div><h1><span style="color:var(--gold)">CINEPRIME</span></h1><div class="sub">Arquivo pessoal de cinema</div></div></div>
- <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
+ <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn" id="importListBtn" type="button">＋ Importar lista</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
 </header>
 <section class="hero"><div><div class="eyebrow">SUA COLEÇÃO. SUA HISTÓRIA.</div></div></section>
 <div id="cinemaQuote" class="cinema-quote" aria-label="Frase de impacto" hidden><div class="cinema-quote__track"><span class="cinema-quote__item"></span><span class="cinema-quote__item" aria-hidden="true"></span></div></div>
@@ -233,7 +260,7 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 </section>
 <div class="sectionhead"><h3 id="listTitle">Minha coleção</h3><span id="resultCount">0 títulos</span></div>
 <section class="grid" id="grid"></section>
-<footer class="footer"><span>CINEPRIME · Edição do colecionador</span><span>Seus dados ficam salvos na nuvem, na sua conta CinePrime.</span><span><button class="btn mini" id="exportBtn">Exportar backup</button> <button class="btn mini" id="importBtn">Importar backup</button></span></footer>
+<footer class="footer"><span>CINEPRIME · Edição do colecionador</span><span id="footerAccessText">Seus dados ficam salvos na nuvem, na sua conta CinePrime.</span><span><button class="btn mini" id="exportBtn">Exportar backup</button> <button class="btn mini" id="importBtn">Importar backup</button></span></footer>
 <input id="importFile" type="file" accept="application/json,.json" hidden>
 </div>
 
@@ -281,13 +308,24 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
   <div class="modalfoot"><button type="button" class="btn" id="cancelDialog">Cancelar</button><button type="submit" class="btn primary">Salvar filme</button></div>
  </form>
 </dialog>
+<dialog id="importListDialog">
+ <div class="modalhead"><h3>Central de importação de filmes</h3><button type="button" class="btn" id="closeImportList">✕</button></div>
+ <div class="modalbody">
+  <div class="field full"><label for="bulkTitles">Cole ou digite uma lista de filmes (um título por linha)</label><textarea id="bulkTitles" rows="7" placeholder="Mad Max&#10;Rocky&#10;Alien&#10;Rambo: Programado para Matar"></textarea><div class="help">A busca usa o TMDB em português. Depois você confere os resultados antes de gravar no catálogo.</div></div>
+  <div class="field"><label for="bulkFormat">Formato dos filmes</label><select id="bulkFormat"><option>DVD</option><option>Blu-ray</option><option>Digital</option></select></div>
+  <div class="field"><label for="bulkTmdbKey">Chave TMDB (v3)</label><input id="bulkTmdbKey" type="password" placeholder="Chave da API"></div>
+  <div class="field full"><button type="button" class="btn primary" id="searchBulkBtn">Pesquisar lista no TMDB</button><div id="bulkStatus" class="help" role="status"></div></div>
+  <div class="field full"><div id="bulkResults" style="display:grid;gap:9px"></div></div>
+ </div>
+ <div class="modalfoot"><button type="button" class="btn" id="cancelImportList">Fechar</button><button type="button" class="btn primary" id="saveBulkBtn" disabled>Adicionar selecionados</button></div>
+</dialog>
 <div class="toast" id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL='https://ajfqoixqewykognhzgls.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ouAeLEXS702j-jK8GMGMNg_58w1-DFo';
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-let films=[],activeFormat='Todos',editId=null,currentUser=null,customOrder=[];
+let films=[],activeFormat='Todos',editId=null,currentUser=null,customOrder=[],isVisitor=false,bulkCandidates=[],passwordRecoveryMode=false;
 const $=id=>document.getElementById(id);
 const SETTINGS_KEY='cineprimeVisualSettingsV1';
 const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',wallpaperUrl:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=2000&q=85',frameBorderColor:'#b99a58',frameTextColor:'#3b3020',frameBgColor:'#f3eee3',genrePrefix:'',order:[],quoteText:'',quoteFont:"'Cinzel',Georgia,serif",quoteColor:'#ffffff',quoteSize:'24px',wallpaperX:50,wallpaperY:38,wallpaperZoom:100,statOpacity:48};
@@ -356,19 +394,19 @@ async function saveCustomOrder(){
 function enableFilmDragging(){
  const grid=$('grid');
  grid.querySelectorAll('.film').forEach(card=>{
-  card.draggable=$('sort').value==='custom';
+  card.draggable=!isVisitor&&$('sort').value==='custom';
   card.title=card.draggable?'Arraste para mudar a posição deste filme':'Selecione “Minha ordem personalizada” para mover os cards';
  });
 }
 $('grid').addEventListener('dragstart',e=>{
  const card=e.target.closest('.film');
- if(!card||$('sort').value!=='custom') {e.preventDefault();return}
+ if(isVisitor||!card||$('sort').value!=='custom') {e.preventDefault();return}
  card.classList.add('dragging');
  e.dataTransfer.effectAllowed='move';
  e.dataTransfer.setData('text/plain',card.dataset.filmId);
 });
 $('grid').addEventListener('dragover',e=>{
- if($('sort').value!=='custom')return;
+ if(isVisitor||$('sort').value!=='custom')return;
  const dragging=$('grid').querySelector('.film.dragging');
  const target=e.target.closest('.film');
  if(!dragging||!target||dragging===target)return;
@@ -378,7 +416,7 @@ $('grid').addEventListener('dragover',e=>{
  target.parentNode.insertBefore(dragging,after?target.nextSibling:target);
 });
 $('grid').addEventListener('drop',e=>{
- if($('sort').value!=='custom')return;
+ if(isVisitor||$('sort').value!=='custom')return;
  e.preventDefault();
  // A ordem final é salva no evento dragend, depois que o navegador conclui o movimento.
 });
@@ -386,17 +424,88 @@ $('grid').addEventListener('dragend',async e=>{
  const card=e.target.closest('.film');
  if(!card)return;
  card.classList.remove('dragging');
- if($('sort').value!=='custom')return;
+ if(isVisitor||$('sort').value!=='custom')return;
  const visibleOrder=[...$('grid').querySelectorAll('.film')].map(card=>String(card.dataset.filmId));
  const visible=new Set(visibleOrder);
  customOrder=[...visibleOrder,...films.map(f=>String(f.id)).filter(id=>!visible.has(id)&&!visibleOrder.includes(id))];
  await saveCustomOrder();
 });
-function setAuthView(signedIn){$('authScreen').style.display=signedIn?'none':'grid';$('appShell').style.display=signedIn?'block':'none';if(signedIn)$('signedInAs').textContent=currentUser?.email||''}
-async function refreshSession(){const {data,error}=await db.auth.getSession();if(error)throw error;currentUser=data.session?.user||null;setAuthView(!!currentUser);if(currentUser){try{await loadFilms()}catch(e){console.error(e);toast('Não foi possível carregar os filmes: '+(e.message||'verifique as políticas de acesso.'))}}}
-$('loginForm').addEventListener('submit',async e=>{e.preventDefault();$('authMessage').textContent='Entrando...';$('loginButton').disabled=true;try{const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)throw error;currentUser=data.user;setAuthView(true);$('authMessage').textContent='';await loadVisualSettings();await loadFilms();toast('Login realizado.')}catch(err){$('authMessage').textContent='Não foi possível entrar. Confira o e-mail e a senha. '+(err.message||'');}finally{$('loginButton').disabled=false}});
-$('resetPassword').addEventListener('click',async()=>{const email=$('loginEmail').value.trim();if(!email){$('authMessage').textContent='Informe seu e-mail acima para receber o link de redefinição.';return}const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});$('authMessage').textContent=error?'Não foi possível solicitar a redefinição: '+error.message:'Se esse e-mail estiver cadastrado, você receberá instruções para redefinir a senha.'});
-$('logoutBtn').addEventListener('click',async()=>{const {error}=await db.auth.signOut();if(error){toast('Não foi possível sair: '+error.message);return}currentUser=null;films=[];setAuthView(false);$('loginPassword').value='';toast('Você saiu do CinePrime.')});
+function setAuthView(signedIn){
+ $('authScreen').style.display=signedIn?'none':'grid';
+ $('appShell').style.display=signedIn?'block':'none';
+ if(signedIn){
+  $('signedInAs').textContent=isVisitor?'MODO VISITANTE':(currentUser?.email||'');
+  $('logoutBtn').textContent=isVisitor?'Sair da visita':'Sair';
+  $('footerAccessText').textContent=isVisitor?'Modo visitante · catálogo completo em somente leitura.':'Seus dados ficam salvos na nuvem, na sua conta CinePrime.';
+  document.body.classList.toggle('cine-visitor',isVisitor);
+ }else{
+  document.body.classList.remove('cine-visitor');
+ }
+}
+async function refreshSession(){
+ const {data,error}=await db.auth.getSession();if(error)throw error;
+ currentUser=data.session?.user||null;isVisitor=false;if(!passwordRecoveryMode)setAuthView(!!currentUser);
+ if(currentUser){
+  try{await loadVisualSettings();await loadFilms()}
+  catch(e){console.error(e);toast('Não foi possível carregar os filmes: '+(e.message||'verifique as políticas de acesso.'))}
+ }
+}
+$('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('authMessage').textContent='Entrando...';$('loginButton').disabled=true;
+ try{
+  const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});
+  if(error)throw error;currentUser=data.user;isVisitor=false;setAuthView(true);
+  $('authMessage').textContent='';await loadVisualSettings();await loadFilms();toast('Login realizado.');
+ }catch(err){$('authMessage').textContent='Não foi possível entrar. Confira o e-mail e a senha. '+(err.message||'');}
+ finally{$('loginButton').disabled=false}
+});
+$('resetPassword').addEventListener('click',async()=>{
+ const email=$('loginEmail').value.trim();
+ if(!email){$('authMessage').textContent='Informe seu e-mail para receber o link de redefinição.';return}
+ const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+ $('authMessage').textContent=error?'Não foi possível solicitar a redefinição: '+error.message:'Se esse e-mail estiver cadastrado, você receberá um link para criar uma nova senha.';
+});
+$('saveNewPassword').addEventListener('click',async()=>{
+ const password=$('newPassword').value;
+ if(password.length<8){$('authMessage').textContent='A nova senha deve ter pelo menos 8 caracteres.';return}
+ $('saveNewPassword').disabled=true;
+ try{
+  const {error}=await db.auth.updateUser({password});if(error)throw error;
+  await db.auth.signOut();currentUser=null;isVisitor=false;setAuthView(false);
+  passwordRecoveryMode=false;$('recoveryPanel').hidden=true;$('loginPassword').value='';$('newPassword').value='';
+  $('authMessage').textContent='Senha atualizada. Entre com sua nova senha.';
+ }catch(err){$('authMessage').textContent='Não foi possível atualizar a senha: '+(err.message||'Confira se o link ainda é válido.')}
+ finally{$('saveNewPassword').disabled=false}
+});
+db.auth.onAuthStateChange((event,session)=>{
+ if(event==='PASSWORD_RECOVERY'){
+  passwordRecoveryMode=true;currentUser=session?.user||null;isVisitor=false;setAuthView(false);
+  $('recoveryPanel').hidden=false;
+  $('authMessage').textContent='Link validado. Informe sua nova senha abaixo.';
+  $('newPassword').focus();
+ }
+});
+$('visitorButton').addEventListener('click',async()=>{
+ const password=$('visitorPassword').value;
+ if(!password){$('authMessage').textContent='Informe a palavra-chave compartilhada.';return}
+ $('visitorButton').disabled=true;$('authMessage').textContent='Validando acesso visitante...';
+ try{
+  const {data,error}=await db.functions.invoke('cineprime-visitor',{body:{password}});
+  if(error)throw error;
+  if(!data||!Array.isArray(data.films))throw new Error(data?.error||'Resposta inválida do serviço visitante.');
+  films=data.films.map(rowToFilm);currentUser=null;isVisitor=true;customOrder=[];
+  $('sort').value='number';setAuthView(true);render();
+  $('visitorPassword').value='';toast('Acesso visitante liberado. Catálogo em modo somente leitura.');
+ }catch(err){
+  console.error(err);$('authMessage').textContent='Não foi possível liberar o acesso. '+(err.message||'Confira a palavra-chave ou a configuração do serviço.');
+ }finally{$('visitorButton').disabled=false}
+});
+$('logoutBtn').addEventListener('click',async()=>{
+ if(isVisitor){isVisitor=false;films=[];setAuthView(false);$('visitorPassword').value='';$('authMessage').textContent='Você saiu do modo visitante.';return}
+ const {error}=await db.auth.signOut();
+ if(error){toast('Não foi possível sair: '+error.message);return}
+ currentUser=null;films=[];setAuthView(false);$('loginPassword').value='';toast('Você saiu do CinePrime.')
+});
 const LED_KEY='cineprimeLedEffectsV2';
 function ledColorForGenre(genre){const n=norm(String(genre||''));if(n.includes('terror'))return '#d946ef';if(n.includes('acao')||n.includes('ação'))return '#ff244f';if(n.includes('ficcao')||n.includes('ficção')||n.includes('cient'))return '#168bff';if(n.includes('suspense')||n.includes('thriller')||n.includes('crime'))return '#ff7a18';if(n.includes('drama'))return '#ffd166';if(n.includes('comedia')||n.includes('comédia'))return '#39e58c';if(n.includes('aventura'))return '#00e5ff';if(n.includes('romance'))return '#ff65a3';if(n.includes('anim'))return '#a78bfa';if(n.includes('faroeste')||n.includes('western'))return '#f59e0b';if(n.includes('document'))return '#e5e7eb';if(n.includes('classico')||n.includes('clássico'))return '#e8d9a8';return '#a855f7'}
 function applyLedPreference(){const on=localStorage.getItem(LED_KEY)==='on';document.body.classList.toggle('cine-leds-on',on);const b=document.getElementById('ledToggle');if(b){b.setAttribute('aria-pressed',String(on));b.textContent=on?'✦ LEDs ON':'✦ LEDs OFF'}}
@@ -452,7 +561,7 @@ function render(){
  });
  else arr.sort((a,b)=>numberFor(a).localeCompare(numberFor(b)));
  $('resultCount').textContent=arr.length+' '+(arr.length===1?'título':'títulos');$('listTitle').textContent=activeFormat==='Todos'?'Minha coleção':'Minha coleção · '+activeFormat;
- const filmCard=f=>`<article class="film" data-film-id="${escAttr(f.id)}" data-genre="${escAttr(f.genre||'')}" style="--led-color:${ledColorForGenre(f.genre)}"><div class="poster">${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div><div class="filmactions"><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div></div></article>`;
+ const filmCard=f=>`<article class="film" data-film-id="${escAttr(f.id)}" data-genre="${escAttr(f.genre||'')}" style="--led-color:${ledColorForGenre(f.genre)}"><div class="poster">${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div>${isVisitor?'':`<div class="filmactions"><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div>`}</div></article>`;
  const genreIcon=name=>{const n=norm(name);if(n.includes('terror'))return '☠';if(n.includes('acao')||n.includes('ação'))return '⚔';if(n.includes('aventura'))return '⌖';if(n.includes('ficcao')||n.includes('ficção')||n.includes('cient'))return '✦';if(n.includes('drama'))return '◈';if(n.includes('faroeste')||n.includes('western'))return '♜';if(n.includes('suspense')||n.includes('thriller'))return '◉';if(n.includes('comedia')||n.includes('comédia'))return '☻';if(n.includes('anim'))return '✿';if(n.includes('romance'))return '♡';if(n.includes('document'))return '▤';return '✦'};
  if(!arr.length){$('grid').innerHTML=`<div class="empty"><b>${films.length?'Nenhum título encontrado':'Sua coleção começa aqui'}</b>${films.length?'Tente alterar a busca ou os filtros.':'Adicione DVDs, Blu-rays ou filmes digitais para montar seu catálogo.'}<div style="margin-top:15px"><button class="btn primary" onclick="openAdd()">＋ Cadastrar filme</button></div></div>`}
  else if(g||q||s){$('grid').innerHTML=`<div class="genre-gallery-grid">${arr.map(filmCard).join('')}</div>`}
@@ -460,16 +569,94 @@ function render(){
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.format===activeFormat));
  enableFilmDragging();
 }
-function openAdd(){editId=null;$('filmForm').reset();$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('format').value='DVD';$('dialogTitle').textContent='Adicionar filme';$('filmDialog').showModal()}
-function editFilm(id){const f=films.find(x=>Number(x.id)===Number(id));if(!f)return;editId=f.id;$('dialogTitle').textContent='Editar filme';for(const k of ['title','year','format','genre','saga','cover','notes'])$(k).value=f[k]??'';$('coverSearchTitle').value=f.title||'';$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('filmDialog').showModal()}
-async function deleteFilm(id){const f=films.find(x=>Number(x.id)===Number(id));if(!f||!confirm('Excluir "'+f.title+'" da coleção?'))return;const {error}=await db.from('filmes').delete().eq('id',id);if(error){toast('Erro ao excluir: '+error.message);return}films=films.filter(x=>Number(x.id)!==Number(id));render();toast('Filme removido da coleção.')}
+function openAdd(){if(isVisitor)return;editId=null;$('filmForm').reset();$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('format').value='DVD';$('dialogTitle').textContent='Adicionar filme';$('filmDialog').showModal()}
+function editFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f)return;editId=f.id;$('dialogTitle').textContent='Editar filme';for(const k of ['title','year','format','genre','saga','cover','notes'])$(k).value=f[k]??'';$('coverSearchTitle').value=f.title||'';$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('filmDialog').showModal()}
+async function deleteFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f||!confirm('Excluir "'+f.title+'" da coleção?'))return;const {error}=await db.from('filmes').delete().eq('id',id);if(error){toast('Erro ao excluir: '+error.message);return}films=films.filter(x=>Number(x.id)!==Number(id));render();toast('Filme removido da coleção.')}
 const TMDB_KEY_STORAGE='cineprimeTmdbApiKey';$('tmdbKey').value=localStorage.getItem(TMDB_KEY_STORAGE)||'';$('tmdbKey').addEventListener('change',()=>localStorage.setItem(TMDB_KEY_STORAGE,$('tmdbKey').value.trim()));
 $('searchCoverBtn').addEventListener('click',async()=>{const key=$('tmdbKey').value.trim(),query=$('coverSearchTitle').value.trim()||$('title').value.trim(),results=$('coverResults');if(!key){alert('Para pesquisar automaticamente, informe uma chave da API do TMDB.');return}if(!query){alert('Digite o título do filme que deseja pesquisar.');return}localStorage.setItem(TMDB_KEY_STORAGE,key);results.innerHTML='<div class="help" style="grid-column:1/-1">Pesquisando cartazes...</div>';try{const url='https://api.themoviedb.org/3/search/movie?api_key='+encodeURIComponent(key)+'&language=pt-BR&include_adult=false&query='+encodeURIComponent(query),response=await fetch(url);if(!response.ok)throw new Error(response.status===401?'A chave da API foi recusada.':'Não foi possível pesquisar (HTTP '+response.status+').');const data=await response.json(),items=(data.results||[]).filter(x=>x.poster_path).slice(0,9);if(!items.length){results.innerHTML='<div class="help" style="grid-column:1/-1">Nenhum cartaz encontrado.</div>';return}results.innerHTML=items.map(x=>{const poster='https://image.tmdb.org/t/p/original'+x.poster_path,title=x.title||x.original_title||'Filme',year=(x.release_date||'').slice(0,4),thumb='https://image.tmdb.org/t/p/w342'+x.poster_path;return `<button type="button" class="btn" data-poster="${escAttr(poster)}" style="padding:6px;text-align:left;overflow:hidden"><img src="${escAttr(thumb)}" alt="" style="display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;margin-bottom:6px"><span style="display:block;font-size:11px;white-space:normal">${esc(title)} ${year?'('+esc(year)+')':''}</span></button>`}).join('');results.querySelectorAll('[data-poster]').forEach(btn=>btn.addEventListener('click',()=>{$('cover').value=btn.dataset.poster;results.querySelectorAll('[data-poster]').forEach(b=>b.style.borderColor='var(--line)');btn.style.borderColor='var(--gold)';toast('Capa selecionada. Salve o filme para guardar a imagem.')}))}catch(err){results.innerHTML='<div class="help" style="grid-column:1/-1">'+esc(err.message||'Erro ao pesquisar.')+'</div>'}});
 $('title').addEventListener('input',()=>{if(!$('coverSearchTitle').value.trim())$('coverSearchTitle').value=$('title').value});
 $('filmForm').addEventListener('submit',async e=>{e.preventDefault();const f={title:$('title').value.trim(),year:$('year').value?Number($('year').value):'',format:$('format').value,genre:$('genre').value.trim(),saga:$('saga').value.trim(),cover:$('cover').value.trim(),notes:$('notes').value.trim()};const dup=films.find(x=>Number(x.id)!==Number(editId)&&norm(x.title)===norm(f.title)&&String(x.year)===String(f.year)&&x.format===f.format);if(dup){alert('Este filme já está cadastrado com o mesmo título, ano e formato. Edite o registro existente.');return}const row=filmToRow(f);let error;if(editId!==null){const result=await db.from('filmes').update(row).eq('id',editId).select().single();error=result.error;if(!error){const idx=films.findIndex(x=>Number(x.id)===Number(editId));films[idx]=rowToFilm(result.data)}}else{const result=await db.from('filmes').insert(row).select().single();error=result.error;if(!error)films.push(rowToFilm(result.data))}if(error){alert('Não foi possível salvar no banco: '+error.message+'\n\nConfira as políticas de acesso do Supabase.');return}$('filmDialog').close();render();toast(editId!==null?'Cadastro atualizado na nuvem.':'Filme cadastrado na nuvem.');editId=null});
 $('addTop').onclick=openAdd;$('closeDialog').onclick=()=>$('filmDialog').close();$('cancelDialog').onclick=()=>$('filmDialog').close();$('search').addEventListener('input',render);$('genreFilter').onchange=render;$('sagaFilter').onchange=render;$('sort').onchange=render;document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{activeFormat=t.dataset.format;render()});
-$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({app:'CinePrime',version:2,films},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cineprime-backup.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exportado.')};
-$('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text()),incoming=Array.isArray(data)?data:data.films;if(!Array.isArray(incoming))throw Error();let added=0;for(const f of incoming){if(!f.title)continue;const exists=films.some(x=>norm(x.title)===norm(f.title)&&String(x.year||'')===String(f.year||'')&&x.format===f.format);if(exists)continue;const {error}=await db.from('filmes').insert(filmToRow(f));if(error)throw error;added++}await loadFilms();toast('Importação concluída: '+added+' filme(s) novo(s).')}catch(err){alert('Não foi possível importar: '+(err.message||'selecione um backup JSON válido.'))}e.target.value=''};
+
+// Central de importação: pesquisa vários títulos e exige conferência antes de gravar.
+$('importListBtn').addEventListener('click',()=>{
+ if(isVisitor)return;
+ $('bulkTmdbKey').value=localStorage.getItem(TMDB_KEY_STORAGE)||'';
+ $('bulkResults').innerHTML='';$('bulkStatus').textContent='';
+ $('saveBulkBtn').disabled=true;bulkCandidates=[];
+ $('importListDialog').showModal();
+});
+$('closeImportList').onclick=()=>$('importListDialog').close();
+$('cancelImportList').onclick=()=>$('importListDialog').close();
+$('searchBulkBtn').addEventListener('click',async()=>{
+ const key=$('bulkTmdbKey').value.trim();
+ const titles=[...new Set($('bulkTitles').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean))];
+ if(!key){$('bulkStatus').textContent='Informe a chave da API TMDB.';return}
+ if(!titles.length){$('bulkStatus').textContent='Cole pelo menos um título, um por linha.';return}
+ if(titles.length>100){$('bulkStatus').textContent='Para manter a busca estável, importe no máximo 100 títulos por vez.';return}
+ localStorage.setItem(TMDB_KEY_STORAGE,key);$('searchBulkBtn').disabled=true;$('saveBulkBtn').disabled=true;
+ $('bulkResults').innerHTML='';bulkCandidates=[];
+ const genreNames={28:'Ação',12:'Aventura',16:'Animação',35:'Comédia',80:'Crime',99:'Documentário',18:'Drama',10751:'Família',14:'Fantasia',36:'História',27:'Terror',10402:'Música',9648:'Mistério',10749:'Romance',878:'Ficção científica',10770:'Cinema para TV',53:'Suspense',10752:'Guerra',37:'Faroeste'};
+ let done=0;
+ for(const query of titles){
+  $('bulkStatus').textContent=`Pesquisando ${++done} de ${titles.length}: ${query}`;
+  try{
+   const url='https://api.themoviedb.org/3/search/movie?api_key='+encodeURIComponent(key)+'&language=pt-BR&include_adult=false&query='+encodeURIComponent(query);
+   const response=await fetch(url);if(!response.ok)throw new Error('HTTP '+response.status);
+   const data=await response.json();
+   const match=(data.results||[]).filter(x=>x.poster_path).sort((a,b)=>{
+    const exactA=norm(a.title||a.original_title)===norm(query)?1:0;
+    const exactB=norm(b.title||b.original_title)===norm(query)?1:0;
+    return exactB-exactA;
+   })[0];
+   if(match){
+    const title=match.title||match.original_title||query;
+    const year=(match.release_date||'').slice(0,4);
+    const genres=(match.genre_ids||[]).map(id=>genreNames[id]).filter(Boolean).slice(0,2).join(' / ');
+    bulkCandidates.push({query,title,year,genre:genres,format:$('bulkFormat').value,cover:'https://image.tmdb.org/t/p/original'+match.poster_path,selected:true});
+   }else bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,missing:true});
+  }catch(err){bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,error:err.message})}
+  await new Promise(resolve=>setTimeout(resolve,180));
+ }
+ renderBulkCandidates();
+ $('bulkStatus').textContent=`Pesquisa concluída: ${bulkCandidates.filter(x=>!x.missing&&!x.error).length} correspondência(s) encontrada(s) de ${titles.length} título(s). Confira os itens marcados antes de importar.`;
+ $('searchBulkBtn').disabled=false;
+});
+function renderBulkCandidates(){
+ $('bulkResults').innerHTML=bulkCandidates.map((f,i)=>{
+  const exists=films.some(x=>norm(x.title)===norm(f.title)&&String(x.year||'')===String(f.year||'')&&x.format===f.format);
+  const disabled=f.missing||f.error||exists;
+  const status=f.error?'Falha na pesquisa':f.missing?'Nenhum cartaz localizado':exists?'Já cadastrado':'Encontrado no TMDB';
+  return `<label class="bulk-result"><input type="checkbox" data-bulk-index="${i}" ${f.selected&&!disabled?'checked':''} ${disabled?'disabled':''} style="width:18px"><div>${f.cover?`<img src="${escAttr(f.cover.replace('/original','/w185'))}" alt="">`:'<div style="width:58px;height:87px;border:1px dashed var(--line);border-radius:5px;display:grid;place-items:center">?</div>'}</div><div><strong>${esc(f.title)}</strong> ${f.year?`<span class="year">(${esc(f.year)})</span>`:''}<div class="help">${esc(f.genre||'Gênero não identificado')} · ${esc(status)}${f.query!==f.title?` · Busca: ${esc(f.query)}`:''}</div></div></label>`;
+ }).join('');
+ $('bulkResults').querySelectorAll('[data-bulk-index]').forEach(box=>box.addEventListener('change',()=>{
+  bulkCandidates[Number(box.dataset.bulkIndex)].selected=box.checked;
+  $('saveBulkBtn').disabled=!bulkCandidates.some(x=>x.selected&&!x.missing&&!x.error);
+ }));
+ $('saveBulkBtn').disabled=!bulkCandidates.some(x=>x.selected&&!x.missing&&!x.error);
+}
+$('saveBulkBtn').addEventListener('click',async()=>{
+ if(isVisitor)return;
+ const selected=bulkCandidates.filter(x=>x.selected&&!x.missing&&!x.error);
+ if(!selected.length)return;
+ $('saveBulkBtn').disabled=true;$('bulkStatus').textContent='Gravando filmes no catálogo...';
+ let added=0,failed=0;
+ const seenKeys=new Set(films.map(x=>[norm(x.title),String(x.year||''),x.format].join('|')));
+ for(const f of selected){
+  const film={title:f.title,year:f.year?Number(f.year):'',format:f.format,genre:f.genre,saga:'',cover:f.cover,notes:''};
+  const dedupeKey=[norm(film.title),String(film.year||''),film.format].join('|');
+  if(seenKeys.has(dedupeKey))continue;
+  const {error}=await db.from('filmes').insert(filmToRow(film));
+  if(error){failed++;console.error(error)}else{added++;seenKeys.add(dedupeKey)}
+ }
+ await loadFilms();
+ $('bulkStatus').textContent=`Importação finalizada: ${added} novo(s), ${failed} com erro.`;
+ $('saveBulkBtn').disabled=true;
+ toast(`${added} filme(s) importado(s) para a nuvem.`);
+});
+
+$('exportBtn').onclick=()=>{if(isVisitor)return;const blob=new Blob([JSON.stringify({app:'CinePrime',version:2,films},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cineprime-backup.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exportado.')};
+$('importBtn').onclick=()=>{if(isVisitor)return;$('importFile').click()};$('importFile').onchange=async e=>{if(isVisitor)return;const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text()),incoming=Array.isArray(data)?data:data.films;if(!Array.isArray(incoming))throw Error();let added=0;for(const f of incoming){if(!f.title)continue;const exists=films.some(x=>norm(x.title)===norm(f.title)&&String(x.year||'')===String(f.year||'')&&x.format===f.format);if(exists)continue;const {error}=await db.from('filmes').insert(filmToRow(f));if(error)throw error;added++}await loadFilms();toast('Importação concluída: '+added+' filme(s) novo(s).')}catch(err){alert('Não foi possível importar: '+(err.message||'selecione um backup JSON válido.'))}e.target.value=''};
 (async()=>{try{await refreshSession()}catch(e){$('authMessage').textContent='Falha ao iniciar conexão com o Supabase. Verifique a configuração do projeto.';console.error(e)}})();
 </script>
 </body></html>
