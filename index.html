@@ -1,4 +1,4 @@
- <!doctype html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -272,7 +272,8 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
    <div class="field full"><label for="backgroundChoice">Fundo da página</label><select id="backgroundChoice"><option value="gradient">Degradê suave</option><option value="solid">Cor uniforme</option><option value="texture">Textura cinematográfica discreta</option></select></div>
    <div class="field"><label for="accentChoice">Cor de destaque</label><input id="accentChoice" type="color" value="#d6b15e"></div>
    <div class="field"><label for="backgroundColor">Cor do fundo</label><input id="backgroundColor" type="color" value="#0b0b0d"></div>
-   <div class="field full"><label for="wallpaperUrl">Imagem de fundo atrás do título CinePrime (URL da imagem)</label><input id="wallpaperUrl" type="url" placeholder="https://.../imagem.jpg"><div class="help">Você pode trocar a imagem quando quiser. Ex.: uma imagem temática inspirada em O Iluminado, Scarface ou Poltergeist. Use um endereço direto de imagem.</div></div>
+   <div class="field full"><label for="wallpaperFile">Papel de parede — enviar imagem do computador/celular</label><input id="wallpaperFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif"><div class="help">A imagem será enviada ao Supabase Storage e ficará disponível nos outros navegadores e dispositivos. Formatos: JPG, PNG, WEBP ou AVIF. Limite: 8 MB. Se não selecionar um novo arquivo, a imagem atual será mantida.</div></div>
+    <div class="field full"><label for="wallpaperUrl">Ou informar endereço direto de imagem (opcional)</label><input id="wallpaperUrl" type="url" placeholder="https://.../imagem.jpg"><div class="help">Para sincronização confiável, prefira enviar o arquivo acima. Endereços externos continuam dependendo do site que hospeda a imagem.</div></div>
    <div class="field full"><label for="quoteText">Frase de impacto (máximo de 350 caracteres)</label><textarea id="quoteText" maxlength="350" rows="4" placeholder="Digite sua frase. Use Enter para quebrar as linhas e ajustar a apresentação."></textarea><div class="help"><span id="quoteCount">0</span>/350 caracteres. Quebras de linha serão mantidas no cabeçalho.</div></div>
    <div class="field"><label for="quoteFont">Formato da letra</label><select id="quoteFont"><option value="'Cinzel',Georgia,serif">Cinema clássico (Cinzel)</option><option value="'Creepster',cursive">Terror (Creepster)</option><option value="Georgia,serif">Clássica (serifada)</option><option value="Arial,Helvetica,sans-serif">Moderna (sem serifa)</option><option value="'Courier New',monospace">Máquina de escrever</option><option value="cursive">Manuscrita</option><option value="system-ui,sans-serif">Padrão do sistema</option></select></div>
    <div class="field"><label for="quoteColor">Cor da frase</label><input id="quoteColor" type="color" value="#ffffff"></div>
@@ -345,7 +346,41 @@ function applySettings(){
  document.documentElement.style.setProperty('--cine-stat-opacity',String(Math.max(0.15,Math.min(0.9,(Number(visualSettings.statOpacity??48))/100))));
  const intro=document.querySelector('.cinema-intro'); const topbar=document.querySelector('.topbar'); const u=(visualSettings.wallpaperUrl||'').trim(); const wallpaper=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:''; if(intro){intro.style.backgroundImage=wallpaper;intro.style.backgroundPosition=`${Number(visualSettings.wallpaperX??50)}% ${Number(visualSettings.wallpaperY??38)}%`;intro.style.backgroundSize=`${Math.max(100,Math.min(220,Number(visualSettings.wallpaperZoom)||100))}% auto`;} if(topbar)topbar.style.backgroundImage='none'; setCinemaQuote(visualSettings.quoteText||'',visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont,visualSettings.quoteColor||'#ffffff',visualSettings.quoteSize||'24px');
 }
-async function saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();if(currentUser){const {error}=await db.from('cineprime_configuracoes_visuais').upsert({user_id:currentUser.id,configuracoes:visualSettings,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error){console.warn('Preferências visuais não sincronizadas; configure a tabela no Supabase:',error.message);return false;}return true;}return false}
+let pendingWallpaperFile=null;
+$('wallpaperFile').addEventListener('change',()=>{
+ const file=$('wallpaperFile').files?.[0]||null;
+ const allowed=['image/jpeg','image/png','image/webp','image/avif'];
+ if(file&&(!allowed.includes(file.type)||file.size>8*1024*1024)){
+  alert('Escolha uma imagem JPG, PNG, WEBP ou AVIF de até 8 MB.');
+  $('wallpaperFile').value='';pendingWallpaperFile=null;return;
+ }
+ pendingWallpaperFile=file;
+});
+async function uploadWallpaperIfSelected(){
+ if(!pendingWallpaperFile)return;
+ if(!currentUser)throw new Error('Entre na sua conta para enviar o papel de parede à nuvem.');
+ const file=pendingWallpaperFile;
+ const ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/avif':'avif'})[file.type];
+ const path=currentUser.id+'/wallpaper-'+Date.now()+'.'+ext;
+ const {data,error}=await db.storage.from('cineprime-wallpapers').upload(path,file,{contentType:file.type,cacheControl:'31536000',upsert:false});
+ if(error)throw error;
+ const {data:publicData}=db.storage.from('cineprime-wallpapers').getPublicUrl(data.path);
+ visualSettings.wallpaperUrl=publicData.publicUrl;
+ visualSettings.wallpaperStoragePath=data.path;
+ $('wallpaperUrl').value=publicData.publicUrl;
+ pendingWallpaperFile=null;
+ $('wallpaperFile').value='';
+}
+async function saveSettings(){
+ if(currentUser)await uploadWallpaperIfSelected();
+ localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();
+ if(currentUser){
+  const {error}=await db.from('cineprime_configuracoes_visuais').upsert({user_id:currentUser.id,configuracoes:visualSettings,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+  if(error){console.warn('Preferências visuais não sincronizadas:',error.message);throw error;}
+  return true;
+ }
+ return false;
+}
 async function loadVisualSettings(){if(!currentUser)return;const {data,error}=await db.from('cineprime_configuracoes_visuais').select('configuracoes').eq('user_id',currentUser.id).maybeSingle();if(!error&&data?.configuracoes&&typeof data.configuracoes==='object'){visualSettings={...DEFAULT_SETTINGS,...data.configuracoes};localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();}else if(error)console.warn('Preferências visuais da nuvem indisponíveis até configurar a tabela:',error.message)}
 function openSettings(){
  $('themeChoice').value=visualSettings.theme;$('backgroundChoice').value=visualSettings.background;
@@ -354,10 +389,13 @@ function openSettings(){
 }
 $('settingsBtn').addEventListener('click',openSettings);
 $('closeSettings').onclick=()=>$('settingsDialog').close();
-$('resetSettings').onclick=async()=>{visualSettings={...DEFAULT_SETTINGS,order:[]};await saveSettings();openSettings();toast('Configurações padrão restauradas.')};
+$('resetSettings').onclick=async()=>{pendingWallpaperFile=null;$('wallpaperFile').value='';visualSettings={...DEFAULT_SETTINGS,order:[]};try{await saveSettings();openSettings();toast('Configurações padrão restauradas.')}catch(err){toast('Falha ao restaurar: '+(err.message||''))}};
 $('settingsForm').addEventListener('submit',async e=>{
  e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value,wallpaperUrl:$('wallpaperUrl').value.trim(),quoteText:$('quoteText').value.slice(0,350),quoteFont:$('quoteFont').value,quoteColor:$('quoteColor').value,quoteSize:$('quoteSize').value,wallpaperX:Number($('wallpaperX').value),wallpaperY:Number($('wallpaperY').value),wallpaperZoom:Number($('wallpaperZoom').value),statOpacity:Number($('statOpacity').value),frameBorderColor:$('frameBorderColor').value,frameTextColor:$('frameTextColor').value,frameBgColor:$('frameBgColor').value,genrePrefix:$('genrePrefix').value.trim()};
- const cloudSaved=await saveSettings();render();$('settingsDialog').close();toast(cloudSaved?'Aparência salva na nuvem.':'Aparência aplicada neste navegador; configure a tabela no Supabase para sincronizar.');
+ try{
+   const cloudSaved=await saveSettings();render();$('settingsDialog').close();
+   toast(cloudSaved?'Aparência e papel de parede salvos na nuvem.':'Aparência aplicada neste navegador; entre na conta para sincronizar.');
+  }catch(err){console.error('Falha ao salvar aparência:',err);toast('Não foi possível salvar na nuvem: '+(err.message||'verifique sua conexão.'));}
 });
 applySettings();
 $('quoteText').addEventListener('input',()=> $('quoteCount').textContent=$('quoteText').value.length);['quoteFont','quoteColor','quoteSize'].forEach(id=>$(id).addEventListener('change',()=>{const q=$('cinemaQuote');if(q){q.style.setProperty('--cine-quote-font',$('quoteFont').value);q.style.setProperty('--cine-quote-color',$('quoteColor').value);q.style.setProperty('--cine-quote-size',$('quoteSize').value)}}));$('wallpaperZoom').addEventListener('input',()=> $('zoomCount').textContent=$('wallpaperZoom').value);$('statOpacity').addEventListener('input',()=>{$('opacityCount').textContent=$('statOpacity').value;document.documentElement.style.setProperty('--cine-stat-opacity',String(Number($('statOpacity').value)/100))});
