@@ -236,7 +236,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 </div>
 <header class="topbar">
  <div class="brand"><div class="brandmark">✦</div><div><h1><span style="color:var(--gold)">CINEPRIME</span></h1><div class="sub">Arquivo pessoal de cinema</div></div></div>
- <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn" id="importListBtn" type="button">＋ Importar lista</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
+ <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn" id="importListBtn" type="button">＋ Importar lista</button><button class="btn" id="recoverCoversBtn" type="button">✦ Recuperar capas</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
 </header>
 <section class="hero"><div><div class="eyebrow">SUA COLEÇÃO. SUA HISTÓRIA.</div></div></section>
 <div id="cinemaQuote" class="cinema-quote" aria-label="Frase de impacto" hidden><div class="cinema-quote__track"><span class="cinema-quote__item"></span><span class="cinema-quote__item" aria-hidden="true"></span></div></div>
@@ -244,7 +244,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 </div><!-- /.cinema-intro -->
 <div class="toolbar">
  <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs OFF</button>
- <div class="search"><input id="search" type="search" name="cineprime-film-search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
+ <div class="search"><input id="search" type="search" name="cineprime-catalog-filter-7f3a" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly')" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
  <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada</option></select>
@@ -611,6 +611,50 @@ function openAdd(){if(isVisitor)return;editId=null;$('filmForm').reset();$('tmdb
 function editFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f)return;editId=f.id;$('dialogTitle').textContent='Editar filme';for(const k of ['title','year','format','genre','saga','cover','notes'])$(k).value=f[k]??'';$('coverSearchTitle').value=f.title||'';$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('filmDialog').showModal()}
 async function deleteFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f||!confirm('Excluir "'+f.title+'" da coleção?'))return;const {error}=await db.from('filmes').delete().eq('id',id);if(error){toast('Erro ao excluir: '+error.message);return}films=films.filter(x=>Number(x.id)!==Number(id));render();toast('Filme removido da coleção.')}
 const TMDB_KEY_STORAGE='cineprimeTmdbApiKey';$('tmdbKey').value=localStorage.getItem(TMDB_KEY_STORAGE)||'';$('tmdbKey').addEventListener('change',()=>localStorage.setItem(TMDB_KEY_STORAGE,$('tmdbKey').value.trim()));
+
+// Recuperação de capas já cadastradas: só grava correspondências exatas de título e ano.
+$('recoverCoversBtn').addEventListener('click',async()=>{
+ if(isVisitor)return;
+ const key=localStorage.getItem('cineprimeTmdbApiKey')||'';
+ if(!key){alert('Abra Adicionar filme, informe sua chave TMDB v3 e salve-a. Depois use Recuperar capas.');return}
+ const missing=films.filter(f=>!String(f.cover||'').trim());
+ if(!missing.length){toast('Todos os filmes já possuem capa cadastrada.');return}
+ if(!confirm('Serão pesquisados '+missing.length+' filmes sem capa. Só serão gravadas capas com título e ano compatíveis. Deseja continuar?'))return;
+ const button=$('recoverCoversBtn');button.disabled=true;
+ let saved=0,notFound=0,failed=0;
+ const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+ try{
+  for(let i=0;i<missing.length;i++){
+   const film=missing[i];
+   button.textContent='Pesquisando capas '+(i+1)+'/'+missing.length;
+   try{
+    const url='https://api.themoviedb.org/3/search/movie?api_key='+encodeURIComponent(key)+'&language=pt-BR&include_adult=false&query='+encodeURIComponent(film.title);
+    const response=await fetch(url);
+    if(!response.ok)throw new Error('TMDB HTTP '+response.status);
+    const data=await response.json();
+    const candidates=(data.results||[]).filter(x=>x.poster_path);
+    const exact=candidates.find(x=>{
+     const titleMatch=norm(x.title||x.original_title)===norm(film.title);
+     const tmdbYear=(x.release_date||'').slice(0,4);
+     const yearMatch=!film.year||!tmdbYear||String(film.year)===tmdbYear;
+     return titleMatch&&yearMatch;
+    });
+    if(!exact){notFound++;await wait(180);continue}
+    const poster='https://image.tmdb.org/t/p/original'+exact.poster_path;
+    const {error}=await db.from('filmes').update({imagem_url:poster}).eq('id',film.id);
+    if(error)throw error;
+    film.cover=poster;saved++;
+   }catch(err){failed++;console.warn('Falha ao recuperar capa de '+film.title,err)}
+   await wait(180);
+  }
+  render();
+  toast('Recuperação concluída: '+saved+' capas salvas; '+notFound+' sem correspondência exata; '+failed+' falhas.');
+  alert('Recuperação de capas concluída.\\n\\nCapas salvas: '+saved+'\\nSem correspondência exata: '+notFound+'\\nFalhas: '+failed+'\\n\\nOs filmes sem correspondência foram mantidos sem alteração para evitar capas incorretas.');
+ }finally{
+  button.disabled=false;button.textContent='✦ Recuperar capas';
+ }
+});
+
 $('searchCoverBtn').addEventListener('click',async()=>{const key=$('tmdbKey').value.trim(),query=$('coverSearchTitle').value.trim()||$('title').value.trim(),results=$('coverResults');if(!key){alert('Para pesquisar automaticamente, informe uma chave da API do TMDB.');return}if(!query){alert('Digite o título do filme que deseja pesquisar.');return}localStorage.setItem(TMDB_KEY_STORAGE,key);results.innerHTML='<div class="help" style="grid-column:1/-1">Pesquisando cartazes...</div>';try{const url='https://api.themoviedb.org/3/search/movie?api_key='+encodeURIComponent(key)+'&language=pt-BR&include_adult=false&query='+encodeURIComponent(query),response=await fetch(url);if(!response.ok)throw new Error(response.status===401?'A chave da API foi recusada.':'Não foi possível pesquisar (HTTP '+response.status+').');const data=await response.json(),items=(data.results||[]).filter(x=>x.poster_path).slice(0,9);if(!items.length){results.innerHTML='<div class="help" style="grid-column:1/-1">Nenhum cartaz encontrado.</div>';return}results.innerHTML=items.map(x=>{const poster='https://image.tmdb.org/t/p/original'+x.poster_path,title=x.title||x.original_title||'Filme',year=(x.release_date||'').slice(0,4),thumb='https://image.tmdb.org/t/p/w342'+x.poster_path;return `<button type="button" class="btn" data-poster="${escAttr(poster)}" style="padding:6px;text-align:left;overflow:hidden"><img src="${escAttr(thumb)}" alt="" style="display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;margin-bottom:6px"><span style="display:block;font-size:11px;white-space:normal">${esc(title)} ${year?'('+esc(year)+')':''}</span></button>`}).join('');results.querySelectorAll('[data-poster]').forEach(btn=>btn.addEventListener('click',()=>{$('cover').value=btn.dataset.poster;results.querySelectorAll('[data-poster]').forEach(b=>b.style.borderColor='var(--line)');btn.style.borderColor='var(--gold)';toast('Capa selecionada. Salve o filme para guardar a imagem.')}))}catch(err){results.innerHTML='<div class="help" style="grid-column:1/-1">'+esc(err.message||'Erro ao pesquisar.')+'</div>'}});
 $('title').addEventListener('input',()=>{if(!$('coverSearchTitle').value.trim())$('coverSearchTitle').value=$('title').value});
 $('filmForm').addEventListener('submit',async e=>{e.preventDefault();const f={title:$('title').value.trim(),year:$('year').value?Number($('year').value):'',format:$('format').value,genre:$('genre').value.trim(),saga:$('saga').value.trim(),cover:$('cover').value.trim(),notes:$('notes').value.trim()};const dup=films.find(x=>Number(x.id)!==Number(editId)&&norm(x.title)===norm(f.title)&&String(x.year)===String(f.year)&&x.format===f.format);if(dup){alert('Este filme já está cadastrado com o mesmo título, ano e formato. Edite o registro existente.');return}const row=filmToRow(f);let error;if(editId!==null){const result=await db.from('filmes').update(row).eq('id',editId).select().single();error=result.error;if(!error){const idx=films.findIndex(x=>Number(x.id)===Number(editId));films[idx]=rowToFilm(result.data)}}else{const result=await db.from('filmes').insert(row).select().single();error=result.error;if(!error)films.push(rowToFilm(result.data))}if(error){alert('Não foi possível salvar no banco: '+error.message+'\n\nConfira as políticas de acesso do Supabase.');return}$('filmDialog').close();render();toast(editId!==null?'Cadastro atualizado na nuvem.':'Filme cadastrado na nuvem.');editId=null});
