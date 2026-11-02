@@ -19,7 +19,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}.shell{max-width
 h1{font-size:clamp(22px,3vw,32px);margin:0;letter-spacing:.02em}.sub{color:var(--muted);font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin-top:4px}
 .btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 14px;border-radius:10px;font-weight:650}.btn.primary{background:linear-gradient(135deg,#e0bf6d,#b88b36);color:#17130b;border:0}.btn:hover{filter:brightness(1.12)}.hero{padding:28px 0 22px;display:flex;justify-content:space-between;gap:22px;align-items:end}.eyebrow{color:var(--gold);font-size:12px;letter-spacing:.2em;text-transform:uppercase}.hero h2{font-size:clamp(25px,4vw,43px);line-height:1.06;margin:8px 0 10px;max-width:680px}.hero p{color:var(--muted);margin:0;max-width:650px;line-height:1.6}.hero-mark{font-size:clamp(54px,9vw,110px);color:#d6b15e1e;line-height:1;user-select:none}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 24px}.stat{background:linear-gradient(145deg,#1a1a1e,#111114);border:1px solid var(--line);padding:16px;border-radius:14px}.stat .num{font-size:28px;font-weight:800;color:var(--gold)}.stat .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.search{flex:1;min-width:210px;position:relative}.search input{width:100%;padding:12px 14px 12px 40px}.search:before{content:"⌕";position:absolute;left:14px;top:6px;font-size:25px;color:var(--muted)}input,select,textarea{background:#101013;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px 12px;outline:none;width:100%}input:focus,select:focus,textarea:focus{border-color:var(--gold)}.toolbar select{width:auto;min-width:140px}.tabs{display:flex;gap:8px;overflow:auto;padding:0 0 16px}.tab{white-space:nowrap;border:1px solid var(--line);background:#141417;color:var(--muted);border-radius:999px;padding:9px 14px}.tab.active{background:#3a2f19;color:#f2d88f;border-color:#8f7135}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.search{flex:1;min-width:210px;position:relative}.search input,.search-editable{width:100%;min-height:48px;padding:12px 14px 12px 40px;background:#101013;border:1px solid var(--line);border-radius:10px;color:var(--text);outline:none;white-space:nowrap;overflow:hidden}.search-editable:empty:before{content:attr(data-placeholder);color:var(--muted);pointer-events:none}.search-editable:focus{border-color:var(--gold)}.search:before{content:"⌕";position:absolute;left:14px;top:6px;font-size:25px;color:var(--muted)}input,select,textarea{background:#101013;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px 12px;outline:none;width:100%}input:focus,select:focus,textarea:focus{border-color:var(--gold)}.toolbar select{width:auto;min-width:140px}.tabs{display:flex;gap:8px;overflow:auto;padding:0 0 16px}.tab{white-space:nowrap;border:1px solid var(--line);background:#141417;color:var(--muted);border-radius:999px;padding:9px 14px}.tab.active{background:#3a2f19;color:#f2d88f;border-color:#8f7135}
 .sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}.sectionhead h3{margin:0;font-size:18px}.sectionhead span{color:var(--muted);font-size:13px}
 .grid{display:block}.genre-gallery-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-bottom:28px}.genre-frame{display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--genre-frame-border,#b99a58);border-radius:10px;padding:11px 16px;margin:26px 0 15px;background:var(--genre-frame-bg,linear-gradient(180deg,#fffdf8,#f3eee3));color:var(--genre-frame-text,#3b3020);box-shadow:0 3px 10px #0000000a}.genre-frame .genre-icon{font-size:18px;line-height:1}.genre-frame h3{margin:0;font-size:13px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}.genre-frame .genre-rule{height:1px;max-width:90px;flex:1;background:linear-gradient(90deg,transparent,var(--genre-frame-border,#b99a58))}.genre-frame .genre-rule:last-child{transform:scaleX(-1)}.film{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#141417;min-width:0;transition:transform .18s,border-color .18s}.film:hover{transform:translateY(-3px);border-color:#8f7135}.poster{aspect-ratio:2/3;background:linear-gradient(150deg,#29231a,#101013 65%);position:relative;overflow:hidden;display:grid;place-items:center}.poster img{width:100%;height:100%;object-fit:cover;display:block}.poster .placeholder{font-size:42px;color:#d6b15e70}.poster .number{position:absolute;top:9px;left:9px;background:#080809d9;border:1px solid #d6b15e80;color:var(--gold);font-size:11px;font-weight:800;padding:5px 7px;border-radius:6px}.format{position:absolute;right:8px;bottom:8px;background:#0b0b0de8;border:1px solid #ffffff2b;border-radius:6px;padding:5px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}.filmcontent{padding:12px}.film h4{margin:0 0 5px;font-size:14px;line-height:1.35}.year{font-size:12px;color:var(--gold)}.meta{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.45;min-height:30px}.filmactions{display:flex;gap:6px;margin-top:10px}.mini{font-size:11px;padding:6px 8px;border-radius:7px;flex:1}.empty{border:1px dashed #47474d;border-radius:14px;padding:42px 18px;text-align:center;color:var(--muted);grid-column:1/-1}.empty b{display:block;color:var(--text);margin-bottom:8px}.footer{border-top:1px solid var(--line);margin-top:34px;padding-top:16px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 dialog{background:#17171b;color:var(--text);border:1px solid #4b4537;border-radius:18px;width:min(600px,calc(100% - 24px));padding:0;box-shadow:0 24px 90px #000b}dialog::backdrop{background:#000b;backdrop-filter:blur(5px)}.modalhead{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modalhead h3{margin:0}.modalbody{padding:20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--muted)}.field.full{grid-column:1/-1}.modalfoot{padding:15px 22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.help{color:var(--muted);font-size:12px;line-height:1.5}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#27231a;border:1px solid #8f7135;color:#f5dfa0;border-radius:10px;padding:12px 16px;display:none;z-index:10;max-width:90vw}
@@ -245,7 +245,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 </div><!-- /.cinema-intro -->
 <div class="toolbar">
  <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs OFF</button>
- <div class="search"><input id="search" type="search" name="cineprime_catalog_lookup_6f91c2" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" inputmode="search" role="searchbox" readonly onfocus="this.removeAttribute('readonly')" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
+ <div class="search"><div id="search" class="search-editable" contenteditable="true" role="searchbox" aria-label="Buscar filmes" aria-multiline="false" data-placeholder="Buscar título, saga, gênero ou ano..." spellcheck="false" autocapitalize="off" autocomplete="off"></div></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
  <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada</option></select>
@@ -303,7 +303,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
    <div class="field"><label for="format">Formato *</label><select id="format" required><option>DVD</option><option>Blu-ray</option><option selected>Digital</option></select></div>
    <div class="field"><label for="genre">Gênero</label><input id="genre" list="genres" placeholder="Ex.: Ação"><datalist id="genres"><option>Ação</option><option>Aventura</option><option>Ficção científica</option><option>Terror</option><option>Drama</option><option>Faroeste</option><option>Suspense</option><option>Comédia</option></datalist></div>
    <div class="field"><label for="saga">Franquia / saga</label><input id="saga" placeholder="Ex.: Rambo"></div>
-   <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes no IMDb por meio da OMDb API. Informe sua chave OMDb abaixo e escolha um resultado para preencher a capa.</div><div class="field" style="margin-top:8px"><label for="omdbKey">Chave da OMDb API (IMDb)</label><input id="omdbKey" type="text" class="api-key-field" name="cineprime_omdb_token_81c7" autocomplete="new-password" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" readonly onfocus="this.removeAttribute('readonly')" placeholder="Cole sua chave OMDb API"><div class="help">A chave fica salva apenas neste navegador. Obtenha uma chave em omdbapi.com. Não compartilhe sua chave.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. O app mantém a proporção vertical do pôster.</div></div>
+   <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes no IMDb por meio da OMDb API. Informe sua chave OMDb abaixo e escolha um resultado para preencher a capa.</div><div class="field" style="margin-top:8px"><label for="omdbKey">Chave da OMDb API (IMDb)</label><input id="omdbKey" type="password" class="api-key-field" name="api_access_code_cineprime_81c7" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" readonly onfocus="this.removeAttribute('readonly')" placeholder="Cole sua chave OMDb API"><div class="help">A chave fica salva apenas neste navegador. Obtenha uma chave em omdbapi.com. Não compartilhe sua chave.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. O app mantém a proporção vertical do pôster.</div></div>
    <div class="field full"><label for="notes">Notas pessoais (opcional)</label><textarea id="notes" rows="2" placeholder="Edição, mídia, observações..."></textarea></div>
    <div class="field full help">O número de catálogo é gerado automaticamente. Títulos com mesmo nome, ano e formato não podem ser duplicados.</div>
   </div>
@@ -315,7 +315,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
  <div class="modalbody">
   <div class="field full"><label for="bulkTitles">Cole ou digite uma lista de filmes (um título por linha)</label><textarea id="bulkTitles" rows="7" placeholder="Mad Max&#10;Rocky&#10;Alien&#10;Rambo: Programado para Matar"></textarea><div class="help">A busca consulta o IMDb por meio da OMDb API. Depois você confere os resultados antes de gravar no catálogo.</div></div>
   <div class="field"><label for="bulkFormat">Formato dos filmes</label><select id="bulkFormat"><option>DVD</option><option>Blu-ray</option><option>Digital</option></select></div>
-  <div class="field"><label for="bulkOmdbKey">Chave OMDb API (IMDb)</label><input id="bulkOmdbKey" type="text" class="api-key-field" name="cineprime_bulk_omdb_token_42bd" autocomplete="new-password" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" readonly onfocus="this.removeAttribute('readonly')" placeholder="Chave da API"></div>
+  <div class="field"><label for="bulkOmdbKey">Chave OMDb API (IMDb)</label><input id="bulkOmdbKey" type="password" class="api-key-field" name="bulk_api_access_code_cineprime_42bd" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" placeholder="Chave da API"></div>
   <div class="field full"><button type="button" class="btn primary" id="searchBulkBtn">Pesquisar lista no IMDb</button><div id="bulkStatus" class="help" role="status"></div></div>
   <div class="field full"><div id="bulkResults" style="display:grid;gap:9px"></div></div>
  </div>
@@ -329,6 +329,11 @@ const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ouAeLEXS702j-jK8GMGMNg_58w1-DFo';
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let films=[],activeFormat='Todos',editId=null,currentUser=null,customOrder=[],isVisitor=false,bulkCandidates=[],passwordRecoveryMode=false;
 const $=id=>document.getElementById(id);
+// Campo de busca em contenteditable: evita heurísticas de autofill de e-mail do Chrome/password managers.
+const searchBox=document.getElementById('search');
+Object.defineProperty(searchBox,'value',{get(){return (this.textContent||'').replace(/\u00a0/g,' ').trim()},set(v){this.textContent=String(v??'')}});
+searchBox.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault()} });
+searchBox.addEventListener('paste',e=>{e.preventDefault();const text=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,text)});
 const SETTINGS_KEY='cineprimeVisualSettingsV1';
 const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',wallpaperUrl:'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=2000&q=85',frameBorderColor:'#b99a58',frameTextColor:'#3b3020',frameBgColor:'#f3eee3',genrePrefix:'',order:[],quoteText:'',quoteFont:"'Cinzel',Georgia,serif",quoteColor:'#ffffff',quoteSize:'24px',wallpaperX:50,wallpaperY:38,wallpaperZoom:100,statOpacity:48};
 function readSettings(){try{return {...DEFAULT_SETTINGS,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')}}catch{return {...DEFAULT_SETTINGS}}}
@@ -615,30 +620,35 @@ async function deleteFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x
 const OMDB_KEY_STORAGE='cineprimeOmdbApiKey';
 // Não reutiliza nem consulta a antiga chave IMDb/OMDb: esta versão usa exclusivamente OMDb/IMDb.
 try{localStorage.removeItem('cineprimeTmdbApiKey')}catch(e){console.warn('Não foi possível limpar a chave IMDb/OMDb antiga deste navegador.',e)}
-async function omdbSearchMovies(query,key){
+async function omdbRequest(params,key){
  const value=String(key||'').trim();
- if(!value)throw new Error('Informe sua chave da OMDb API (IMDb).');
- const url='https://www.omdbapi.com/?apikey='+encodeURIComponent(value)+'&type=movie&s='+encodeURIComponent(query)+'&page=1';
- const response=await fetch(url);
- if(!response.ok)throw new Error('Falha na consulta à OMDb API (HTTP '+response.status+').');
- const data=await response.json();
+ if(!value)throw new Error('Informe sua chave ativa da OMDb API (IMDb).');
+ const url='https://www.omdbapi.com/?apikey='+encodeURIComponent(value)+'&'+new URLSearchParams(params).toString();
+ let response;
+ try{response=await fetch(url,{method:'GET',headers:{'Accept':'application/json'}})}
+ catch(e){throw new Error('Não foi possível conectar à OMDb. Verifique a internet e tente novamente.');}
+ let data={};
+ try{data=await response.json()}catch(e){data={};}
+ const apiError=String(data.Error||'');
+ if(response.status===401||/invalid api key|unauthorized/i.test(apiError)){
+  throw new Error('A OMDb recusou a chave (HTTP 401). Isso não é erro de capa nem do Supabase: a chave digitada não foi reconhecida/ativada pela OMDb. Gere ou confirme a chave em omdbapi.com/apikey.aspx, conclua a ativação por e-mail e cole a chave OMDb — não a chave TMDB.');
+ }
+ if(!response.ok)throw new Error('Falha na consulta à OMDb API (HTTP '+response.status+'). '+apiError);
  if(data.Response==='False'){
-  const message=String(data.Error||'Nenhum resultado encontrado.');
-  if(/invalid api key/i.test(message))throw new Error('A chave da OMDb API foi recusada. Confira a chave cadastrada no site omdbapi.com.');
-  if(/too many requests/i.test(message))throw new Error('Limite de consultas da OMDb API atingido. Aguarde e tente novamente.');
-  return {Search:[]};
+  if(/too many requests/i.test(apiError))throw new Error('Limite de consultas da OMDb API atingido. Aguarde e tente novamente.');
+  if(/not found/i.test(apiError))return {Search:[]};
+  throw new Error('Resposta da OMDb: '+(apiError||'consulta não concluída.'));
  }
  return data;
 }
+async function omdbSearchMovies(query,key){
+ return await omdbRequest({type:'movie',s:String(query||'').trim(),page:'1'},key);
+}
 async function omdbMovieDetails(imdbID,key){
- const url='https://www.omdbapi.com/?apikey='+encodeURIComponent(String(key||'').trim())+'&i='+encodeURIComponent(imdbID)+'&plot=short';
- const response=await fetch(url);
- if(!response.ok)throw new Error('Falha ao consultar detalhes na OMDb API (HTTP '+response.status+').');
- const data=await response.json();
- if(data.Response==='False')throw new Error(data.Error||'Detalhes do filme indisponíveis.');
- return data;
+ return await omdbRequest({i:String(imdbID||''),plot:'short'},key);
 }
 $('omdbKey').value=localStorage.getItem(OMDB_KEY_STORAGE)||'';
+$('omdbKey').addEventListener('input',()=>localStorage.setItem(OMDB_KEY_STORAGE,$('omdbKey').value.trim()));
 $('omdbKey').addEventListener('change',()=>localStorage.setItem(OMDB_KEY_STORAGE,$('omdbKey').value.trim()));
 
 // Recupera somente capas com título e ano compatíveis; não altera os demais dados do filme.
