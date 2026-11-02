@@ -190,6 +190,7 @@ body.cine-visitor .filmactions,
 body.cine-visitor #sort option[value="custom"]{display:none!important}
 body.cine-visitor #logoutBtn{display:inline-flex}
 body.cine-visitor .film[draggable="true"]{cursor:default}
+.api-key-field{-webkit-text-security:disc;text-security:disc}
 .bulk-result{display:grid;grid-template-columns:22px 58px 1fr;gap:10px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:10px;background:#101013}
 .bulk-result img{width:58px;aspect-ratio:2/3;object-fit:cover;border-radius:5px}
 .bulk-result .help{margin-top:3px}
@@ -244,7 +245,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 </div><!-- /.cinema-intro -->
 <div class="toolbar">
  <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs OFF</button>
- <div class="search"><input id="search" type="text" name="catalog_filter_cineprime_91d2" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other" inputmode="search" role="searchbox" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
+ <div class="search"><input id="search" type="search" name="cineprime_catalog_lookup_6f91c2" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" inputmode="search" role="searchbox" readonly onfocus="this.removeAttribute('readonly')" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
  <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada</option></select>
@@ -302,7 +303,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
    <div class="field"><label for="format">Formato *</label><select id="format" required><option>DVD</option><option>Blu-ray</option><option selected>Digital</option></select></div>
    <div class="field"><label for="genre">Gênero</label><input id="genre" list="genres" placeholder="Ex.: Ação"><datalist id="genres"><option>Ação</option><option>Aventura</option><option>Ficção científica</option><option>Terror</option><option>Drama</option><option>Faroeste</option><option>Suspense</option><option>Comédia</option></datalist></div>
    <div class="field"><label for="saga">Franquia / saga</label><input id="saga" placeholder="Ex.: Rambo"></div>
-   <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes no IMDb por meio da OMDb API. Informe sua chave OMDb abaixo e escolha um resultado para preencher a capa.</div><div class="field" style="margin-top:8px"><label for="omdbKey">Chave da OMDb API (IMDb)</label><input id="omdbKey" type="password" placeholder="Cole sua chave OMDb API"><div class="help">A chave fica salva apenas neste navegador. Obtenha uma chave em omdbapi.com. Não compartilhe sua chave.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. O app mantém a proporção vertical do pôster.</div></div>
+   <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes no IMDb por meio da OMDb API. Informe sua chave OMDb abaixo e escolha um resultado para preencher a capa.</div><div class="field" style="margin-top:8px"><label for="omdbKey">Chave da OMDb API (IMDb)</label><input id="omdbKey" type="text" class="api-key-field" name="cineprime_omdb_token_81c7" autocomplete="new-password" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" readonly onfocus="this.removeAttribute('readonly')" placeholder="Cole sua chave OMDb API"><div class="help">A chave fica salva apenas neste navegador. Obtenha uma chave em omdbapi.com. Não compartilhe sua chave.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. O app mantém a proporção vertical do pôster.</div></div>
    <div class="field full"><label for="notes">Notas pessoais (opcional)</label><textarea id="notes" rows="2" placeholder="Edição, mídia, observações..."></textarea></div>
    <div class="field full help">O número de catálogo é gerado automaticamente. Títulos com mesmo nome, ano e formato não podem ser duplicados.</div>
   </div>
@@ -314,7 +315,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
  <div class="modalbody">
   <div class="field full"><label for="bulkTitles">Cole ou digite uma lista de filmes (um título por linha)</label><textarea id="bulkTitles" rows="7" placeholder="Mad Max&#10;Rocky&#10;Alien&#10;Rambo: Programado para Matar"></textarea><div class="help">A busca consulta o IMDb por meio da OMDb API. Depois você confere os resultados antes de gravar no catálogo.</div></div>
   <div class="field"><label for="bulkFormat">Formato dos filmes</label><select id="bulkFormat"><option>DVD</option><option>Blu-ray</option><option>Digital</option></select></div>
-  <div class="field"><label for="bulkOmdbKey">Chave OMDb API (IMDb)</label><input id="bulkOmdbKey" type="password" placeholder="Chave da API"></div>
+  <div class="field"><label for="bulkOmdbKey">Chave OMDb API (IMDb)</label><input id="bulkOmdbKey" type="text" class="api-key-field" name="cineprime_bulk_omdb_token_42bd" autocomplete="new-password" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" readonly onfocus="this.removeAttribute('readonly')" placeholder="Chave da API"></div>
   <div class="field full"><button type="button" class="btn primary" id="searchBulkBtn">Pesquisar lista no IMDb</button><div id="bulkStatus" class="help" role="status"></div></div>
   <div class="field full"><div id="bulkResults" style="display:grid;gap:9px"></div></div>
  </div>
@@ -612,6 +613,8 @@ function editFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===N
 async function deleteFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f||!confirm('Excluir "'+f.title+'" da coleção?'))return;const {error}=await db.from('filmes').delete().eq('id',id);if(error){toast('Erro ao excluir: '+error.message);return}films=films.filter(x=>Number(x.id)!==Number(id));render();toast('Filme removido da coleção.')}
 
 const OMDB_KEY_STORAGE='cineprimeOmdbApiKey';
+// Não reutiliza nem consulta a antiga chave IMDb/OMDb: esta versão usa exclusivamente OMDb/IMDb.
+try{localStorage.removeItem('cineprimeTmdbApiKey')}catch(e){console.warn('Não foi possível limpar a chave IMDb/OMDb antiga deste navegador.',e)}
 async function omdbSearchMovies(query,key){
  const value=String(key||'').trim();
  if(!value)throw new Error('Informe sua chave da OMDb API (IMDb).');
