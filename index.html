@@ -302,7 +302,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
    <div class="field"><label for="format">Formato *</label><select id="format" required><option>DVD</option><option>Blu-ray</option><option selected>Digital</option></select></div>
    <div class="field"><label for="genre">Gênero</label><input id="genre" list="genres" placeholder="Ex.: Ação"><datalist id="genres"><option>Ação</option><option>Aventura</option><option>Ficção científica</option><option>Terror</option><option>Drama</option><option>Faroeste</option><option>Suspense</option><option>Comédia</option></datalist></div>
    <div class="field"><label for="saga">Franquia / saga</label><input id="saga" placeholder="Ex.: Rambo"></div>
-   <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes no TMDB. Para habilitar a busca, informe sua chave gratuita da API do TMDB abaixo. Escolha um resultado para preencher a capa.</div><div class="field" style="margin-top:8px"><label for="tmdbKey">Chave da API TMDB</label><input id="tmdbKey" type="password" placeholder="Cole sua chave de API (v3)"><div class="help">A chave fica salva apenas neste navegador. Obtenha uma chave em themoviedb.org/settings/api. Não compartilhe sua chave.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. O app mantém a proporção vertical do pôster.</div></div>
+   <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes no IMDb por meio da OMDb API. Informe sua chave OMDb abaixo e escolha um resultado para preencher a capa.</div><div class="field" style="margin-top:8px"><label for="omdbKey">Chave da OMDb API (IMDb)</label><input id="omdbKey" type="password" placeholder="Cole sua chave OMDb API"><div class="help">A chave fica salva apenas neste navegador. Obtenha uma chave em omdbapi.com. Não compartilhe sua chave.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. O app mantém a proporção vertical do pôster.</div></div>
    <div class="field full"><label for="notes">Notas pessoais (opcional)</label><textarea id="notes" rows="2" placeholder="Edição, mídia, observações..."></textarea></div>
    <div class="field full help">O número de catálogo é gerado automaticamente. Títulos com mesmo nome, ano e formato não podem ser duplicados.</div>
   </div>
@@ -312,10 +312,10 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 <dialog id="importListDialog">
  <div class="modalhead"><h3>Central de importação de filmes</h3><button type="button" class="btn" id="closeImportList">✕</button></div>
  <div class="modalbody">
-  <div class="field full"><label for="bulkTitles">Cole ou digite uma lista de filmes (um título por linha)</label><textarea id="bulkTitles" rows="7" placeholder="Mad Max&#10;Rocky&#10;Alien&#10;Rambo: Programado para Matar"></textarea><div class="help">A busca usa o TMDB em português. Depois você confere os resultados antes de gravar no catálogo.</div></div>
+  <div class="field full"><label for="bulkTitles">Cole ou digite uma lista de filmes (um título por linha)</label><textarea id="bulkTitles" rows="7" placeholder="Mad Max&#10;Rocky&#10;Alien&#10;Rambo: Programado para Matar"></textarea><div class="help">A busca consulta o IMDb por meio da OMDb API. Depois você confere os resultados antes de gravar no catálogo.</div></div>
   <div class="field"><label for="bulkFormat">Formato dos filmes</label><select id="bulkFormat"><option>DVD</option><option>Blu-ray</option><option>Digital</option></select></div>
-  <div class="field"><label for="bulkTmdbKey">Chave TMDB (v3)</label><input id="bulkTmdbKey" type="password" placeholder="Chave da API"></div>
-  <div class="field full"><button type="button" class="btn primary" id="searchBulkBtn">Pesquisar lista no TMDB</button><div id="bulkStatus" class="help" role="status"></div></div>
+  <div class="field"><label for="bulkOmdbKey">Chave OMDb API (IMDb)</label><input id="bulkOmdbKey" type="password" placeholder="Chave da API"></div>
+  <div class="field full"><button type="button" class="btn primary" id="searchBulkBtn">Pesquisar lista no IMDb</button><div id="bulkStatus" class="help" role="status"></div></div>
   <div class="field full"><div id="bulkResults" style="display:grid;gap:9px"></div></div>
  </div>
  <div class="modalfoot"><button type="button" class="btn" id="cancelImportList">Fechar</button><button type="button" class="btn primary" id="saveBulkBtn" disabled>Adicionar selecionados</button></div>
@@ -607,74 +607,88 @@ function render(){
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.format===activeFormat));
  enableFilmDragging();
 }
-function openAdd(){if(isVisitor)return;editId=null;$('filmForm').reset();$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('format').value='DVD';$('dialogTitle').textContent='Adicionar filme';$('filmDialog').showModal()}
-function editFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f)return;editId=f.id;$('dialogTitle').textContent='Editar filme';for(const k of ['title','year','format','genre','saga','cover','notes'])$(k).value=f[k]??'';$('coverSearchTitle').value=f.title||'';$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('filmDialog').showModal()}
+function openAdd(){if(isVisitor)return;editId=null;$('filmForm').reset();$('omdbKey').value=localStorage.getItem('cineprimeOmdbApiKey')||'';$('coverResults').innerHTML='';$('format').value='DVD';$('dialogTitle').textContent='Adicionar filme';$('filmDialog').showModal()}
+function editFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f)return;editId=f.id;$('dialogTitle').textContent='Editar filme';for(const k of ['title','year','format','genre','saga','cover','notes'])$(k).value=f[k]??'';$('coverSearchTitle').value=f.title||'';$('omdbKey').value=localStorage.getItem('cineprimeOmdbApiKey')||'';$('coverResults').innerHTML='';$('filmDialog').showModal()}
 async function deleteFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f||!confirm('Excluir "'+f.title+'" da coleção?'))return;const {error}=await db.from('filmes').delete().eq('id',id);if(error){toast('Erro ao excluir: '+error.message);return}films=films.filter(x=>Number(x.id)!==Number(id));render();toast('Filme removido da coleção.')}
 
-const TMDB_KEY_STORAGE='cineprimeTmdbApiKey';
-// Aceita a chave clássica v3 ou o token de leitura v4 no mesmo campo.
-function tmdbAuth(key){
+const OMDB_KEY_STORAGE='cineprimeOmdbApiKey';
+async function omdbSearchMovies(query,key){
  const value=String(key||'').trim();
- if(!value)throw new Error('Informe a chave de acesso do TMDB.');
- if(value.split('.').length===3){
-  return {headers:{Authorization:'Bearer '+value},urlParam:''};
+ if(!value)throw new Error('Informe sua chave da OMDb API (IMDb).');
+ const url='https://www.omdbapi.com/?apikey='+encodeURIComponent(value)+'&type=movie&s='+encodeURIComponent(query)+'&page=1';
+ const response=await fetch(url);
+ if(!response.ok)throw new Error('Falha na consulta à OMDb API (HTTP '+response.status+').');
+ const data=await response.json();
+ if(data.Response==='False'){
+  const message=String(data.Error||'Nenhum resultado encontrado.');
+  if(/invalid api key/i.test(message))throw new Error('A chave da OMDb API foi recusada. Confira a chave cadastrada no site omdbapi.com.');
+  if(/too many requests/i.test(message))throw new Error('Limite de consultas da OMDb API atingido. Aguarde e tente novamente.');
+  return {Search:[]};
  }
- return {headers:{},urlParam:'&api_key='+encodeURIComponent(value)};
+ return data;
 }
-async function tmdbSearchMovies(query,key){
- const auth=tmdbAuth(key);
- const url='https://api.themoviedb.org/3/search/movie?language=pt-BR&include_adult=false&query='+encodeURIComponent(query)+auth.urlParam;
- const response=await fetch(url,{headers:auth.headers});
- if(!response.ok){
-  if(response.status===401)throw new Error('O TMDB recusou a chave. Confira se é uma chave v3 válida ou um token de leitura v4, sem espaços extras.');
-  if(response.status===403)throw new Error('O TMDB negou o acesso (403). Verifique as permissões da chave/token.');
-  throw new Error('Falha na consulta ao TMDB (HTTP '+response.status+').');
- }
- return await response.json();
+async function omdbMovieDetails(imdbID,key){
+ const url='https://www.omdbapi.com/?apikey='+encodeURIComponent(String(key||'').trim())+'&i='+encodeURIComponent(imdbID)+'&plot=short';
+ const response=await fetch(url);
+ if(!response.ok)throw new Error('Falha ao consultar detalhes na OMDb API (HTTP '+response.status+').');
+ const data=await response.json();
+ if(data.Response==='False')throw new Error(data.Error||'Detalhes do filme indisponíveis.');
+ return data;
 }
-$('tmdbKey').value=localStorage.getItem(TMDB_KEY_STORAGE)||'';$('tmdbKey').addEventListener('change',()=>localStorage.setItem(TMDB_KEY_STORAGE,$('tmdbKey').value.trim()));
+$('omdbKey').value=localStorage.getItem(OMDB_KEY_STORAGE)||'';
+$('omdbKey').addEventListener('change',()=>localStorage.setItem(OMDB_KEY_STORAGE,$('omdbKey').value.trim()));
 
-// Recuperação de capas já cadastradas: só grava correspondências exatas de título e ano.
+// Recupera somente capas com título e ano compatíveis; não altera os demais dados do filme.
 $('recoverCoversBtn').addEventListener('click',async()=>{
  if(isVisitor)return;
- const key=localStorage.getItem('cineprimeTmdbApiKey')||'';
- if(!key){alert('Abra Adicionar filme, informe sua chave TMDB v3 e salve-a. Depois use Recuperar capas.');return}
+ const key=localStorage.getItem(OMDB_KEY_STORAGE)||'';
+ if(!key){alert('Abra Adicionar filme, informe sua chave OMDb API (IMDb) e salve-a. Depois use Recuperar capas.');return}
  const missing=films.filter(f=>!String(f.cover||'').trim());
  if(!missing.length){toast('Todos os filmes já possuem capa cadastrada.');return}
- if(!confirm('Serão pesquisados '+missing.length+' filmes sem capa. Só serão gravadas capas com título e ano compatíveis. Deseja continuar?'))return;
+ if(!confirm('Serão pesquisados '+missing.length+' filmes sem capa na base IMDb/OMDb. Só serão gravadas capas com título e ano compatíveis. Deseja continuar?'))return;
+ let firstSearch;
+ try{firstSearch=await omdbSearchMovies(missing[0].title,key)}catch(err){alert(err.message||'Não foi possível validar a chave OMDb.');return}
  const button=$('recoverCoversBtn');button.disabled=true;
  let saved=0,notFound=0,failed=0;
  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  try{
   for(let i=0;i<missing.length;i++){
-   const film=missing[i];
-   button.textContent='Pesquisando capas '+(i+1)+'/'+missing.length;
+   const film=missing[i];button.textContent='Pesquisando capas '+(i+1)+'/'+missing.length;
    try{
-    const data=await tmdbSearchMovies(film.title,key);
-    const candidates=(data.results||[]).filter(x=>x.poster_path);
+    const data=i===0?firstSearch:await omdbSearchMovies(film.title,key);
+    const candidates=(data.Search||[]).filter(x=>x.Poster&&x.Poster!=='N/A');
     const exact=candidates.find(x=>{
-     const titleMatch=norm(x.title||x.original_title)===norm(film.title);
-     const tmdbYear=(x.release_date||'').slice(0,4);
-     const yearMatch=!film.year||!tmdbYear||String(film.year)===tmdbYear;
+     const titleMatch=norm(x.Title)===norm(film.title);
+     const yearValue=String(x.Year||'').slice(0,4);
+     const yearMatch=!film.year||!yearValue||String(film.year)===yearValue;
      return titleMatch&&yearMatch;
     });
-    if(!exact){notFound++;await wait(180);continue}
-    const poster='https://image.tmdb.org/t/p/original'+exact.poster_path;
+    if(!exact){notFound++;await wait(250);continue}
+    const poster=exact.Poster;
     const {error}=await db.from('filmes').update({imagem_url:poster}).eq('id',film.id);
     if(error)throw error;
     film.cover=poster;saved++;
    }catch(err){failed++;console.warn('Falha ao recuperar capa de '+film.title,err)}
-   await wait(180);
+   await wait(250);
   }
   render();
   toast('Recuperação concluída: '+saved+' capas salvas; '+notFound+' sem correspondência exata; '+failed+' falhas.');
   alert('Recuperação de capas concluída.\\n\\nCapas salvas: '+saved+'\\nSem correspondência exata: '+notFound+'\\nFalhas: '+failed+'\\n\\nOs filmes sem correspondência foram mantidos sem alteração para evitar capas incorretas.');
- }finally{
-  button.disabled=false;button.textContent='✦ Recuperar capas';
- }
+ }finally{button.disabled=false;button.textContent='✦ Recuperar capas'}
 });
 
-$('searchCoverBtn').addEventListener('click',async()=>{const key=$('tmdbKey').value.trim(),query=$('coverSearchTitle').value.trim()||$('title').value.trim(),results=$('coverResults');if(!key){alert('Para pesquisar automaticamente, informe uma chave da API do TMDB.');return}if(!query){alert('Digite o título do filme que deseja pesquisar.');return}localStorage.setItem(TMDB_KEY_STORAGE,key);results.innerHTML='<div class="help" style="grid-column:1/-1">Pesquisando cartazes...</div>';try{const data=await tmdbSearchMovies(query,key),items=(data.results||[]).filter(x=>x.poster_path).slice(0,9);if(!items.length){results.innerHTML='<div class="help" style="grid-column:1/-1">Nenhum cartaz encontrado.</div>';return}results.innerHTML=items.map(x=>{const poster='https://image.tmdb.org/t/p/original'+x.poster_path,title=x.title||x.original_title||'Filme',year=(x.release_date||'').slice(0,4),thumb='https://image.tmdb.org/t/p/w342'+x.poster_path;return `<button type="button" class="btn" data-poster="${escAttr(poster)}" style="padding:6px;text-align:left;overflow:hidden"><img src="${escAttr(thumb)}" alt="" style="display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;margin-bottom:6px"><span style="display:block;font-size:11px;white-space:normal">${esc(title)} ${year?'('+esc(year)+')':''}</span></button>`}).join('');results.querySelectorAll('[data-poster]').forEach(btn=>btn.addEventListener('click',()=>{$('cover').value=btn.dataset.poster;results.querySelectorAll('[data-poster]').forEach(b=>b.style.borderColor='var(--line)');btn.style.borderColor='var(--gold)';toast('Capa selecionada. Salve o filme para guardar a imagem.')}))}catch(err){results.innerHTML='<div class="help" style="grid-column:1/-1">'+esc(err.message||'Erro ao pesquisar.')+'</div>'}});
+$('searchCoverBtn').addEventListener('click',async()=>{
+ const key=$('omdbKey').value.trim(),query=$('coverSearchTitle').value.trim()||$('title').value.trim(),results=$('coverResults');
+ if(!key){alert('Informe sua chave da OMDb API (IMDb).');return}
+ if(!query){alert('Digite o título do filme que deseja pesquisar.');return}
+ localStorage.setItem(OMDB_KEY_STORAGE,key);results.innerHTML='<div class="help" style="grid-column:1/-1">Pesquisando no IMDb...</div>';
+ try{
+  const data=await omdbSearchMovies(query,key),items=(data.Search||[]).filter(x=>x.Poster&&x.Poster!=='N/A').slice(0,9);
+  if(!items.length){results.innerHTML='<div class="help" style="grid-column:1/-1">Nenhum cartaz encontrado no IMDb.</div>';return}
+  results.innerHTML=items.map(x=>`<button type="button" class="btn" data-poster="${escAttr(x.Poster)}" style="padding:6px;text-align:left;overflow:hidden"><img src="${escAttr(x.Poster)}" alt="" style="display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;margin-bottom:6px"><span style="display:block;font-size:11px;white-space:normal">${esc(x.Title)} ${x.Year?'('+esc(x.Year)+')':''}</span></button>`).join('');
+  results.querySelectorAll('[data-poster]').forEach(btn=>btn.addEventListener('click',()=>{$('cover').value=btn.dataset.poster;results.querySelectorAll('[data-poster]').forEach(b=>b.style.borderColor='var(--line)');btn.style.borderColor='var(--gold)';toast('Capa selecionada. Salve o filme para guardar a imagem.')}));
+ }catch(err){results.innerHTML='<div class="help" style="grid-column:1/-1">'+esc(err.message||'Erro ao pesquisar.')+'</div>'}
+});
 $('title').addEventListener('input',()=>{if(!$('coverSearchTitle').value.trim())$('coverSearchTitle').value=$('title').value});
 $('filmForm').addEventListener('submit',async e=>{e.preventDefault();const f={title:$('title').value.trim(),year:$('year').value?Number($('year').value):'',format:$('format').value,genre:$('genre').value.trim(),saga:$('saga').value.trim(),cover:$('cover').value.trim(),notes:$('notes').value.trim()};const dup=films.find(x=>Number(x.id)!==Number(editId)&&norm(x.title)===norm(f.title)&&String(x.year)===String(f.year)&&x.format===f.format);if(dup){alert('Este filme já está cadastrado com o mesmo título, ano e formato. Edite o registro existente.');return}const row=filmToRow(f);let error;if(editId!==null){const result=await db.from('filmes').update(row).eq('id',editId).select().single();error=result.error;if(!error){const idx=films.findIndex(x=>Number(x.id)===Number(editId));films[idx]=rowToFilm(result.data)}}else{const result=await db.from('filmes').insert(row).select().single();error=result.error;if(!error)films.push(rowToFilm(result.data))}if(error){alert('Não foi possível salvar no banco: '+error.message+'\n\nConfira as políticas de acesso do Supabase.');return}$('filmDialog').close();render();toast(editId!==null?'Cadastro atualizado na nuvem.':'Filme cadastrado na nuvem.');editId=null});
 $('addTop').onclick=openAdd;$('closeDialog').onclick=()=>$('filmDialog').close();$('cancelDialog').onclick=()=>$('filmDialog').close();$('search').addEventListener('input',render);$('genreFilter').onchange=render;$('sagaFilter').onchange=render;$('sort').onchange=render;document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{activeFormat=t.dataset.format;render()});
@@ -682,7 +696,7 @@ $('addTop').onclick=openAdd;$('closeDialog').onclick=()=>$('filmDialog').close()
 // Central de importação: pesquisa vários títulos e exige conferência antes de gravar.
 $('importListBtn').addEventListener('click',()=>{
  if(isVisitor)return;
- $('bulkTmdbKey').value=localStorage.getItem(TMDB_KEY_STORAGE)||'';
+ $('bulkOmdbKey').value=localStorage.getItem(OMDB_KEY_STORAGE)||'';
  $('bulkResults').innerHTML='';$('bulkStatus').textContent='';
  $('saveBulkBtn').disabled=true;bulkCandidates=[];
  $('importListDialog').showModal();
@@ -690,29 +704,30 @@ $('importListBtn').addEventListener('click',()=>{
 $('closeImportList').onclick=()=>$('importListDialog').close();
 $('cancelImportList').onclick=()=>$('importListDialog').close();
 $('searchBulkBtn').addEventListener('click',async()=>{
- const key=$('bulkTmdbKey').value.trim();
+ const key=$('bulkOmdbKey').value.trim();
  const titles=[...new Set($('bulkTitles').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean))];
- if(!key){$('bulkStatus').textContent='Informe a chave da API TMDB.';return}
+ if(!key){$('bulkStatus').textContent='Informe sua chave OMDb API (IMDb).';return}
  if(!titles.length){$('bulkStatus').textContent='Cole pelo menos um título, um por linha.';return}
  if(titles.length>100){$('bulkStatus').textContent='Para manter a busca estável, importe no máximo 100 títulos por vez.';return}
- localStorage.setItem(TMDB_KEY_STORAGE,key);$('searchBulkBtn').disabled=true;$('saveBulkBtn').disabled=true;
+ localStorage.setItem(OMDB_KEY_STORAGE,key);$('searchBulkBtn').disabled=true;$('saveBulkBtn').disabled=true;
  $('bulkResults').innerHTML='';bulkCandidates=[];
- const genreNames={28:'Ação',12:'Aventura',16:'Animação',35:'Comédia',80:'Crime',99:'Documentário',18:'Drama',10751:'Família',14:'Fantasia',36:'História',27:'Terror',10402:'Música',9648:'Mistério',10749:'Romance',878:'Ficção científica',10770:'Cinema para TV',53:'Suspense',10752:'Guerra',37:'Faroeste'};
+ 
  let done=0;
  for(const query of titles){
   $('bulkStatus').textContent=`Pesquisando ${++done} de ${titles.length}: ${query}`;
   try{
-   const data=await tmdbSearchMovies(query,key);
-   const match=(data.results||[]).filter(x=>x.poster_path).sort((a,b)=>{
-    const exactA=norm(a.title||a.original_title)===norm(query)?1:0;
-    const exactB=norm(b.title||b.original_title)===norm(query)?1:0;
+   const data=await omdbSearchMovies(query,key);
+   const match=(data.Search||[]).filter(x=>x.Poster&&x.Poster!=='N/A').sort((a,b)=>{
+    const exactA=norm(a.Title)===norm(query)?1:0;
+    const exactB=norm(b.Title)===norm(query)?1:0;
     return exactB-exactA;
    })[0];
    if(match){
-    const title=match.title||match.original_title||query;
-    const year=(match.release_date||'').slice(0,4);
-    const genres=(match.genre_ids||[]).map(id=>genreNames[id]).filter(Boolean).slice(0,2).join(' / ');
-    bulkCandidates.push({query,title,year,genre:genres,format:$('bulkFormat').value,cover:'https://image.tmdb.org/t/p/original'+match.poster_path,selected:true});
+    const title=match.Title||query;
+    const year=String(match.Year||'').slice(0,4);
+    let genres='';
+    try{const details=await omdbMovieDetails(match.imdbID,key);genres=String(details.Genre||'').split(',').slice(0,2).join(' / ')}catch(e){console.warn('Gênero indisponível para '+title,e)}
+    bulkCandidates.push({query,title,year,genre:genres,format:$('bulkFormat').value,cover:match.Poster,selected:true});
    }else bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,missing:true});
   }catch(err){bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,error:err.message})}
   await new Promise(resolve=>setTimeout(resolve,180));
@@ -725,7 +740,7 @@ function renderBulkCandidates(){
  $('bulkResults').innerHTML=bulkCandidates.map((f,i)=>{
   const exists=films.some(x=>norm(x.title)===norm(f.title)&&String(x.year||'')===String(f.year||'')&&x.format===f.format);
   const disabled=f.missing||f.error||exists;
-  const status=f.error?'Falha na pesquisa':f.missing?'Nenhum cartaz localizado':exists?'Já cadastrado':'Encontrado no TMDB';
+  const status=f.error?'Falha na pesquisa':f.missing?'Nenhum cartaz localizado':exists?'Já cadastrado':'Encontrado no IMDb';
   return `<label class="bulk-result"><input type="checkbox" data-bulk-index="${i}" ${f.selected&&!disabled?'checked':''} ${disabled?'disabled':''} style="width:18px"><div>${f.cover?`<img src="${escAttr(f.cover.replace('/original','/w185'))}" alt="">`:'<div style="width:58px;height:87px;border:1px dashed var(--line);border-radius:5px;display:grid;place-items:center">?</div>'}</div><div><strong>${esc(f.title)}</strong> ${f.year?`<span class="year">(${esc(f.year)})</span>`:''}<div class="help">${esc(f.genre||'Gênero não identificado')} · ${esc(status)}${f.query!==f.title?` · Busca: ${esc(f.query)}`:''}</div></div></label>`;
  }).join('');
  $('bulkResults').querySelectorAll('[data-bulk-index]').forEach(box=>box.addEventListener('change',()=>{
