@@ -660,14 +660,17 @@ $('recoverCoversBtn').addEventListener('click',async()=>{
  if(!key){alert('Abra Adicionar filme, informe sua chave OMDb API (IMDb) e saia do campo para salvá-la neste navegador.');return}
  const target=films.slice(-100),unresolved=target.filter(f=>!f.cover||!f.genre||!f.imdbId||!f.description),pending=unresolved.filter(f=>!repairAttempted.has(String(f.id))).slice(0,10);
  if(!pending.length){repairAttempted.clear();toast(unresolved.length?'Não restam correspondências automáticas nesta rodada. Revise os títulos pendentes manualmente.':'Os 100 filmes recentes já estão completos.');return}
+ let firstSearch;try{firstSearch=await omdbSearchMovies(pending[0].title,key)}catch(err){alert(err.message||'Não foi possível consultar a OMDb. Confira a chave salva e tente novamente.');return}
  const button=$('recoverCoversBtn');button.disabled=true;let saved=0,notFound=0,failed=0;
  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  try{
   for(let i=0;i<pending.length;i++){
    const film=pending[i];button.textContent='Corrigindo '+(i+1)+'/'+pending.length;
    try{
-    const data=await omdbSearchMovies(film.title,key);
-    const exact=(data.Search||[]).find(x=>norm(x.Title)===norm(film.title)&&String(x.Year||'').slice(0,4)===String(film.year||''));
+    const data=i===0?firstSearch:await omdbSearchMovies(film.title,key),candidates=(data.Search||[]).filter(x=>!x.Type||x.Type==='movie');
+    const yearMatches=candidates.filter(x=>String(x.Year||'').slice(0,4)===String(film.year||''));
+    const exactTitle=yearMatches.filter(x=>norm(x.Title)===norm(film.title));
+    const exact=exactTitle.length===1?exactTitle[0]:(exactTitle.length===0&&yearMatches.length===1?yearMatches[0]:(!film.year&&candidates.filter(x=>norm(x.Title)===norm(film.title)).length===1?candidates.find(x=>norm(x.Title)===norm(film.title)):null));
     if(!exact){notFound++;await wait(250);continue}
     const details=await omdbMovieDetails(exact.imdbID,key);
     if(details.Response==='False'||norm(details.Title)!==norm(film.title)||String(details.Year||'').slice(0,4)!==String(film.year||'')){notFound++;await wait(250);continue}
