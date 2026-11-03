@@ -329,7 +329,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 const SUPABASE_URL='https://ajfqoixqewykognhzgls.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ouAeLEXS702j-jK8GMGMNg_58w1-DFo';
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-let films=[],activeFormat='Todos',editId=null,currentUser=null,customOrder=[],isVisitor=false,bulkCandidates=[],passwordRecoveryMode=false;
+let films=[],activeFormat='Todos',editId=null,currentUser=null,customOrder=[],isVisitor=false,bulkCandidates=[],passwordRecoveryMode=false,repairAttempted=new Set();
 const $=id=>document.getElementById(id);
 // Campo de busca em contenteditable: evita heurísticas de autofill de e-mail do Chrome/password managers.
 const searchBox=document.getElementById('search');
@@ -658,8 +658,8 @@ $('recoverCoversBtn').addEventListener('click',async()=>{
  if(isVisitor)return;
  const key=localStorage.getItem(OMDB_KEY_STORAGE)||'';
  if(!key){alert('Abra Adicionar filme, informe sua chave OMDb API (IMDb) e saia do campo para salvá-la neste navegador.');return}
- const target=films.slice(-100),pending=target.filter(f=>!f.cover||!f.genre||!f.imdbId||!f.description).slice(0,10);
- if(!pending.length){toast('Os 100 filmes recentes já estão completos.');return}
+ const target=films.slice(-100),unresolved=target.filter(f=>!f.cover||!f.genre||!f.imdbId||!f.description),pending=unresolved.filter(f=>!repairAttempted.has(String(f.id))).slice(0,10);
+ if(!pending.length){repairAttempted.clear();toast(unresolved.length?'Não restam correspondências automáticas nesta rodada. Revise os títulos pendentes manualmente.':'Os 100 filmes recentes já estão completos.');return}
  const button=$('recoverCoversBtn');button.disabled=true;let saved=0,notFound=0,failed=0;
  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  try{
@@ -677,6 +677,7 @@ $('recoverCoversBtn').addEventListener('click',async()=>{
     const {data:updated,error}=await db.from('filmes').update(row).eq('id',film.id).select().single();if(error)throw error;
     const idx=films.findIndex(x=>Number(x.id)===Number(film.id));films[idx]=rowToFilm(updated);saved++;
    }catch(err){failed++;console.warn('Falha ao recuperar metadados de '+film.title,err)}
+   repairAttempted.add(String(film.id));
    await wait(250);
   }
   render();const remaining=films.slice(-100).filter(f=>!f.cover||!f.genre||!f.imdbId||!f.description).length;
