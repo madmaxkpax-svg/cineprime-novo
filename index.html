@@ -693,9 +693,9 @@ async function tmdbLocalizedPosters(title,year,key){
  for(const film of (search.results||[]).slice(0,9)){
   if(year&&String(film.release_date||'').slice(0,4)!==String(year))continue;
   const detail=await tmdbGet('/movie/'+film.id+'?language=pt-BR&append_to_response=external_ids,images&include_image_language=pt,null',key);
-  const posters=detail.images?.posters||[],pt=posters.filter(x=>x.iso_639_1==='pt').sort((a,b)=>(b.vote_average||0)-(a.vote_average||0)),noLanguage=posters.filter(x=>x.iso_639_1===null).sort((a,b)=>(b.vote_average||0)-(a.vote_average||0)),poster=pt[0]||noLanguage[0];
+  const posters=detail.images?.posters||[],pt=posters.filter(x=>x.iso_639_1==='pt').sort((a,b)=>(b.vote_average||0)-(a.vote_average||0)),poster=pt[0];
   if(!poster?.file_path)continue;
-  results.push({source:'tmdb',tmdbId:film.id,title:detail.title||film.title||title,year:String(detail.release_date||film.release_date||'').slice(0,4),genre:(detail.genres||[]).map(x=>x.name).join(' / '),imdbId:detail.external_ids?.imdb_id||'',description:detail.overview||'',cover:'https://image.tmdb.org/t/p/w500'+poster.file_path,posterLanguage:poster.iso_639_1==='pt'?'pt':'null'});
+  results.push({source:'tmdb',tmdbId:film.id,title:detail.title||film.title||title,year:String(detail.release_date||film.release_date||'').slice(0,4),genre:(detail.genres||[]).map(x=>x.name).join(' / '),imdbId:detail.external_ids?.imdb_id||'',description:detail.overview||'',cover:'https://image.tmdb.org/t/p/w500'+poster.file_path,posterLanguage:'pt'});
  }
  return results;
 }
@@ -758,7 +758,7 @@ $('searchCoverBtn').addEventListener('click',async()=>{
  try{
   const items=(await tmdbLocalizedPosters(query,$('year').value,tmdbKey)).slice(0,9);
   if(!items.length){results.innerHTML='<div class="help" style="grid-column:1/-1">Não achei pôster em português com esse título/ano. Confira o ano ou tente outra variação do título.</div>';return}
-  results.innerHTML=items.map((x,i)=>`<button type="button" class="btn" data-candidate-index="${i}" style="padding:6px;text-align:left;overflow:hidden"><img src="${escAttr(x.cover)}" alt="Capa em português de ${escAttr(x.title)}" style="display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;margin-bottom:6px"><span style="display:block;font-size:11px;white-space:normal">${esc(x.title)} ${x.year?'('+esc(x.year)+')':''} · ${x.posterLanguage==='pt'?'Português':'sem idioma'}</span></button>`).join('');
+  results.innerHTML=items.map((x,i)=>`<button type="button" class="btn" data-candidate-index="${i}" style="padding:6px;text-align:left;overflow:hidden"><img src="${escAttr(x.cover)}" alt="Capa em português de ${escAttr(x.title)}" style="display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;margin-bottom:6px"><span style="display:block;font-size:11px;white-space:normal">${esc(x.title)} ${x.year?'('+esc(x.year)+')':''} · Pôster em português</span></button>`).join('');
   results.querySelectorAll('[data-candidate-index]').forEach(btn=>btn.addEventListener('click',()=>{const selected=items[Number(btn.dataset.candidateIndex)];$('cover').value=selected.cover;$('imdbId').value=selected.imdbId||'';$('genre').value=selected.genre||'';$('description').value=selected.description||'';$('year').value=selected.year||$('year').value;results.querySelectorAll('[data-candidate-index]').forEach(b=>b.style.borderColor='var(--line)');btn.style.borderColor='var(--gold)';toast('Pôster em português, gênero, sinopse e ID IMDb preenchidos. Confira e salve.')}));
  }catch(err){results.innerHTML='<div class="help" style="grid-column:1/-1">'+esc(err.message||'Erro ao pesquisar.')+'</div>'}
 });
