@@ -649,6 +649,37 @@ async function omdbSearchMovies(query,key){
 async function omdbMovieDetails(imdbID,key){
  return await omdbRequest({i:String(imdbID||''),plot:'short'},key);
 }
+// OMDb searches its own title index, which often omits Brazilian release titles.
+// Wikidata's public search covers labels and aliases; OMDb then supplies poster/metadata by IMDb ID.
+async function wikidataImdbCandidates(title,year){
+ const q=String(title||'').trim();if(!q)return [];
+ const searchParams=new URLSearchParams({action:'wbsearchentities',search:q,language:'pt',uselang:'pt',type:'item',limit:'10',format:'json',origin:'*'});
+ const searchResponse=await fetch('https://www.wikidata.org/w/api.php?'+searchParams.toString());if(!searchResponse.ok)throw new Error('Busca alternativa por títulos brasileiros indisponível (HTTP '+searchResponse.status+').');
+ const searchData=await searchResponse.json(),ids=(searchData.search||[]).map(x=>x.id).filter(x=>/^Q\d+$/.test(x));if(!ids.length)return [];
+ const entityParams=new URLSearchParams({action:'wbgetentities',ids:ids.join('|'),props:'labels|aliases|claims',languages:'pt|en',format:'json',origin:'*'});
+ const entityResponse=await fetch('https://www.wikidata.org/w/api.php?'+entityParams.toString());if(!entityResponse.ok)throw new Error('Não foi possível conferir os títulos localizados.');
+ const entityData=await entityResponse.json(),wanted=norm(q),matches=[];
+ for(const entity of Object.values(entityData.entities||{})){
+  const names=[entity.labels?.pt?.value,...(entity.aliases?.pt||[]).map(x=>x.value)].filter(Boolean);
+  if(!names.some(x=>norm(x)===wanted))continue;
+  const dates=(entity.claims?.P577||[]).map(c=>c.mainsnak?.datavalue?.value?.time||'').map(x=>{const m=x.match(/[+-](\d{4})/);return m?m[1]:''}).filter(Boolean);
+  if(year&&dates.length&&!dates.includes(String(year)))continue;
+  const imdbIds=(entity.claims?.P345||[]).filter(c=>c.rank!=='deprecated').map(c=>c.mainsnak?.datavalue?.value).filter(x=>/^tt\d{7,10}$/.test(x||''));
+  imdbIds.forEach(imdbId=>matches.push({imdbID:imdbId,yearMatch:!!(year&&dates.includes(String(year)))}));
+ }
+ return matches.sort((a,b)=>Number(b.yearMatch)-Number(a.yearMatch));
+}
+async function omdbSearchWithLocalizedFallback(title,year,key,initialData){
+ const data=initialData||await omdbSearchMovies(title,key),direct=(data.Search||[]).filter(x=>x.Poster&&x.Poster!=='N/A'&&(!year||String(x.Year||'').slice(0,4)===String(year)));
+ if(direct.length)return direct;
+ const candidates=await wikidataImdbCandidates(title,year),resolved=[];
+ for(const candidate of candidates){
+  const details=await omdbMovieDetails(candidate.imdbID,key);
+  if(details.Response==='False'||(year&&String(details.Year||'').slice(0,4)!==String(year))||!details.Poster||details.Poster==='N/A')continue;
+  resolved.push({...details,imdbID:details.imdbID||candidate.imdbID});
+ }
+ return resolved.length===1?resolved:[];
+}
 $('omdbKey').value=localStorage.getItem(OMDB_KEY_STORAGE)||'';
 $('omdbKey').addEventListener('input',()=>localStorage.setItem(OMDB_KEY_STORAGE,$('omdbKey').value.trim()));
 $('omdbKey').addEventListener('change',()=>localStorage.setItem(OMDB_KEY_STORAGE,$('omdbKey').value.trim()));
@@ -667,13 +698,13 @@ $('recoverCoversBtn').addEventListener('click',async()=>{
   for(let i=0;i<pending.length;i++){
    const film=pending[i];button.textContent='Corrigindo '+(i+1)+'/'+pending.length;
    try{
-    const data=i===0?firstSearch:await omdbSearchMovies(film.title,key),candidates=(data.Search||[]).filter(x=>!x.Type||x.Type==='movie');
-    const yearMatches=candidates.filter(x=>String(x.Year||'').slice(0,4)===String(film.year||''));
+    const candidates=await omdbSearchWithLocalizedFallback(film.title,film.year,key,i===0?firstSearch:null);
+    const yearMatches=candidates.filter(x=>!x.Type||x.Type==='movie').filter(x=>String(x.Year||'').slice(0,4)===String(film.year||''));
     const exactTitle=yearMatches.filter(x=>norm(x.Title)===norm(film.title));
     const exact=exactTitle.length===1?exactTitle[0]:(exactTitle.length===0&&yearMatches.length===1?yearMatches[0]:(!film.year&&candidates.filter(x=>norm(x.Title)===norm(film.title)).length===1?candidates.find(x=>norm(x.Title)===norm(film.title)):null));
     if(!exact){notFound++;await wait(250);continue}
-    const details=await omdbMovieDetails(exact.imdbID,key);
-    if(details.Response==='False'||norm(details.Title)!==norm(film.title)||String(details.Year||'').slice(0,4)!==String(film.year||'')){notFound++;await wait(250);continue}
+    const details=exact.Genre?exact:await omdbMovieDetails(exact.imdbID,key);
+    if(details.Response==='False'||(film.year&&String(details.Year||'').slice(0,4)!==String(film.year))){notFound++;await wait(250);continue}
     const genre=String(details.Genre||'').split(',').slice(0,2).map(x=>x.trim()).filter(Boolean).join(' / ');
     const poster=details.Poster&&details.Poster!=='N/A'?details.Poster:(exact.Poster&&exact.Poster!=='N/A'?exact.Poster:'');
     const row={imagem_url:film.cover||poster||null,categoria:film.genre||genre||null,imdb_id:film.imdbId||details.imdbID||exact.imdbID||null,descricao:film.description||((details.Plot&&details.Plot!=='N/A')?details.Plot:null)};
@@ -695,8 +726,8 @@ $('searchCoverBtn').addEventListener('click',async()=>{
  if(!query){alert('Digite o título do filme que deseja pesquisar.');return}
  localStorage.setItem(OMDB_KEY_STORAGE,key);results.innerHTML='<div class="help" style="grid-column:1/-1">Pesquisando no IMDb...</div>';
  try{
-  const data=await omdbSearchMovies(query,key),items=(data.Search||[]).filter(x=>x.Poster&&x.Poster!=='N/A').slice(0,9);
-  if(!items.length){results.innerHTML='<div class="help" style="grid-column:1/-1">Nenhum cartaz encontrado no IMDb.</div>';return}
+  const items=(await omdbSearchWithLocalizedFallback(query,$('year').value,key)).slice(0,9);
+  if(!items.length){results.innerHTML='<div class="help" style="grid-column:1/-1">Não achei capa por esse título/ano. Tente o título original ou confira o ano.</div>';return}
   results.innerHTML=items.map(x=>`<button type="button" class="btn" data-poster="${escAttr(x.Poster)}" data-imdb-id="${escAttr(x.imdbID||'')}" style="padding:6px;text-align:left;overflow:hidden"><img src="${escAttr(x.Poster)}" alt="" style="display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;margin-bottom:6px"><span style="display:block;font-size:11px;white-space:normal">${esc(x.Title)} ${x.Year?'('+esc(x.Year)+')':''}</span></button>`).join('');
   results.querySelectorAll('[data-poster]').forEach(btn=>btn.addEventListener('click',async()=>{ $('cover').value=btn.dataset.poster;$('imdbId').value=btn.dataset.imdbId||'';results.querySelectorAll('[data-poster]').forEach(b=>b.style.borderColor='var(--line)');btn.style.borderColor='var(--gold)';try{const detail=await omdbMovieDetails(btn.dataset.imdbId,key);if(detail.Response!=='False'){$('genre').value=String(detail.Genre||'').split(',').slice(0,2).map(x=>x.trim()).filter(Boolean).join(' / ');$('description').value=detail.Plot&&detail.Plot!=='N/A'?detail.Plot:'';$('year').value=String(detail.Year||'').slice(0,4)||$('year').value}toast('Capa, gênero, sinopse e código IMDb preenchidos. Confira e salve.')}catch(err){toast('Capa e ID escolhidos; metadados restantes indisponíveis.')}}));
  }catch(err){results.innerHTML='<div class="help" style="grid-column:1/-1">'+esc(err.message||'Erro ao pesquisar.')+'</div>'}
@@ -728,8 +759,8 @@ $('searchBulkBtn').addEventListener('click',async()=>{
  for(const query of titles){
   $('bulkStatus').textContent=`Pesquisando ${++done} de ${titles.length}: ${query}`;
   try{
-   const data=await omdbSearchMovies(query,key);
-   const match=(data.Search||[]).filter(x=>x.Poster&&x.Poster!=='N/A').sort((a,b)=>{
+   const searchResults=await omdbSearchWithLocalizedFallback(query,'',key);
+   const match=searchResults.sort((a,b)=>{
     const exactA=norm(a.Title)===norm(query)?1:0;
     const exactB=norm(b.Title)===norm(query)?1:0;
     return exactB-exactA;
@@ -738,7 +769,7 @@ $('searchBulkBtn').addEventListener('click',async()=>{
     const title=match.Title||query;
     const year=String(match.Year||'').slice(0,4);
     let genres='',description='',imdbId=match.imdbID;
-    try{const details=await omdbMovieDetails(match.imdbID,key);genres=String(details.Genre||'').split(',').slice(0,2).map(x=>x.trim()).join(' / ');description=details.Plot&&details.Plot!=='N/A'?details.Plot:'';imdbId=details.imdbID||match.imdbID}catch(e){console.warn('Metadados indisponíveis para '+title,e)}
+    try{const details=match.Genre?match:await omdbMovieDetails(match.imdbID,key);genres=String(details.Genre||'').split(',').slice(0,2).map(x=>x.trim()).join(' / ');description=details.Plot&&details.Plot!=='N/A'?details.Plot:'';imdbId=details.imdbID||match.imdbID}catch(e){console.warn('Metadados indisponíveis para '+title,e)}
     bulkCandidates.push({query,title,year,genre:genres,format:$('bulkFormat').value,cover:match.Poster,imdbId,description,selected:true});
    }else bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,missing:true});
   }catch(err){bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,error:err.message})}
