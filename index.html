@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -236,7 +236,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 </div>
 <header class="topbar">
  <div class="brand"><div class="brandmark">✦</div><div><h1><span style="color:var(--gold)">CINEPRIME</span></h1><div class="sub">Arquivo pessoal de cinema</div></div></div>
- <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn" id="importListBtn" type="button">＋ Importar lista</button><button class="btn" id="recoverCoversBtn" type="button">✦ Recuperar capas</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
+ <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn" id="importListBtn" type="button">＋ Importar lista</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
 </header>
 <section class="hero"><div><div class="eyebrow">SUA COLEÇÃO. SUA HISTÓRIA.</div></div></section>
 <div id="cinemaQuote" class="cinema-quote" aria-label="Frase de impacto" hidden><div class="cinema-quote__track"><span class="cinema-quote__item"></span><span class="cinema-quote__item" aria-hidden="true"></span></div></div>
@@ -244,7 +244,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 </div><!-- /.cinema-intro -->
 <div class="toolbar">
  <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs OFF</button>
- <div class="search"><input id="search" type="search" name="cineprime-catalog-filter-7f3a" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly')" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
+ <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
  <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada</option></select>
@@ -272,8 +272,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
    <div class="field full"><label for="backgroundChoice">Fundo da página</label><select id="backgroundChoice"><option value="gradient">Degradê suave</option><option value="solid">Cor uniforme</option><option value="texture">Textura cinematográfica discreta</option></select></div>
    <div class="field"><label for="accentChoice">Cor de destaque</label><input id="accentChoice" type="color" value="#d6b15e"></div>
    <div class="field"><label for="backgroundColor">Cor do fundo</label><input id="backgroundColor" type="color" value="#0b0b0d"></div>
-   <div class="field full"><label for="wallpaperFile">Papel de parede — enviar imagem do computador/celular</label><input id="wallpaperFile" type="file" accept="image/jpeg,image/png,image/webp,image/avif"><div class="help">A imagem será enviada ao Supabase Storage e ficará disponível nos outros navegadores e dispositivos. Formatos: JPG, PNG, WEBP ou AVIF. Limite: 8 MB. Se não selecionar um novo arquivo, a imagem atual será mantida.</div></div>
-    <div class="field full"><label for="wallpaperUrl">Ou informar endereço direto de imagem (opcional)</label><input id="wallpaperUrl" type="url" placeholder="https://.../imagem.jpg"><div class="help">Para sincronização confiável, prefira enviar o arquivo acima. Endereços externos continuam dependendo do site que hospeda a imagem.</div></div>
+   <div class="field full"><label for="wallpaperUrl">Imagem de fundo atrás do título CinePrime (URL da imagem)</label><input id="wallpaperUrl" type="url" placeholder="https://.../imagem.jpg"><div class="help">Você pode trocar a imagem quando quiser. Ex.: uma imagem temática inspirada em O Iluminado, Scarface ou Poltergeist. Use um endereço direto de imagem.</div></div>
    <div class="field full"><label for="quoteText">Frase de impacto (máximo de 350 caracteres)</label><textarea id="quoteText" maxlength="350" rows="4" placeholder="Digite sua frase. Use Enter para quebrar as linhas e ajustar a apresentação."></textarea><div class="help"><span id="quoteCount">0</span>/350 caracteres. Quebras de linha serão mantidas no cabeçalho.</div></div>
    <div class="field"><label for="quoteFont">Formato da letra</label><select id="quoteFont"><option value="'Cinzel',Georgia,serif">Cinema clássico (Cinzel)</option><option value="'Creepster',cursive">Terror (Creepster)</option><option value="Georgia,serif">Clássica (serifada)</option><option value="Arial,Helvetica,sans-serif">Moderna (sem serifa)</option><option value="'Courier New',monospace">Máquina de escrever</option><option value="cursive">Manuscrita</option><option value="system-ui,sans-serif">Padrão do sistema</option></select></div>
    <div class="field"><label for="quoteColor">Cor da frase</label><input id="quoteColor" type="color" value="#ffffff"></div>
@@ -302,7 +301,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
    <div class="field"><label for="format">Formato *</label><select id="format" required><option>DVD</option><option>Blu-ray</option><option selected>Digital</option></select></div>
    <div class="field"><label for="genre">Gênero</label><input id="genre" list="genres" placeholder="Ex.: Ação"><datalist id="genres"><option>Ação</option><option>Aventura</option><option>Ficção científica</option><option>Terror</option><option>Drama</option><option>Faroeste</option><option>Suspense</option><option>Comédia</option></datalist></div>
    <div class="field"><label for="saga">Franquia / saga</label><input id="saga" placeholder="Ex.: Rambo"></div>
-   <div class="field full"><label>Buscar filme e capa em fontes abertas (IMDb quando disponível)</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa gratuita no Wikidata. Quando disponível, o resultado mostra o identificador IMDb e uma imagem publicada no Wikimedia Commons. A disponibilidade de pôsteres varia por filme.</div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. O app mantém a proporção vertical do pôster.</div></div>
+   <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes no TMDB. Para habilitar a busca, informe sua chave gratuita da API do TMDB abaixo. Escolha um resultado para preencher a capa.</div><div class="field" style="margin-top:8px"><label for="tmdbKey">Chave da API TMDB</label><input id="tmdbKey" type="password" placeholder="Cole sua chave de API (v3)"><div class="help">A chave fica salva apenas neste navegador. Obtenha uma chave em themoviedb.org/settings/api. Não compartilhe sua chave.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. O app mantém a proporção vertical do pôster.</div></div>
    <div class="field full"><label for="notes">Notas pessoais (opcional)</label><textarea id="notes" rows="2" placeholder="Edição, mídia, observações..."></textarea></div>
    <div class="field full help">O número de catálogo é gerado automaticamente. Títulos com mesmo nome, ano e formato não podem ser duplicados.</div>
   </div>
@@ -312,9 +311,9 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 <dialog id="importListDialog">
  <div class="modalhead"><h3>Central de importação de filmes</h3><button type="button" class="btn" id="closeImportList">✕</button></div>
  <div class="modalbody">
-  <div class="field full"><label for="bulkTitles">Cole ou digite uma lista de filmes (um título por linha)</label><textarea id="bulkTitles" rows="7" placeholder="Mad Max&#10;Rocky&#10;Alien&#10;Rambo: Programado para Matar"></textarea><div class="help">A busca consulta o Wikidata e imagens do Wikimedia Commons. Confira título, ano e identificador IMDb antes de gravar no catálogo.</div></div>
+  <div class="field full"><label for="bulkTitles">Cole ou digite uma lista de filmes (um título por linha)</label><textarea id="bulkTitles" rows="7" placeholder="Mad Max&#10;Rocky&#10;Alien&#10;Rambo: Programado para Matar"></textarea><div class="help">A busca usa o TMDB em português. Depois você confere os resultados antes de gravar no catálogo.</div></div>
   <div class="field"><label for="bulkFormat">Formato dos filmes</label><select id="bulkFormat"><option>DVD</option><option>Blu-ray</option><option>Digital</option></select></div>
-  <div class="field full"><button type="button" class="btn primary" id="searchBulkBtn">Pesquisar lista em fontes abertas</button><div id="bulkStatus" class="help" role="status"></div></div>
+  <div class="field full"><button type="button" class="btn primary" id="searchBulkBtn">Pesquisar lista no TMDB</button><div id="bulkStatus" class="help" role="status"></div></div>
   <div class="field full"><div id="bulkResults" style="display:grid;gap:9px"></div></div>
  </div>
  <div class="modalfoot"><button type="button" class="btn" id="cancelImportList">Fechar</button><button type="button" class="btn primary" id="saveBulkBtn" disabled>Adicionar selecionados</button></div>
@@ -345,41 +344,7 @@ function applySettings(){
  document.documentElement.style.setProperty('--cine-stat-opacity',String(Math.max(0.15,Math.min(0.9,(Number(visualSettings.statOpacity??48))/100))));
  const intro=document.querySelector('.cinema-intro'); const topbar=document.querySelector('.topbar'); const u=(visualSettings.wallpaperUrl||'').trim(); const wallpaper=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:''; if(intro){intro.style.backgroundImage=wallpaper;intro.style.backgroundPosition=`${Number(visualSettings.wallpaperX??50)}% ${Number(visualSettings.wallpaperY??38)}%`;intro.style.backgroundSize=`${Math.max(100,Math.min(220,Number(visualSettings.wallpaperZoom)||100))}% auto`;} if(topbar)topbar.style.backgroundImage='none'; setCinemaQuote(visualSettings.quoteText||'',visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont,visualSettings.quoteColor||'#ffffff',visualSettings.quoteSize||'24px');
 }
-let pendingWallpaperFile=null;
-$('wallpaperFile').addEventListener('change',()=>{
- const file=$('wallpaperFile').files?.[0]||null;
- const allowed=['image/jpeg','image/png','image/webp','image/avif'];
- if(file&&(!allowed.includes(file.type)||file.size>8*1024*1024)){
-  alert('Escolha uma imagem JPG, PNG, WEBP ou AVIF de até 8 MB.');
-  $('wallpaperFile').value='';pendingWallpaperFile=null;return;
- }
- pendingWallpaperFile=file;
-});
-async function uploadWallpaperIfSelected(){
- if(!pendingWallpaperFile)return;
- if(!currentUser)throw new Error('Entre na sua conta para enviar o papel de parede à nuvem.');
- const file=pendingWallpaperFile;
- const ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/avif':'avif'})[file.type];
- const path=currentUser.id+'/wallpaper-'+Date.now()+'.'+ext;
- const {data,error}=await db.storage.from('cineprime-wallpapers').upload(path,file,{contentType:file.type,cacheControl:'31536000',upsert:false});
- if(error)throw error;
- const {data:publicData}=db.storage.from('cineprime-wallpapers').getPublicUrl(data.path);
- visualSettings.wallpaperUrl=publicData.publicUrl;
- visualSettings.wallpaperStoragePath=data.path;
- $('wallpaperUrl').value=publicData.publicUrl;
- pendingWallpaperFile=null;
- $('wallpaperFile').value='';
-}
-async function saveSettings(){
- if(currentUser)await uploadWallpaperIfSelected();
- localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();
- if(currentUser){
-  const {error}=await db.from('cineprime_configuracoes_visuais').upsert({user_id:currentUser.id,configuracoes:visualSettings,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-  if(error){console.warn('Preferências visuais não sincronizadas:',error.message);throw error;}
-  return true;
- }
- return false;
-}
+async function saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();if(currentUser){const {error}=await db.from('cineprime_configuracoes_visuais').upsert({user_id:currentUser.id,configuracoes:visualSettings,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error){console.warn('Preferências visuais não sincronizadas; configure a tabela no Supabase:',error.message);return false;}return true;}return false}
 async function loadVisualSettings(){if(!currentUser)return;const {data,error}=await db.from('cineprime_configuracoes_visuais').select('configuracoes').eq('user_id',currentUser.id).maybeSingle();if(!error&&data?.configuracoes&&typeof data.configuracoes==='object'){visualSettings={...DEFAULT_SETTINGS,...data.configuracoes};localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();}else if(error)console.warn('Preferências visuais da nuvem indisponíveis até configurar a tabela:',error.message)}
 function openSettings(){
  $('themeChoice').value=visualSettings.theme;$('backgroundChoice').value=visualSettings.background;
@@ -388,13 +353,10 @@ function openSettings(){
 }
 $('settingsBtn').addEventListener('click',openSettings);
 $('closeSettings').onclick=()=>$('settingsDialog').close();
-$('resetSettings').onclick=async()=>{pendingWallpaperFile=null;$('wallpaperFile').value='';visualSettings={...DEFAULT_SETTINGS,order:[]};try{await saveSettings();openSettings();toast('Configurações padrão restauradas.')}catch(err){toast('Falha ao restaurar: '+(err.message||''))}};
+$('resetSettings').onclick=async()=>{visualSettings={...DEFAULT_SETTINGS,order:[]};await saveSettings();openSettings();toast('Configurações padrão restauradas.')};
 $('settingsForm').addEventListener('submit',async e=>{
  e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value,wallpaperUrl:$('wallpaperUrl').value.trim(),quoteText:$('quoteText').value.slice(0,350),quoteFont:$('quoteFont').value,quoteColor:$('quoteColor').value,quoteSize:$('quoteSize').value,wallpaperX:Number($('wallpaperX').value),wallpaperY:Number($('wallpaperY').value),wallpaperZoom:Number($('wallpaperZoom').value),statOpacity:Number($('statOpacity').value),frameBorderColor:$('frameBorderColor').value,frameTextColor:$('frameTextColor').value,frameBgColor:$('frameBgColor').value,genrePrefix:$('genrePrefix').value.trim()};
- try{
-   const cloudSaved=await saveSettings();render();$('settingsDialog').close();
-   toast(cloudSaved?'Aparência e papel de parede salvos na nuvem.':'Aparência aplicada neste navegador; entre na conta para sincronizar.');
-  }catch(err){console.error('Falha ao salvar aparência:',err);toast('Não foi possível salvar na nuvem: '+(err.message||'verifique sua conexão.'));}
+ const cloudSaved=await saveSettings();render();$('settingsDialog').close();toast(cloudSaved?'Aparência salva na nuvem.':'Aparência aplicada neste navegador; configure a tabela no Supabase para sincronizar.');
 });
 applySettings();
 $('quoteText').addEventListener('input',()=> $('quoteCount').textContent=$('quoteText').value.length);['quoteFont','quoteColor','quoteSize'].forEach(id=>$(id).addEventListener('change',()=>{const q=$('cinemaQuote');if(q){q.style.setProperty('--cine-quote-font',$('quoteFont').value);q.style.setProperty('--cine-quote-color',$('quoteColor').value);q.style.setProperty('--cine-quote-size',$('quoteSize').value)}}));$('wallpaperZoom').addEventListener('input',()=> $('zoomCount').textContent=$('wallpaperZoom').value);$('statOpacity').addEventListener('input',()=>{$('opacityCount').textContent=$('statOpacity').value;document.documentElement.style.setProperty('--cine-stat-opacity',String(Number($('statOpacity').value)/100))});
@@ -606,90 +568,74 @@ function render(){
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.format===activeFormat));
  enableFilmDragging();
 }
-function openAdd(){if(isVisitor)return;editId=null;$('filmForm').reset();$('coverResults').innerHTML='';$('format').value='DVD';$('dialogTitle').textContent='Adicionar filme';$('filmDialog').showModal()}
-function editFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f)return;editId=f.id;$('dialogTitle').textContent='Editar filme';for(const k of ['title','year','format','genre','saga','cover','notes'])$(k).value=f[k]??'';$('coverSearchTitle').value=f.title||'';$('coverResults').innerHTML='';$('filmDialog').showModal()}
+function openAdd(){if(isVisitor)return;editId=null;$('filmForm').reset();$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('format').value='DVD';$('dialogTitle').textContent='Adicionar filme';$('filmDialog').showModal()}
+function editFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f)return;editId=f.id;$('dialogTitle').textContent='Editar filme';for(const k of ['title','year','format','genre','saga','cover','notes'])$(k).value=f[k]??'';$('coverSearchTitle').value=f.title||'';$('tmdbKey').value=localStorage.getItem('cineprimeTmdbApiKey')||'';$('coverResults').innerHTML='';$('filmDialog').showModal()}
 async function deleteFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f||!confirm('Excluir "'+f.title+'" da coleção?'))return;const {error}=await db.from('filmes').delete().eq('id',id);if(error){toast('Erro ao excluir: '+error.message);return}films=films.filter(x=>Number(x.id)!==Number(id));render();toast('Filme removido da coleção.')}
-// Busca gratuita em fontes abertas. IMDb é um identificador (P345) quando vinculado no Wikidata.
-const WIKIDATA_API='https://www.wikidata.org/w/api.php';
-function wikidataYear(value){const m=String(value||'').match(/\b(18\d{2}|19\d{2}|20\d{2}|2100)\b/);return m?m[1]:''}
-function wikidataImageUrl(file){return file?'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(String(file).replace(/ /g,'_'))+'?width=500':''}
-function claimValue(claim){return claim?.mainsnak?.datavalue?.value}
-async function wikidataJson(url){const response=await fetch(url,{headers:{Accept:'application/json'}});if(!response.ok)throw new Error(response.status===429?'A fonte gratuita limitou temporariamente as consultas. Aguarde e tente novamente.':'Falha ao consultar o catálogo aberto (HTTP '+response.status+').');return response.json()}
-async function searchOpenFilm(title,year=''){
- const query=String(title||'').trim();if(!query)throw new Error('Informe o título do filme.');
- const params=new URLSearchParams({action:'wbsearchentities',search:query,language:'pt',uselang:'pt',type:'item',limit:'10',format:'json',origin:'*'});
- let data=await wikidataJson(WIKIDATA_API+'?'+params.toString());let hits=data.search||[];
- if(!hits.length){params.set('language','en');params.set('uselang','en');data=await wikidataJson(WIKIDATA_API+'?'+params.toString());hits=data.search||[];}
- if(!hits.length)return [];
- const ids=hits.map(x=>x.id).filter(Boolean).slice(0,8);
- const detailParams=new URLSearchParams({action:'wbgetentities',ids:ids.join('|'),props:'labels|descriptions|claims',languages:'pt|en',format:'json',origin:'*'});
- const detail=await wikidataJson(WIKIDATA_API+'?'+detailParams.toString());const results=[];
- for(const hit of hits.slice(0,8)){
-  const entity=detail.entities?.[hit.id];if(!entity)continue;
-  const label=entity.labels?.pt?.value||entity.labels?.en?.value||hit.label||'';
-  const description=entity.descriptions?.pt?.value||entity.descriptions?.en?.value||'';const claims=entity.claims||{};
-  const imdb=claimValue((claims.P345||[])[0])||'';const date=claimValue((claims.P577||[])[0]);const filmYear=wikidataYear(date?.time||'');
-  const image=claimValue((claims.P18||[])[0])||'';const isFilm=(claims.P31||[]).some(c=>['Q11424','Q24869','Q202866'].includes(claimValue(c)?.id));
-  const exact=norm(label)===norm(query),yearMatch=!year||!filmYear||String(year)===String(filmYear);
-  const score=(exact?5:0)+(isFilm?3:0)+(yearMatch?2:0)+(imdb?1:0)+(image?1:0);
-  results.push({id:hit.id,title:label,year:filmYear,description,imdbID:imdb,image:wikidataImageUrl(image),score,exact,yearMatch,isFilm});
- }
- return results.sort((a,b)=>b.score-a.score).slice(0,8);
-}
-function safeImdbLink(id){return /^tt\d{5,12}$/.test(String(id||''))?'https://www.imdb.com/title/'+id+'/':''}
-function isReliableFilmMatch(item,query,year=''){return !!item&&item.isFilm&&item.exact&&(!year||!item.year||String(year)===String(item.year))}
-
-// Recuperação conservadora: só atualiza capas de registros existentes com título exato e ano compatível.
-$('recoverCoversBtn').addEventListener('click',async()=>{
- if(isVisitor)return;const missing=films.filter(f=>!String(f.cover||'').trim());
- if(!missing.length){toast('Todos os filmes já possuem capa cadastrada.');return}
- if(!confirm('Pesquisar '+missing.length+' filmes sem capa em fontes abertas? Só serão gravadas imagens com título exato, tipo filme e ano compatível.'))return;
- const button=$('recoverCoversBtn');button.disabled=true;let saved=0,notFound=0,failed=0;
- try{for(let i=0;i<missing.length;i++){const film=missing[i];button.textContent='Pesquisando capas '+(i+1)+'/'+missing.length;try{
-  const candidates=await searchOpenFilm(film.title,film.year||'');const exact=candidates.find(x=>isReliableFilmMatch(x,film.title,film.year)&&x.image);
-  if(!exact){notFound++;continue}const {error}=await db.from('filmes').update({imagem_url:exact.image}).eq('id',film.id);if(error)throw error;film.cover=exact.image;saved++;
- }catch(err){failed++;console.warn('Falha ao recuperar capa de '+film.title,err)}await new Promise(resolve=>setTimeout(resolve,900));}
- render();toast('Recuperação concluída: '+saved+' capas salvas; '+notFound+' sem imagem compatível; '+failed+' falhas.');
- alert('Recuperação concluída.\n\nCapas salvas: '+saved+'\nSem imagem compatível: '+notFound+'\nFalhas: '+failed+'\n\nOs filmes sem correspondência foram mantidos sem alteração.');
- }finally{button.disabled=false;button.textContent='✦ Recuperar capas'}
-});
-
-$('searchCoverBtn').addEventListener('click',async()=>{
- const query=$('coverSearchTitle').value.trim()||$('title').value.trim(),year=$('year').value.trim(),results=$('coverResults');if(!query){alert('Digite o título do filme.');return}
- results.innerHTML='<div class="help" style="grid-column:1/-1">Pesquisando no Wikidata e verificando imagens abertas...</div>';
- try{const items=(await searchOpenFilm(query,year)).slice(0,8);if(!items.length){results.innerHTML='<div class="help" style="grid-column:1/-1">Nenhum registro localizado. Você pode informar manualmente uma URL de capa autorizada.</div>';return}
-  results.innerHTML=items.map(x=>`<button type="button" class="btn" data-poster="${escAttr(x.image)}" data-title="${escAttr(x.title)}" data-year="${escAttr(x.year)}" data-imdb="${escAttr(x.imdbID)}" style="padding:6px;text-align:left;overflow:hidden"><div style="width:100%;aspect-ratio:2/3;background:#101013;border-radius:6px;margin-bottom:6px;display:grid;place-items:center;overflow:hidden">${x.image?`<img src="${escAttr(x.image)}" alt="" style="display:block;width:100%;height:100%;object-fit:cover">`:'<span class="help">Sem imagem disponível</span>'}</div><span style="display:block;font-size:11px;white-space:normal">${esc(x.title)} ${x.year?'('+esc(x.year)+')':''}</span><span style="display:block;font-size:10px;color:var(--muted)">${esc(x.imdbID||x.id)} · ${esc(x.description||'Wikidata')}</span></button>`).join('');
-  results.querySelectorAll('[data-title]').forEach(btn=>btn.addEventListener('click',()=>{$('title').value=btn.dataset.title;$('year').value=btn.dataset.year||$('year').value;if(btn.dataset.poster)$('cover').value=btn.dataset.poster;results.querySelectorAll('[data-title]').forEach(b=>b.style.borderColor='var(--line)');btn.style.borderColor='var(--gold)';toast(btn.dataset.poster?'Filme e imagem selecionados. Salve para guardar.':'Filme selecionado; não há imagem disponível. Informe uma capa manualmente, se desejar.')}));
- }catch(err){results.innerHTML='<div class="help" style="grid-column:1/-1">'+esc(err.message||'Erro ao pesquisar.')+'</div>'}
-});
+const TMDB_KEY_STORAGE='cineprimeTmdbApiKey';
+function getTmdbKey(){return (localStorage.getItem(TMDB_KEY_STORAGE)||'').trim()}
+function saveTmdbKey(value){const key=(value||'').trim();if(key)localStorage.setItem(TMDB_KEY_STORAGE,key);return key}
+$('tmdbKey').value=getTmdbKey();
+$('tmdbKey').addEventListener('input',()=>saveTmdbKey($('tmdbKey').value));
+$('tmdbKey').addEventListener('change',()=>saveTmdbKey($('tmdbKey').value));
+$('searchCoverBtn').addEventListener('click',async()=>{const key=saveTmdbKey($('tmdbKey').value)||getTmdbKey(),query=$('coverSearchTitle').value.trim()||$('title').value.trim(),results=$('coverResults');if(!key){alert('Para pesquisar automaticamente, informe uma chave da API do TMDB.');return}if(!query){alert('Digite o título do filme que deseja pesquisar.');return}saveTmdbKey(key);results.innerHTML='<div class="help" style="grid-column:1/-1">Pesquisando cartazes...</div>';try{const url='https://api.themoviedb.org/3/search/movie?api_key='+encodeURIComponent(key)+'&language=pt-BR&include_adult=false&query='+encodeURIComponent(query),response=await fetch(url);if(!response.ok)throw new Error(response.status===401?'A chave da API foi recusada.':'Não foi possível pesquisar (HTTP '+response.status+').');const data=await response.json(),items=(data.results||[]).filter(x=>x.poster_path).slice(0,9);if(!items.length){results.innerHTML='<div class="help" style="grid-column:1/-1">Nenhum cartaz encontrado.</div>';return}results.innerHTML=items.map(x=>{const poster='https://image.tmdb.org/t/p/original'+x.poster_path,title=x.title||x.original_title||'Filme',year=(x.release_date||'').slice(0,4),thumb='https://image.tmdb.org/t/p/w342'+x.poster_path;return `<button type="button" class="btn" data-poster="${escAttr(poster)}" style="padding:6px;text-align:left;overflow:hidden"><img src="${escAttr(thumb)}" alt="" style="display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;margin-bottom:6px"><span style="display:block;font-size:11px;white-space:normal">${esc(title)} ${year?'('+esc(year)+')':''}</span></button>`}).join('');results.querySelectorAll('[data-poster]').forEach(btn=>btn.addEventListener('click',()=>{$('cover').value=btn.dataset.poster;results.querySelectorAll('[data-poster]').forEach(b=>b.style.borderColor='var(--line)');btn.style.borderColor='var(--gold)';toast('Capa selecionada. Salve o filme para guardar a imagem.')}))}catch(err){results.innerHTML='<div class="help" style="grid-column:1/-1">'+esc(err.message||'Erro ao pesquisar.')+'</div>'}});
 $('title').addEventListener('input',()=>{if(!$('coverSearchTitle').value.trim())$('coverSearchTitle').value=$('title').value});
 $('filmForm').addEventListener('submit',async e=>{e.preventDefault();const f={title:$('title').value.trim(),year:$('year').value?Number($('year').value):'',format:$('format').value,genre:$('genre').value.trim(),saga:$('saga').value.trim(),cover:$('cover').value.trim(),notes:$('notes').value.trim()};const dup=films.find(x=>Number(x.id)!==Number(editId)&&norm(x.title)===norm(f.title)&&String(x.year)===String(f.year)&&x.format===f.format);if(dup){alert('Este filme já está cadastrado com o mesmo título, ano e formato. Edite o registro existente.');return}const row=filmToRow(f);let error;if(editId!==null){const result=await db.from('filmes').update(row).eq('id',editId).select().single();error=result.error;if(!error){const idx=films.findIndex(x=>Number(x.id)===Number(editId));films[idx]=rowToFilm(result.data)}}else{const result=await db.from('filmes').insert(row).select().single();error=result.error;if(!error)films.push(rowToFilm(result.data))}if(error){alert('Não foi possível salvar no banco: '+error.message+'\n\nConfira as políticas de acesso do Supabase.');return}$('filmDialog').close();render();toast(editId!==null?'Cadastro atualizado na nuvem.':'Filme cadastrado na nuvem.');editId=null});
 $('addTop').onclick=openAdd;$('closeDialog').onclick=()=>$('filmDialog').close();$('cancelDialog').onclick=()=>$('filmDialog').close();$('search').addEventListener('input',render);$('genreFilter').onchange=render;$('sagaFilter').onchange=render;$('sort').onchange=render;document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{activeFormat=t.dataset.format;render()});
 
-// Central de importação: consulta fontes abertas, mostra candidatos e exige conferência antes de gravar.
+// Central de importação: pesquisa vários títulos e exige conferência antes de gravar.
 $('importListBtn').addEventListener('click',()=>{
- if(isVisitor)return;$('bulkResults').innerHTML='';$('bulkStatus').textContent='';$('saveBulkBtn').disabled=true;bulkCandidates=[];$('importListDialog').showModal();
+ if(isVisitor)return;
+ $('bulkResults').innerHTML='';$('bulkStatus').textContent='';
+ $('saveBulkBtn').disabled=true;bulkCandidates=[];
+ $('importListDialog').showModal();
 });
 $('closeImportList').onclick=()=>$('importListDialog').close();
 $('cancelImportList').onclick=()=>$('importListDialog').close();
 $('searchBulkBtn').addEventListener('click',async()=>{
+ const key=getTmdbKey();
  const titles=[...new Set($('bulkTitles').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean))];
+ if(!key){$('bulkStatus').textContent='Cadastre sua chave TMDB uma única vez no campo de busca de capa de um filme. A importação em lote reutilizará essa mesma chave.';return}
  if(!titles.length){$('bulkStatus').textContent='Cole pelo menos um título, um por linha.';return}
- if(titles.length>50){$('bulkStatus').textContent='Pesquise no máximo 50 títulos por vez para respeitar os limites das fontes gratuitas.';return}
- $('searchBulkBtn').disabled=true;$('saveBulkBtn').disabled=true;$('bulkResults').innerHTML='';bulkCandidates=[];
- let done=0;for(const query of titles){$('bulkStatus').textContent=`Pesquisando ${++done} de ${titles.length}: ${query}`;try{
-  const candidates=await searchOpenFilm(query);const match=candidates.find(x=>isReliableFilmMatch(x,query,''))||candidates[0];
-  if(match)bulkCandidates.push({query,title:match.title,year:match.year||'',genre:'',format:$('bulkFormat').value,cover:match.image||'',imdbID:match.imdbID||'',wikidataID:match.id,selected:!!(match.exact&&match.isFilm)});
-  else bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,missing:true});
- }catch(err){bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,error:err.message})}
- renderBulkCandidates();await new Promise(resolve=>setTimeout(resolve,900));}
- renderBulkCandidates();$('bulkStatus').textContent=`Pesquisa concluída: ${bulkCandidates.filter(x=>!x.missing&&!x.error).length} resultado(s) de ${titles.length}. Confira título, ano e IMDb antes de importar.`;$('searchBulkBtn').disabled=false;
+ if(titles.length>100){$('bulkStatus').textContent='Para manter a busca estável, importe no máximo 100 títulos por vez.';return}
+ $('searchBulkBtn').disabled=true;$('saveBulkBtn').disabled=true;
+ $('bulkResults').innerHTML='';bulkCandidates=[];
+ const genreNames={28:'Ação',12:'Aventura',16:'Animação',35:'Comédia',80:'Crime',99:'Documentário',18:'Drama',10751:'Família',14:'Fantasia',36:'História',27:'Terror',10402:'Música',9648:'Mistério',10749:'Romance',878:'Ficção científica',10770:'Cinema para TV',53:'Suspense',10752:'Guerra',37:'Faroeste'};
+ let done=0;
+ for(const query of titles){
+  $('bulkStatus').textContent=`Pesquisando ${++done} de ${titles.length}: ${query}`;
+  try{
+   const url='https://api.themoviedb.org/3/search/movie?api_key='+encodeURIComponent(key)+'&language=pt-BR&include_adult=false&query='+encodeURIComponent(query);
+   const response=await fetch(url);if(!response.ok)throw new Error('HTTP '+response.status);
+   const data=await response.json();
+   const match=(data.results||[]).filter(x=>x.poster_path).sort((a,b)=>{
+    const exactA=norm(a.title||a.original_title)===norm(query)?1:0;
+    const exactB=norm(b.title||b.original_title)===norm(query)?1:0;
+    return exactB-exactA;
+   })[0];
+   if(match){
+    const title=match.title||match.original_title||query;
+    const year=(match.release_date||'').slice(0,4);
+    const genres=(match.genre_ids||[]).map(id=>genreNames[id]).filter(Boolean).slice(0,2).join(' / ');
+    bulkCandidates.push({query,title,year,genre:genres,format:$('bulkFormat').value,cover:'https://image.tmdb.org/t/p/original'+match.poster_path,selected:true});
+   }else bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,missing:true});
+  }catch(err){bulkCandidates.push({query,title:query,year:'',genre:'',format:$('bulkFormat').value,cover:'',selected:false,error:err.message})}
+  await new Promise(resolve=>setTimeout(resolve,180));
+ }
+ renderBulkCandidates();
+ $('bulkStatus').textContent=`Pesquisa concluída: ${bulkCandidates.filter(x=>!x.missing&&!x.error).length} correspondência(s) encontrada(s) de ${titles.length} título(s). Confira os itens marcados antes de importar.`;
+ $('searchBulkBtn').disabled=false;
 });
 function renderBulkCandidates(){
- $('bulkResults').innerHTML=bulkCandidates.map((f,i)=>{const exists=films.some(x=>norm(x.title)===norm(f.title)&&String(x.year||'')===String(f.year||'')&&x.format===f.format);const disabled=f.missing||f.error||exists;const status=f.error?'Falha na pesquisa':f.missing?'Nenhum registro localizado':exists?'Já cadastrado':(f.imdbID?'IMDb vinculado':'Sem ID IMDb');const imdb=safeImdbLink(f.imdbID);
- return `<label class="bulk-result"><input type="checkbox" data-bulk-index="${i}" ${f.selected&&!disabled?'checked':''} ${disabled?'disabled':''} style="width:18px"><div>${f.cover?`<img src="${escAttr(f.cover)}" alt="">`:'<div style="width:58px;height:87px;border:1px dashed var(--line);border-radius:5px;display:grid;place-items:center">?</div>'}</div><div><strong>${esc(f.title)}</strong> ${f.year?`<span class="year">(${esc(f.year)})</span>`:''}<div class="help">${esc(status)}${f.imdbID?' · '+esc(f.imdbID):''}${imdb?' · <a href="'+imdb+'" target="_blank" rel="noopener">IMDb</a>':''}${f.query!==f.title?' · Busca: '+esc(f.query):''}${!f.cover?' · sem imagem aberta':''}</div></div></label>`;
+ $('bulkResults').innerHTML=bulkCandidates.map((f,i)=>{
+  const exists=films.some(x=>norm(x.title)===norm(f.title)&&String(x.year||'')===String(f.year||'')&&x.format===f.format);
+  const disabled=f.missing||f.error||exists;
+  const status=f.error?'Falha na pesquisa':f.missing?'Nenhum cartaz localizado':exists?'Já cadastrado':'Encontrado no TMDB';
+  return `<label class="bulk-result"><input type="checkbox" data-bulk-index="${i}" ${f.selected&&!disabled?'checked':''} ${disabled?'disabled':''} style="width:18px"><div>${f.cover?`<img src="${escAttr(f.cover.replace('/original','/w185'))}" alt="">`:'<div style="width:58px;height:87px;border:1px dashed var(--line);border-radius:5px;display:grid;place-items:center">?</div>'}</div><div><strong>${esc(f.title)}</strong> ${f.year?`<span class="year">(${esc(f.year)})</span>`:''}<div class="help">${esc(f.genre||'Gênero não identificado')} · ${esc(status)}${f.query!==f.title?` · Busca: ${esc(f.query)}`:''}</div></div></label>`;
  }).join('');
- $('bulkResults').querySelectorAll('[data-bulk-index]').forEach(box=>box.addEventListener('change',()=>{bulkCandidates[Number(box.dataset.bulkIndex)].selected=box.checked;$('saveBulkBtn').disabled=!bulkCandidates.some(x=>x.selected&&!x.missing&&!x.error)}));
+ $('bulkResults').querySelectorAll('[data-bulk-index]').forEach(box=>box.addEventListener('change',()=>{
+  bulkCandidates[Number(box.dataset.bulkIndex)].selected=box.checked;
+  $('saveBulkBtn').disabled=!bulkCandidates.some(x=>x.selected&&!x.missing&&!x.error);
+ }));
  $('saveBulkBtn').disabled=!bulkCandidates.some(x=>x.selected&&!x.missing&&!x.error);
 }
 $('saveBulkBtn').addEventListener('click',async()=>{
