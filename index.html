@@ -251,7 +251,7 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 </div><!-- /.cinema-intro -->
 <div class="toolbar">
  <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs OFF</button>
- <button class="btn" id="autoCoverBtn" type="button">✦ Buscar capas automaticamente</button>
+ <button class="btn" id="autoCoverBtn" type="button">✦ Buscar capas automaticamente</button><button class="btn" id="autoMetadataBtn" type="button">✦ Completar gêneros e frases</button>
  <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
@@ -744,6 +744,40 @@ if(autoCoverBtn){
    status.textContent=`Busca concluída. ${updated} capa(s) atualizada(s); ${notFound} sem correspondência segura; ${failed} com erro. Os demais dados dos filmes foram preservados.`;
    toast(`${updated} capa(s) atualizada(s) no catálogo.`);
   }finally{autoCoverBtn.disabled=false}
+ });
+}
+
+// Completa somente campos vazios com o gênero principal e a tagline oficial do TMDB.
+const autoMetadataBtn=$('autoMetadataBtn');
+if(autoMetadataBtn){
+ const status=document.getElementById('autoCoverStatus');
+ const genreNames={28:'Ação',12:'Aventura',16:'Animação',35:'Comédia',80:'Crime',99:'Documentário',18:'Drama',10751:'Família',14:'Fantasia',36:'História',27:'Terror',10402:'Música',9648:'Mistério',10749:'Romance',878:'Ficção científica',10770:'Cinema para TV',53:'Suspense',10752:'Guerra',37:'Faroeste'};
+ const requestTmdb=async(path,key,language)=>{const v4=key.split('.').length===3,params='language='+encodeURIComponent(language)+(v4?'':'&api_key='+encodeURIComponent(key)),url='https://api.themoviedb.org/3'+path+(path.includes('?')?'&':'?')+params;const response=await fetch(url,{headers:v4?{Authorization:'Bearer '+key,Accept:'application/json'}:{Accept:'application/json'}});if(!response.ok)throw new Error('TMDB HTTP '+response.status);return response.json()};
+ const sameTitle=(a,b)=>norm(String(a||'').replace(/\s*\([^)]*\)\s*$/,'')).replace(/[^a-z0-9]/g,'')===norm(String(b||'').replace(/\s*\([^)]*\)\s*$/,'')).replace(/[^a-z0-9]/g,'');
+ autoMetadataBtn.addEventListener('click',async()=>{
+  if(isVisitor||!currentUser){toast('Entre na conta para atualizar o catálogo.');return}
+  const key=getTmdbKey();if(!key){status.textContent='Informe sua credencial TMDB em Adicionar filme antes de iniciar a atualização.';return}
+  const pending=films.filter(f=>f.title&&(!String(f.genre||'').trim()||!String(f.notes||'').trim()));
+  if(!pending.length){status.textContent='Todos os filmes já têm gênero e frase.';return}
+  if(!confirm(`Serão pesquisados ${pending.length} filme(s). O CinePrime preencherá somente gênero e frase vazios, usando apenas correspondências exatas de título e ano e tagline oficial do TMDB. Continuar?`))return;
+  autoMetadataBtn.disabled=true;let genres=0,taglines=0,notFound=0,failed=0;
+  try{for(let i=0;i<pending.length;i++){
+   const film=pending[i];status.textContent=`Atualizando ${i+1} de ${pending.length}: ${film.title} (${genres} gênero(s), ${taglines} frase(s))`;
+   try{
+    const search=await tmdbSearchMovies(film.title,key),year=String(film.year||'').slice(0,4);
+    const match=(search.results||[]).find(x=>sameTitle(x.title,film.title)||sameTitle(x.original_title,film.title))||null;
+    if(!match||year&&String(match.release_date||'').slice(0,4)!==year){notFound++;continue}
+    const details=await requestTmdb('/movie/'+encodeURIComponent(match.id),key,'pt-BR');
+    let tagline=String(details.tagline||'').trim();
+    if(!tagline){const original=await requestTmdb('/movie/'+encodeURIComponent(match.id),key,'en-US');tagline=String(original.tagline||'').trim()}
+    const genre=genreNames[(match.genre_ids||[])[0]]||genreNames[(details.genres||[])[0]?.id]||'';
+    const changes={};if(!String(film.genre||'').trim()&&genre){changes.categoria=genre;film.genre=genre;genres++}
+    if(!String(film.notes||'').trim()&&tagline){const notes=notesWithAdminStatus(tagline,film.adminStatus);changes.notas=notes;changes.descricao=notes;film.notes=tagline;taglines++}
+    if(Object.keys(changes).length){const {error}=await db.from('filmes').update(changes).eq('id',film.id);if(error)throw error}
+   }catch(err){failed++;console.warn('Falha ao completar '+film.title,err)}
+   await new Promise(resolve=>setTimeout(resolve,300));
+  }render();status.textContent=`Concluído: ${genres} gênero(s) e ${taglines} frase(s) atualizados; ${notFound} sem correspondência exata; ${failed} com erro. Nenhum dado existente foi substituído.`;toast(`${genres} gênero(s) e ${taglines} frase(s) atualizados.`)
+  }finally{autoMetadataBtn.disabled=false}
  });
 }
 
