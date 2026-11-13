@@ -189,6 +189,7 @@ body.cine-visitor #settingsBtn,
 body.cine-visitor #addTop,
 body.cine-visitor #importListBtn,
 body.cine-visitor #autoCoverBtn,
+body.cine-visitor #autoMetadataBtn,
 body.cine-visitor #exportBtn,
 body.cine-visitor #importBtn,
 body.cine-visitor .filmactions,
@@ -201,6 +202,21 @@ body.cine-visitor .film[draggable="true"]{cursor:default}
 #bulkResults:empty{display:none}
 #autoCoverStatus{flex-basis:100%;font-size:12px;color:var(--muted);line-height:1.5}
 #autoCoverBtn:disabled{opacity:.6;cursor:wait}
+
+/* Ajustes de desempenho e leitura para CinePrime TV / Google TV. */
+body.cine-tv .cinema-intro{background-position:center center!important}
+body.cine-tv .genre-gallery-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;justify-items:center;gap:22px}
+body.cine-tv .film{width:100%;max-width:220px;transition:none!important}
+body.cine-tv .film:hover{transform:none!important}
+body.cine-tv .film:focus{outline:3px solid #f2c75c!important;outline-offset:5px;z-index:30}
+body.cine-tv .film::before,body.cine-tv .film::after{animation:none!important}
+body.cine-tv .poster-quote__track,body.cine-tv .cinema-quote__track{animation:none!important;transform:none!important}
+body.cine-tv .searchlight-overlay__beam,body.cine-tv .searchlight-overlay__fixture,body.cine-tv .searchlight-overlay__glow{animation:none!important}
+body.cine-tv .toolbar{gap:12px}
+body.cine-tv .shell{max-width:1800px;padding:24px 4vw 48px}
+body.cine-tv :focus-visible{outline:3px solid #f2c75c!important;outline-offset:5px!important;box-shadow:0 0 0 4px #f2c75c44!important}
+@media(max-width:1100px){body.cine-tv .genre-gallery-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+
 </style>
 </head>
 <body>
@@ -515,6 +531,10 @@ $('visitorButton').addEventListener('click',async()=>{
   if(error)throw error;
   if(!data||!Array.isArray(data.films))throw new Error(data?.error||'Resposta inválida do serviço visitante.');
   films=data.films.map(rowToFilm);currentUser=null;isVisitor=true;customOrder=[];
+  if(data.visualSettings && typeof data.visualSettings==='object'){
+   visualSettings={...DEFAULT_SETTINGS,...data.visualSettings};
+   applySettings();
+  }
   $('sort').value='number';setAuthView(true);render();
   $('visitorPassword').value='';toast('Acesso visitante liberado. Catálogo em modo somente leitura.');
  }catch(err){
@@ -543,6 +563,15 @@ if(searchlightOverlay){
  const leftGlow=searchlightOverlay.querySelector('.searchlight-overlay__glow--left');
  const rightGlow=searchlightOverlay.querySelector('.searchlight-overlay__glow--right');
  const animateLights=time=>{
+  if(document.body.classList.contains('cine-tv')){
+   leftBeam.style.transform='translateY(-8px) rotate(-12deg)';
+   rightBeam.style.transform='translateY(-8px) rotate(12deg)';
+   leftBeam.style.opacity='.38';rightBeam.style.opacity='.38';
+   leftFixture.style.transform='none';rightFixture.style.transform='none';
+   leftGlow.style.transform='scale(1)';rightGlow.style.transform='scale(1)';
+   leftGlow.style.opacity='.65';rightGlow.style.opacity='.65';
+   return;
+  }
   const a=Math.sin(time/620),b=Math.sin(time/790+1.4),pulse=(Math.sin(time/430)+1)/2;
   leftBeam.style.transform=`translateY(${-4-a*16}px) rotate(${-12+a*6}deg)`;
   rightBeam.style.transform=`translateY(${-4-b*16}px) rotate(${12+b*6}deg)`;
