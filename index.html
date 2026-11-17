@@ -23,6 +23,13 @@ h1{font-size:clamp(22px,3vw,32px);margin:0;letter-spacing:.02em}.sub{color:var(-
 .sectionhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}.sectionhead h3{margin:0;font-size:18px}.sectionhead span{color:var(--muted);font-size:13px}
 .grid{display:block}.genre-gallery-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-bottom:28px}.genre-frame{display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--genre-frame-border,#b99a58);border-radius:10px;padding:11px 16px;margin:26px 0 15px;background:var(--genre-frame-bg,linear-gradient(180deg,#fffdf8,#f3eee3));color:var(--genre-frame-text,#3b3020);box-shadow:0 3px 10px #0000000a}.genre-frame .genre-icon{font-size:18px;line-height:1}.genre-frame h3{margin:0;font-size:13px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}.genre-frame .genre-rule{height:1px;max-width:90px;flex:1;background:linear-gradient(90deg,transparent,var(--genre-frame-border,#b99a58))}.genre-frame .genre-rule:last-child{transform:scaleX(-1)}.film{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#141417;min-width:0;transition:transform .18s,border-color .18s}.film:hover{transform:translateY(-3px);border-color:#8f7135}.poster{aspect-ratio:2/3;background:linear-gradient(150deg,#29231a,#101013 65%);position:relative;overflow:hidden;display:grid;place-items:center}.poster img{width:100%;height:100%;object-fit:cover;display:block}.poster .placeholder{font-size:42px;color:#d6b15e70}.poster .number{position:absolute;top:9px;left:9px;background:#080809d9;border:1px solid #d6b15e80;color:var(--gold);font-size:11px;font-weight:800;padding:5px 7px;border-radius:6px}.format{position:absolute;right:8px;bottom:8px;background:#0b0b0de8;border:1px solid #ffffff2b;border-radius:6px;padding:5px 7px;font-size:10px;text-transform:uppercase;letter-spacing:.06em}.filmcontent{padding:12px}.film h4{margin:0 0 5px;font-size:14px;line-height:1.35}.year{font-size:12px;color:var(--gold)}.meta{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.45;min-height:30px}.filmactions{display:flex;gap:6px;margin-top:10px}.mini{font-size:11px;padding:6px 8px;border-radius:7px;flex:1}.empty{border:1px dashed #47474d;border-radius:14px;padding:42px 18px;text-align:center;color:var(--muted);grid-column:1/-1}.empty b{display:block;color:var(--text);margin-bottom:8px}.footer{border-top:1px solid var(--line);margin-top:34px;padding-top:16px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .admin-cover-status{position:absolute;z-index:5;top:8px;right:8px;max-width:calc(100% - 16px);padding:5px 7px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#fff;background:#176c42eF;border:1px solid #9ce7b6;box-shadow:0 3px 10px #0009}.admin-cover-status--maintenance{background:#8e3030ed;border-color:#ffc0a8;color:#fff3e7}.admin-status-button{flex:1}
+.admin-seal-list{display:grid;gap:9px}
+.admin-seal-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,190px) auto;gap:9px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:#101013}
+.admin-seal-title{font-size:13px;font-weight:700;line-height:1.35}
+.admin-seal-meta{font-size:11px;color:var(--muted);margin-top:3px}
+.admin-seal-row select{min-width:0}
+@media(max-width:560px){.admin-seal-row{grid-template-columns:1fr 1fr}.admin-seal-row .admin-seal-info{grid-column:1/-1}}
+
 dialog{background:#17171b;color:var(--text);border:1px solid #4b4537;border-radius:18px;width:min(600px,calc(100% - 24px));padding:0;box-shadow:0 24px 90px #000b}dialog::backdrop{background:#000b;backdrop-filter:blur(5px)}.modalhead{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modalhead h3{margin:0}.modalbody{padding:20px 22px;display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--muted)}.field.full{grid-column:1/-1}.modalfoot{padding:15px 22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.help{color:var(--muted);font-size:12px;line-height:1.5}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#27231a;border:1px solid #8f7135;color:#f5dfa0;border-radius:10px;padding:12px 16px;display:none;z-index:10;max-width:90vw}
 
 /* Configurações visuais do CinePrime */
@@ -185,6 +192,7 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 
 
 /* Acesso visitante: interface estritamente somente leitura. */
+body.cine-visitor #adminSealsBtn,
 body.cine-visitor #settingsBtn,
 body.cine-visitor #addTop,
 body.cine-visitor #importListBtn,
@@ -267,6 +275,7 @@ body.cine-tv :focus-visible{outline:3px solid #f2c75c!important;outline-offset:5
 </div><!-- /.cinema-intro -->
 <div class="toolbar">
  <button class="btn" id="sagaGalleryToggle" type="button" aria-pressed="false">▦ Sagas e Franquias</button>
+  <button class="btn" id="adminSealsBtn" type="button">⚙ Controle ADM · Selos</button>
   <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs OFF</button>
  <button class="btn" id="autoCoverBtn" type="button">✦ Buscar capas automaticamente</button><button class="btn" id="autoMetadataBtn" type="button">✦ Completar gêneros e frases</button>
  <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
@@ -341,6 +350,17 @@ body.cine-tv :focus-visible{outline:3px solid #f2c75c!important;outline-offset:5
   <div class="modalbody"><div class="field full"><label for="quickAdminStatus">Sinal para esta peça</label><select id="quickAdminStatus"><option value="">Sem sinal</option><option value="counted">✓ Peça contada</option><option value="maintenance">⚠ Precisa de manutenção</option></select><div class="help">O sinal é visível apenas no acesso administrativo. Escolha “Sem sinal” para removê-lo.</div></div></div>
   <div class="modalfoot"><button type="button" class="btn" id="cancelStatusDialog">Cancelar</button><button type="submit" class="btn primary">Salvar sinal</button></div>
  </form>
+</dialog>
+<dialog id="adminSealsDialog">
+ <div class="modalhead"><h3>Controle ADM · Selos das mídias</h3><button type="button" class="btn" id="closeAdminSeals">✕</button></div>
+ <div class="modalbody" style="grid-template-columns:1fr">
+  <div class="field full">
+   <div class="help">Altere o selo de cada filme e salve. “Contada” e “Manutenção” aparecem na capa no acesso administrativo; o visitante continua em modo somente leitura.</div>
+   <input id="adminSealSearch" type="search" placeholder="Buscar filme pelo título..." aria-label="Buscar filme no controle de selos">
+  </div>
+  <div class="field full"><div id="adminSealList" class="admin-seal-list"></div></div>
+ </div>
+ <div class="modalfoot"><span class="help" id="adminSealSummary">0 mídias</span><button type="button" class="btn primary" id="refreshAdminSeals">Atualizar lista</button></div>
 </dialog>
 <dialog id="importListDialog">
  <div class="modalhead"><h3>Central de importação de filmes</h3><button type="button" class="btn" id="closeImportList">✕</button></div>
@@ -589,7 +609,8 @@ if(searchlightOverlay){
 }
 
 function render(){
- $('total').textContent=films.length;$('dvds').textContent=films.filter(f=>f.format==='DVD').length;$('blurays').textContent=films.filter(f=>f.format==='Blu-ray').length;$('digital').textContent=films.filter(f=>f.format==='Digital').length;$('authored').textContent=films.filter(f=>f.format==='Versão autorada').length;
+ const mediaCounts=films.reduce((acc,f)=>{acc.total++;if(f.format==='DVD')acc.dvd++;else if(f.format==='Blu-ray')acc.bluray++;else if(f.format==='Digital')acc.digital++;else if(f.format==='Versão autorada')acc.authored++;return acc},{total:0,dvd:0,bluray:0,digital:0,authored:0});
+ $('total').textContent=mediaCounts.total;$('dvds').textContent=mediaCounts.dvd;$('blurays').textContent=mediaCounts.bluray;$('digital').textContent=mediaCounts.digital;$('authored').textContent=mediaCounts.authored;
  const oldG=$('genreFilter').value,oldS=$('sagaFilter').value;
  const genres=[...new Set(films.map(f=>f.genre).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  const sagas=[...new Set(films.map(f=>f.saga).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
@@ -633,6 +654,41 @@ let statusFilmId=null;
 function openStatusDialog(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f)return;statusFilmId=f.id;$('quickAdminStatus').value=f.adminStatus||'';$('statusDialog').showModal()}
 async function saveAdminStatus(){const f=films.find(x=>Number(x.id)===Number(statusFilmId));if(!f)return;const adminStatus=$('quickAdminStatus').value,notes=notesWithAdminStatus(f.notes,adminStatus);const {data,error}=await db.from('filmes').update({notas:notes||null,descricao:notes||null}).eq('id',f.id).select().single();if(error){alert('Não foi possível salvar o sinal: '+error.message);return}const index=films.findIndex(x=>Number(x.id)===Number(f.id));films[index]=rowToFilm(data);$('statusDialog').close();render();toast(adminStatus==='counted'?'Peça marcada como contada.':adminStatus==='maintenance'?'Peça marcada para manutenção.':'Sinal removido da capa.');statusFilmId=null}
 $('statusForm').addEventListener('submit',async e=>{e.preventDefault();await saveAdminStatus()});
+
+function renderAdminSealList(){
+ const q=norm($('adminSealSearch')?.value||'');
+ const rows=films.filter(f=>!q||norm(f.title).includes(q)).sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
+ $('adminSealSummary').textContent=`${rows.length} de ${films.length} mídias · ${films.filter(f=>f.adminStatus==='counted').length} contadas · ${films.filter(f=>f.adminStatus==='maintenance').length} em manutenção`;
+ $('adminSealList').innerHTML=rows.length?rows.map(f=>`<div class="admin-seal-row" data-admin-film-id="${escAttr(f.id)}"><div class="admin-seal-info"><div class="admin-seal-title">${esc(f.title)}</div><div class="admin-seal-meta">${esc(f.year||'Ano não informado')} · ${esc(f.format||'Formato não informado')}</div></div><select aria-label="Selo de ${escAttr(f.title)}" data-admin-status><option value="" ${!f.adminStatus?'selected':''}>Sem selo</option><option value="counted" ${f.adminStatus==='counted'?'selected':''}>✓ Contada</option><option value="maintenance" ${f.adminStatus==='maintenance'?'selected':''}>⚠ Manutenção</option></select><button type="button" class="btn mini" data-save-admin-seal>Salvar</button></div>`).join(''):'<div class="empty">Nenhum filme encontrado.</div>';
+}
+function openAdminSealPanel(){
+ if(isVisitor||!currentUser){toast('Entre com a conta administrativa para controlar os selos.');return}
+ $('adminSealSearch').value='';renderAdminSealList();$('adminSealsDialog').showModal();
+}
+async function saveAdminSealFromPanel(button){
+ const row=button.closest('[data-admin-film-id]');if(!row)return;
+ const id=row.dataset.adminFilmId,film=films.find(f=>String(f.id)===String(id));if(!film)return;
+ const status=row.querySelector('[data-admin-status]').value;
+ const notes=notesWithAdminStatus(film.notes,status);button.disabled=true;
+ try{
+  const {data,error}=await db.from('filmes').update({notas:notes||null,descricao:notes||null}).eq('id',film.id).select().single();
+  if(error)throw error;
+  const index=films.findIndex(f=>String(f.id)===String(id));if(index>=0)films[index]=rowToFilm(data);
+  render();renderAdminSealList();toast(status==='counted'?'Selo CONTADA salvo.':status==='maintenance'?'Selo MANUTENÇÃO salvo.':'Selo removido.');
+ }catch(error){alert('Não foi possível salvar o selo: '+(error.message||'verifique a conexão e as permissões do Supabase.'))}
+ finally{button.disabled=false}
+}
+$('adminSealsBtn').addEventListener('click',openAdminSealPanel);
+$('closeAdminSeals').addEventListener('click',()=>$('adminSealsDialog').close());
+$('refreshAdminSeals').addEventListener('click',async()=>{
+ try{await loadFilms();renderAdminSealList();toast('Lista de mídias atualizada do Supabase.')}
+ catch(error){toast('Não foi possível atualizar a lista: '+(error.message||''))}
+});
+$('adminSealSearch').addEventListener('input',renderAdminSealList);
+$('adminSealList').addEventListener('click',e=>{
+ const button=e.target.closest('[data-save-admin-seal]');if(button)saveAdminSealFromPanel(button);
+});
+
 ['closeStatusDialog','cancelStatusDialog'].forEach(id=>$(id).addEventListener('click',()=>{$('statusDialog').close();statusFilmId=null}));
 async function deleteFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f||!confirm('Excluir "'+f.title+'" da coleção?'))return;const {error}=await db.from('filmes').delete().eq('id',id);if(error){toast('Erro ao excluir: '+error.message);return}films=films.filter(x=>Number(x.id)!==Number(id));render();toast('Filme removido da coleção.')}
 const TMDB_KEY_STORAGE='cineprimeTmdbApiKey';
