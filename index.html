@@ -281,7 +281,7 @@ body.cine-tv :focus-visible{outline:3px solid #f2c75c!important;outline-offset:5
  <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
- <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada</option></select>
+ <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada · arraste os filmes</option></select>
 </div>
 <nav class="tabs" aria-label="Formato">
  <button class="tab active" data-format="Todos">Todos os formatos</button><button class="tab" data-format="DVD">DVD</button><button class="tab" data-format="Blu-ray">Blu-ray</button><button class="tab" data-format="Digital">Digital</button><button class="tab" data-format="Versão autorada">Versão autorada</button>
@@ -420,7 +420,26 @@ function setCinemaQuote(text,font,color,size){const q=document.getElementById('c
 function toast(msg){$('toast').textContent=msg;$('toast').style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').style.display='none',2600)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function escAttr(s){return esc(s)}
-function numberFor(f){return String([...films].sort((a,b)=>(a.added||a.id||0)-(b.added||b.id||0)).findIndex(x=>x.id===f.id)+1).padStart(3,'0')}
+
+// Numeração única do catálogo: respeita a ordem personalizada salva e mantém
+// cada franquia agrupada, em ordem cronológica, a partir da posição do primeiro título.
+let catalogNumberMap=new Map();
+function rebuildCatalogNumberMap(){
+ // A ordem manual é a referência definitiva da numeração.
+ // Assim, franquias com títulos diferentes (ex.: Bourne) podem ser agrupadas
+ // arrastando os cards, sem depender do campo Saga/Franquia.
+ const positions=new Map((customOrder||[]).map((id,index)=>[String(id),index]));
+ const ordered=[...films].sort((a,b)=>{
+  const pa=positions.has(String(a.id))?positions.get(String(a.id)):Number.MAX_SAFE_INTEGER;
+  const pb=positions.has(String(b.id))?positions.get(String(b.id)):Number.MAX_SAFE_INTEGER;
+  if(pa!==pb)return pa-pb;
+  return (Number(a.added)||Number(a.id)||0)-(Number(b.added)||Number(b.id)||0);
+ });
+ catalogNumberMap=new Map(ordered.map((film,index)=>[String(film.id),index+1]));
+}
+function numberFor(f){
+ return String(catalogNumberMap.get(String(f.id))||'').padStart(3,'0');
+}
 const ADMIN_STATUS_TAG=/\s*\[\[CINEPRIME_ADMIN_STATUS:(counted|maintenance)\]\]/g;
 function adminStatusFromNotes(notes){const matches=[...String(notes||'').matchAll(ADMIN_STATUS_TAG)];return matches.length?matches[matches.length-1][1]:''}
 function notesWithoutAdminStatus(notes){return String(notes||'').replace(ADMIN_STATUS_TAG,'').trim()}
@@ -486,6 +505,7 @@ $('grid').addEventListener('dragend',async e=>{
  const visible=new Set(visibleOrder);
  customOrder=[...visibleOrder,...films.map(f=>String(f.id)).filter(id=>!visible.has(id)&&!visibleOrder.includes(id))];
  await saveCustomOrder();
+ render();
 });
 function setAuthView(signedIn){
  $('authScreen').style.display=signedIn?'none':'grid';
@@ -609,6 +629,7 @@ if(searchlightOverlay){
 }
 
 function render(){
+ rebuildCatalogNumberMap();
  const mediaCounts=films.reduce((acc,f)=>{acc.total++;if(f.format==='DVD')acc.dvd++;else if(f.format==='Blu-ray')acc.bluray++;else if(f.format==='Digital')acc.digital++;else if(f.format==='Versão autorada')acc.authored++;return acc},{total:0,dvd:0,bluray:0,digital:0,authored:0});
  $('total').textContent=mediaCounts.total;$('dvds').textContent=mediaCounts.dvd;$('blurays').textContent=mediaCounts.bluray;$('digital').textContent=mediaCounts.digital;$('authored').textContent=mediaCounts.authored;
  const oldG=$('genreFilter').value,oldS=$('sagaFilter').value;
@@ -620,7 +641,7 @@ function render(){
  if(sort==='title')arr.sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
  else if(sort==='year')arr.sort((a,b)=>(a.year||9999)-(b.year||9999));
  else if(sort==='newest')arr.sort((a,b)=>(b.added||0)-(a.added||0));
- else if(sort==='custom'){const positions=new Map(customOrder.map((id,index)=>[String(id),index]));arr.sort((a,b)=>(positions.get(String(a.id))??Number.MAX_SAFE_INTEGER)-(positions.get(String(b.id))??Number.MAX_SAFE_INTEGER));}
+ else if(sort==='custom'){arr.sort((a,b)=>numberFor(a).localeCompare(numberFor(b)));}
  else if(sort==='saga')arr.sort((a,b)=>{
   const sagaA=norm(a.saga),sagaB=norm(b.saga);
   if(!sagaA&&sagaB)return 1;
@@ -643,7 +664,7 @@ function render(){
   $('listTitle').textContent='Sagas e Franquias';
   $('grid').innerHTML=collections.length?collections.map(([name,items])=>{items.sort((a,b)=>(Number(a.year)||9999)-(Number(b.year)||9999)||a.title.localeCompare(b.title,'pt-BR'));return `<section class="genre-gallery"><div class="genre-frame"><span class="genre-rule"></span><span class="genre-icon">🎬</span><h3>${esc(name)} · ${items.length} filmes</h3><span class="genre-rule"></span></div><div class="genre-gallery-grid">${items.map(filmCard).join('')}</div></section>`}).join(''):`<div class="empty"><b>Nenhuma franquia com dois ou mais filmes neste filtro.</b>Altere os filtros ou volte à coleção completa.</div>`;
  }
- else if(g||q||s){$('grid').innerHTML=`<div class="genre-gallery-grid">${arr.map(filmCard).join('')}</div>`}
+ else if(sort==='custom'||g||q||s){$('grid').innerHTML=`<div class="genre-gallery-grid">${arr.map(filmCard).join('')}</div>`}
  else {const grouped=new Map();arr.forEach(f=>{const key=f.genre.trim()||'Gênero não informado';if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(f)});const orderedGenres=[...grouped.keys()].sort((a,b)=>a.localeCompare(b,'pt-BR'));$('grid').innerHTML=orderedGenres.map(name=>`<section class="genre-gallery"><div class="genre-frame"><span class="genre-rule"></span><span class="genre-icon">${genreIcon(name)}</span><h3>${esc((visualSettings.genrePrefix?visualSettings.genrePrefix+' · ':'')+name)}</h3><span class="genre-rule"></span></div><div class="genre-gallery-grid">${grouped.get(name).map(filmCard).join('')}</div></section>`).join('')}
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.format===activeFormat));
  enableFilmDragging();
