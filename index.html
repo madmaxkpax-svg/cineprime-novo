@@ -244,6 +244,29 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 .wallpaper-editor-preview.is-dragging{cursor:grabbing}
 .wallpaper-editor-preview .preview-label{position:absolute;top:10px;left:10px;padding:6px 9px;border-radius:7px;background:#08090bd9;color:#fff;font-size:11px;font-weight:700;pointer-events:none}
 @media(max-width:640px){.wallpaper-editor-preview{min-height:180px}}
+
+/* Guia cinematográfico: lista editorial compacta. */
+.cine-main-tabs{margin:18px 0}
+.guide-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:28px 0 20px;flex-wrap:wrap}
+.guide-heading h2{font-size:clamp(24px,3vw,34px);margin:7px 0}
+.guide-heading p{color:var(--muted);margin:0;max-width:650px;line-height:1.5}
+.guide-counts{display:flex;gap:8px;flex-wrap:wrap}
+.guide-counts span{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 10px}
+.guide-toolbar{display:grid;grid-template-columns:minmax(200px,2fr) repeat(4,minmax(130px,1fr));gap:9px;margin:18px 0}
+.guide-note{font-size:12px;color:var(--muted);margin:8px 0 12px}
+.guide-list{border-top:1px solid var(--line)}
+.guide-row{display:grid;grid-template-columns:62px minmax(0,1fr) minmax(225px,auto);gap:14px;align-items:center;padding:13px 2px;border-bottom:1px solid var(--line)}
+.guide-poster{width:62px;height:88px;object-fit:cover;border-radius:7px;background:#222}
+.guide-poster-empty{display:grid;place-items:center;color:#b99a58;font-size:24px}
+.guide-info{min-width:0}.guide-info h3{font-size:15px;margin:0 0 4px}
+.guide-meta{font-size:11px;color:var(--muted);margin-bottom:6px}
+.guide-synopsis{font-size:13px;line-height:1.45;color:var(--text);opacity:.9}
+.guide-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.guide-actions button{font-size:10px;padding:7px 9px;white-space:nowrap}
+.guide-actions button[aria-pressed="true"]{border-color:var(--gold);background:#3a2f19;color:#f2d88f}
+.guide-empty{padding:35px 14px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+@media(max-width:850px){.guide-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.guide-toolbar input{grid-column:1/-1}.guide-row{grid-template-columns:54px minmax(0,1fr)}.guide-poster{width:54px;height:78px}.guide-actions{grid-column:2;justify-content:flex-start}}
+@media(max-width:480px){.guide-toolbar{grid-template-columns:1fr 1fr}.guide-row{gap:10px}.guide-synopsis{font-size:12px}.guide-actions button{flex:1}}
 </style>
 </head>
 <body>
@@ -292,6 +315,11 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 <div id="cinemaQuote" class="cinema-quote" aria-label="Frase de impacto" hidden><div class="cinema-quote__track"><span class="cinema-quote__item"></span><span class="cinema-quote__item" aria-hidden="true"></span></div></div>
 
 </div><!-- /.cinema-intro -->
+<nav class="tabs cine-main-tabs" aria-label="Seções do CinePrime">
+ <button class="tab active" id="collectionTab" type="button">Minha coleção</button>
+ <button class="tab" id="guideTab" type="button">🎬 Guia de filmes e séries</button>
+</nav>
+<div id="collectionView">
 <div class="toolbar">
  <button class="btn" id="sagaGalleryToggle" type="button" aria-pressed="false">▦ Sagas e Franquias</button>
   <button class="btn" id="adminSealsBtn" type="button">⚙ Controle ADM · Selos</button>
@@ -314,6 +342,22 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 </section>
 <div class="sectionhead"><h3 id="listTitle">Minha coleção</h3><span id="resultCount">0 títulos</span></div>
 <section class="grid" id="grid"></section>
+</div><!-- /collectionView -->
+<section id="guideView" hidden>
+ <div class="guide-heading">
+  <div><div class="eyebrow">GUIA CINEMATOGRÁFICO</div><h2>Filmes e séries para descobrir</h2><p>Consulte o catálogo e marque o que já assistiu, o que quer assistir e o que está acompanhando.</p></div>
+  <div class="guide-counts"><span id="guideTotal">0 títulos</span><span id="guideWatched">0 assistidos</span><span id="guideWant">0 quero assistir</span><span id="guideWatching">0 assistindo</span></div>
+ </div>
+ <div class="guide-toolbar">
+  <input id="guideSearch" type="search" placeholder="Buscar título, ano ou gênero..." aria-label="Buscar no guia">
+  <select id="guideType"><option value="Todos">Filmes e séries</option><option value="Filme">Somente filmes</option><option value="Série">Somente séries</option></select>
+  <select id="guideGenre"><option value="">Todos os gêneros</option></select>
+  <select id="guideStatus"><option value="Todos">Todas as situações</option><option value="nao_classificado">Não classificados</option><option value="quero_assistir">Quero assistir</option><option value="assistindo">Assistindo</option><option value="ja_assisti">Já assisti</option></select>
+  <select id="guideSort"><option value="recent">Mais recentes primeiro</option><option value="old">Mais antigos primeiro</option><option value="title">Título A–Z</option></select>
+ </div>
+ <div class="guide-note" id="guideMessage" role="status">O catálogo inicial está sendo carregado.</div>
+ <div id="guideList" class="guide-list"></div>
+</section>
 <footer class="footer"><span>CINEPRIME · Edição do colecionador</span><span id="footerAccessText">Seus dados ficam salvos na nuvem, na sua conta CinePrime.</span><span><button class="btn mini" id="exportBtn">Exportar backup</button> <button class="btn mini" id="importBtn">Importar backup</button></span></footer>
 <input id="importFile" type="file" accept="application/json,.json" hidden>
 </div>
@@ -589,7 +633,7 @@ async function refreshSession(){
  const {data,error}=await db.auth.getSession();if(error)throw error;
  currentUser=data.session?.user||null;isVisitor=false;if(!passwordRecoveryMode)setAuthView(!!currentUser);
  if(currentUser){
-  try{await loadVisualSettings();await loadFilms()}
+  try{await loadVisualSettings();await loadFilms();await loadGuide()}
   catch(e){console.error(e);toast('Não foi possível carregar os filmes: '+(e.message||'verifique as políticas de acesso.'))}
  }
 }
@@ -598,7 +642,7 @@ $('loginForm').addEventListener('submit',async e=>{
  try{
   const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});
   if(error)throw error;currentUser=data.user;isVisitor=false;setAuthView(true);
-  $('authMessage').textContent='';await loadVisualSettings();await loadFilms();toast('Login realizado.');
+  $('authMessage').textContent='';await loadVisualSettings();await loadFilms();await loadGuide();toast('Login realizado.');
  }catch(err){$('authMessage').textContent='Não foi possível entrar. Confira o e-mail e a senha. '+(err.message||'');}
  finally{$('loginButton').disabled=false}
 });
@@ -693,6 +737,70 @@ if(searchlightOverlay){
  };
  requestAnimationFrame(animateLights);
 }
+
+
+/* Guia CinePrime: catálogo compartilhado e classificação privada por usuário. */
+let guideCatalog=[],guideStatuses=new Map(),guideLoaded=false;
+const guideStatusLabels={quero_assistir:'Quero assistir',assistindo:'Assistindo',ja_assisti:'Já assisti'};
+async function loadGuide(){
+ const {data,error}=await db.from('guia_catalogo').select('*').order('ano_inicio',{ascending:false});
+ if(error)throw error;
+ guideCatalog=data||[];guideStatuses=new Map();
+ if(currentUser){
+  const {data:mine,error:statusError}=await db.from('guia_status_usuario').select('*').eq('usuario_id',currentUser.id);
+  if(statusError)throw statusError;
+  (mine||[]).forEach(row=>guideStatuses.set(Number(row.catalogo_id),row));
+ }
+ guideLoaded=true;renderGuide();
+}
+function guideState(id){return guideStatuses.get(Number(id))||null}
+function renderGuide(){
+ if(!$('guideList'))return;
+ const oldGenre=$('guideGenre').value;
+ const genres=[...new Set(guideCatalog.flatMap(x=>x.generos||[]))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+ $('guideGenre').innerHTML='<option value="">Todos os gêneros</option>'+genres.map(g=>'<option value="'+escAttr(g)+'">'+esc(g)+'</option>').join('');
+ $('guideGenre').value=genres.includes(oldGenre)?oldGenre:'';
+ const q=norm($('guideSearch').value),type=$('guideType').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value;
+ let rows=guideCatalog.filter(x=>(type==='Todos'||x.tipo===type)&&(!genre||(x.generos||[]).includes(genre))&&(!q||norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q)));
+ const counts={ja_assisti:0,quero_assistir:0,assistindo:0};guideStatuses.forEach(s=>{if(counts[s.status]!==undefined)counts[s.status]++});
+ $('guideTotal').textContent=guideCatalog.length+' títulos';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';
+ if(status!=='Todos')rows=rows.filter(x=>status==='nao_classificado'?!guideState(x.id):guideState(x.id)?.status===status);
+ if(sort==='title')rows.sort((a,b)=>a.titulo.localeCompare(b.titulo,'pt-BR'));
+ else if(sort==='old')rows.sort((a,b)=>(Number(a.ano_inicio)||9999)-(Number(b.ano_inicio)||9999));
+ else rows.sort((a,b)=>(Number(b.ano_inicio)||0)-(Number(a.ano_inicio)||0));
+ $('guideMessage').textContent=currentUser?'Sua classificação é salva na sua conta e não altera sua coleção física ou digital.':'Entre na sua conta para salvar sua classificação pessoal.';
+ $('guideList').innerHTML=rows.length?rows.map(item=>{
+  const state=guideState(item.id),active=state?.status||'',year=item.ano_fim&&item.ano_fim!==item.ano_inicio?item.ano_inicio+'–'+item.ano_fim:(item.ano_inicio||'Ano não informado');
+  const cover=item.poster_url?'<img class="guide-poster" loading="lazy" src="'+escAttr(item.poster_url)+'" alt="Pôster de '+escAttr(item.titulo)+'">':'<div class="guide-poster guide-poster-empty">✦</div>';
+  const progress=item.tipo==='Série'&&active==='assistindo'&&(state?.temporada_atual||state?.episodio_atual)?'<div class="guide-meta">Temporada '+(state.temporada_atual||'—')+' · Episódio '+(state.episodio_atual||'—')+'</div>':'';
+  const buttons=['quero_assistir','assistindo','ja_assisti'].map(s=>'<button type="button" class="btn" data-guide-id="'+item.id+'" data-guide-status="'+s+'" aria-pressed="'+(active===s)+'" '+(!currentUser||isVisitor?'disabled':'')+'>'+guideStatusLabels[s]+'</button>').join('');
+  return '<article class="guide-row">'+cover+'<div class="guide-info"><h3>'+esc(item.titulo)+'</h3><div class="guide-meta">'+esc(item.tipo)+' · '+esc(year)+' · '+esc((item.generos||[]).join(' / ')||'Gênero não informado')+'</div><div class="guide-synopsis">'+esc(item.sinopse||'Sinopse ainda não cadastrada.')+'</div>'+progress+'</div><div class="guide-actions">'+buttons+'</div></article>';
+ }).join(''):'<div class="guide-empty">Nenhum título encontrado com esses filtros.</div>';
+ $('guideList').querySelectorAll('[data-guide-id]').forEach(button=>button.addEventListener('click',()=>updateGuideStatus(Number(button.dataset.guideId),button.dataset.guideStatus)));
+}
+async function updateGuideStatus(catalogId,status){
+ if(!currentUser||isVisitor){toast('Entre na sua conta para classificar os títulos.');return}
+ const item=guideCatalog.find(x=>Number(x.id)===catalogId),previous=guideState(catalogId);
+ const payload={usuario_id:currentUser.id,catalogo_id:catalogId,status,atualizado_em:new Date().toISOString()};
+ if(item?.tipo==='Série'&&status==='assistindo'){
+  const season=prompt('Temporada atual (opcional):',String(previous?.temporada_atual||''));if(season===null)return;
+  const episode=prompt('Episódio atual (opcional):',String(previous?.episodio_atual||''));if(episode===null)return;
+  payload.temporada_atual=season.trim()?Math.max(0,Number(season)||0):null;
+  payload.episodio_atual=episode.trim()?Math.max(0,Number(episode)||0):null;
+ }
+ const {data,error}=await db.from('guia_status_usuario').upsert(payload,{onConflict:'usuario_id,catalogo_id'}).select().single();
+ if(error){toast('Não foi possível salvar: '+error.message);return}
+ guideStatuses.set(catalogId,data);renderGuide();toast('Classificação salva na nuvem.');
+}
+function showGuideSection(section){
+ $('collectionView').hidden=section!=='collection';$('guideView').hidden=section!=='guide';
+ $('collectionTab').classList.toggle('active',section==='collection');$('guideTab').classList.toggle('active',section==='guide');
+ if(section==='guide'&&!guideLoaded)loadGuide().catch(err=>{$('guideMessage').textContent='Não foi possível carregar o guia: '+err.message});
+ if(section==='guide'&&guideLoaded)renderGuide();
+}
+$('collectionTab').addEventListener('click',()=>showGuideSection('collection'));
+$('guideTab').addEventListener('click',()=>showGuideSection('guide'));
+['guideSearch','guideType','guideGenre','guideStatus','guideSort'].forEach(id=>$(id).addEventListener(id==='guideSearch'?'input':'change',renderGuide));
 
 function render(){
  rebuildCatalogNumberMap();
