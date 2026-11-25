@@ -511,7 +511,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
  <div class="modalbody" style="grid-template-columns:1fr">
   <div class="field full">
    <div class="help">Altere o selo de cada filme e salve. “Contada” e “Manutenção” aparecem na capa no acesso administrativo; o visitante continua em modo somente leitura.</div>
-   <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><select id="adminSealFilter" aria-label="Filtrar mídias por selo" style="min-width:210px;flex:1"><option value="all">Todas as mídias</option><option value="with">Com etiqueta (Contada ou Manutenção)</option><option value="without">Sem etiqueta</option><option value="counted">Somente Contadas</option><option value="maintenance">Somente em Manutenção</option></select><input id="adminSealSearch" type="search" placeholder="Buscar filme pelo título..." aria-label="Buscar filme no controle de selos" style="min-width:220px;flex:2"></div>
+   <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><select id="adminSealFilter" aria-label="Filtrar mídias por selo" style="min-width:210px;flex:1"><option value="all">Todas as mídias</option><option value="with">✓ Com selo CONTADA</option><option value="without">Sem selo CONTADA</option></select><input id="adminSealSearch" type="search" placeholder="Buscar filme pelo título..." aria-label="Buscar filme no controle de selos" style="min-width:220px;flex:2"></div>
   </div>
   <div class="field full"><div id="adminSealList" class="admin-seal-list"></div></div>
  </div>
@@ -1103,8 +1103,8 @@ $('statusForm').addEventListener('submit',async e=>{e.preventDefault();await sav
 
 function renderAdminSealList(){
  const q=norm($('adminSealSearch')?.value||''),filter=$('adminSealFilter')?.value||'all';
- const rows=films.filter(f=>{const has=!!f.adminStatus;const ok=filter==='with'?has:filter==='without'?!has:filter==='counted'?f.adminStatus==='counted':filter==='maintenance'?f.adminStatus==='maintenance':true;return ok&&(!q||norm(f.title).includes(q))}).sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
- $('adminSealSummary').textContent=`${rows.length} exibidas de ${films.length} mídias · ${films.filter(f=>f.adminStatus==='counted').length} contadas · ${films.filter(f=>f.adminStatus==='maintenance').length} manutenção · ${films.filter(f=>!f.adminStatus).length} sem etiqueta`;
+ const rows=films.filter(f=>{const hasCounted=f.adminStatus==='counted';const ok=filter==='with'?hasCounted:filter==='without'?!hasCounted:true;return ok&&(!q||norm(f.title).includes(q))}).sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
+ $('adminSealSummary').textContent=`${rows.length} exibidas de ${films.length} mídias · ${films.filter(f=>f.adminStatus==='counted').length} com selo CONTADA · ${films.filter(f=>f.adminStatus!=='counted').length} sem selo CONTADA`;
  $('adminSealList').innerHTML=rows.length?rows.map(f=>`<div class="admin-seal-row" data-admin-film-id="${escAttr(f.id)}"><div class="admin-seal-info"><div class="admin-seal-title">${esc(f.title)}</div><div class="admin-seal-meta">${esc(f.year||'Ano não informado')} · ${esc(f.format||'Formato não informado')}</div></div><select aria-label="Selo de ${escAttr(f.title)}" data-admin-status><option value="" ${!f.adminStatus?'selected':''}>Sem selo</option><option value="counted" ${f.adminStatus==='counted'?'selected':''}>✓ Contada</option><option value="maintenance" ${f.adminStatus==='maintenance'?'selected':''}>⚠ Manutenção</option></select><button type="button" class="btn mini" data-save-admin-seal>Salvar</button></div>`).join(''):'<div class="empty">Nenhum filme encontrado.</div>';
 }
 function openAdminSealPanel(){
