@@ -346,13 +346,13 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 <section id="guideView" hidden>
  <div class="guide-heading">
   <div><div class="eyebrow">GUIA CINEMATOGRÁFICO</div><h2>Filmes e séries para descobrir</h2><p>Consulte o catálogo e marque o que já assistiu, o que quer assistir e o que está acompanhando.</p></div>
-  <div class="guide-counts"><span id="guideTotal">0 títulos</span><span id="guideWatched">0 assistidos</span><span id="guideWant">0 quero assistir</span><span id="guideWatching">0 assistindo</span></div>
+  <div class="guide-counts"><span id="guideTotal">0 títulos</span><span id="guideWatched">0 assistidos</span><span id="guideWant">0 quero assistir</span><span id="guideWatching">0 assistindo</span><span id="guideNotWatched">0 não assistidos</span></div>
  </div>
  <div class="guide-toolbar">
   <input id="guideSearch" type="search" placeholder="Buscar título, ano ou gênero..." aria-label="Buscar no guia">
   <select id="guideType"><option value="Todos">Filmes e séries</option><option value="Filme">Somente filmes</option><option value="Série">Somente séries</option></select>
   <select id="guideGenre"><option value="">Todos os gêneros</option></select>
-  <select id="guideStatus"><option value="Todos">Todas as situações</option><option value="nao_classificado">Não classificados</option><option value="quero_assistir">Quero assistir</option><option value="assistindo">Assistindo</option><option value="ja_assisti">Já assisti</option></select>
+  <select id="guideStatus"><option value="Todos">Todas as situações</option><option value="nao_classificado">Não classificados</option><option value="quero_assistir">Quero assistir</option><option value="assistindo">Assistindo</option><option value="ja_assisti">Já assisti</option><option value="nao_assisti">Não assisti</option></select>
   <select id="guideSort"><option value="recent">Mais recentes primeiro</option><option value="old">Mais antigos primeiro</option><option value="title">Título A–Z</option></select>
  </div>
  <div class="guide-note" id="guideMessage" role="status">O catálogo inicial está sendo carregado.</div>
@@ -741,7 +741,7 @@ if(searchlightOverlay){
 
 /* Guia CinePrime: catálogo compartilhado e classificação privada por usuário. */
 let guideCatalog=[],guideStatuses=new Map(),guideLoaded=false;
-const guideStatusLabels={quero_assistir:'Quero assistir',assistindo:'Assistindo',ja_assisti:'Já assisti'};
+const guideStatusLabels={quero_assistir:'Quero assistir',assistindo:'Assistindo',ja_assisti:'Já assisti',nao_assisti:'Não assisti'};
 async function loadGuide(){
  const {data,error}=await db.from('guia_catalogo').select('*').order('ano_inicio',{ascending:false});
  if(error)throw error;
@@ -762,8 +762,8 @@ function renderGuide(){
  $('guideGenre').value=genres.includes(oldGenre)?oldGenre:'';
  const q=norm($('guideSearch').value),type=$('guideType').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value;
  let rows=guideCatalog.filter(x=>(type==='Todos'||x.tipo===type)&&(!genre||(x.generos||[]).includes(genre))&&(!q||norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q)));
- const counts={ja_assisti:0,quero_assistir:0,assistindo:0};guideStatuses.forEach(s=>{if(counts[s.status]!==undefined)counts[s.status]++});
- $('guideTotal').textContent=guideCatalog.length+' títulos';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';
+ const counts={ja_assisti:0,quero_assistir:0,assistindo:0,nao_assisti:0};guideStatuses.forEach(s=>{if(counts[s.status]!==undefined)counts[s.status]++});
+ $('guideTotal').textContent=guideCatalog.length+' títulos';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';$('guideNotWatched').textContent=counts.nao_assisti+' não assistidos';
  if(status!=='Todos')rows=rows.filter(x=>status==='nao_classificado'?!guideState(x.id):guideState(x.id)?.status===status);
  if(sort==='title')rows.sort((a,b)=>a.titulo.localeCompare(b.titulo,'pt-BR'));
  else if(sort==='old')rows.sort((a,b)=>(Number(a.ano_inicio)||9999)-(Number(b.ano_inicio)||9999));
@@ -773,7 +773,7 @@ function renderGuide(){
   const state=guideState(item.id),active=state?.status||'',year=item.ano_fim&&item.ano_fim!==item.ano_inicio?item.ano_inicio+'–'+item.ano_fim:(item.ano_inicio||'Ano não informado');
   const cover=item.poster_url?'<img class="guide-poster" loading="lazy" src="'+escAttr(item.poster_url)+'" alt="Pôster de '+escAttr(item.titulo)+'">':'<div class="guide-poster guide-poster-empty">✦</div>';
   const progress=item.tipo==='Série'&&active==='assistindo'&&(state?.temporada_atual||state?.episodio_atual)?'<div class="guide-meta">Temporada '+(state.temporada_atual||'—')+' · Episódio '+(state.episodio_atual||'—')+'</div>':'';
-  const buttons=['quero_assistir','assistindo','ja_assisti'].map(s=>'<button type="button" class="btn" data-guide-id="'+item.id+'" data-guide-status="'+s+'" aria-pressed="'+(active===s)+'" '+(!currentUser||isVisitor?'disabled':'')+'>'+guideStatusLabels[s]+'</button>').join('');
+  const buttons=['quero_assistir','assistindo','ja_assisti','nao_assisti'].map(s=>'<button type="button" class="btn" data-guide-id="'+item.id+'" data-guide-status="'+s+'" aria-pressed="'+(active===s)+'" '+(!currentUser||isVisitor?'disabled':'')+'>'+guideStatusLabels[s]+'</button>').join('');
   return '<article class="guide-row">'+cover+'<div class="guide-info"><h3>'+esc(item.titulo)+'</h3><div class="guide-meta">'+esc(item.tipo)+' · '+esc(year)+' · '+esc((item.generos||[]).join(' / ')||'Gênero não informado')+'</div><div class="guide-synopsis">'+esc(item.sinopse||'Sinopse ainda não cadastrada.')+'</div>'+progress+'</div><div class="guide-actions">'+buttons+'</div></article>';
  }).join(''):'<div class="guide-empty">Nenhum título encontrado com esses filtros.</div>';
  $('guideList').querySelectorAll('[data-guide-id]').forEach(button=>button.addEventListener('click',()=>updateGuideStatus(Number(button.dataset.guideId),button.dataset.guideStatus)));
