@@ -359,12 +359,13 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
  </div>
  <div class="guide-toolbar">
   <input id="guideSearch" type="search" placeholder="Buscar título, ano ou gênero..." aria-label="Buscar no guia">
-  <select id="guideType"><option value="Todos">Filmes e séries</option><option value="Filme">Somente filmes</option><option value="Série">Somente séries</option></select>
+  <select id="guideType" aria-label="Tipo de conteúdo"><option value="Todos">Filmes e séries</option><option value="Filme">Somente filmes</option><option value="Série">Somente séries</option></select>
+  <select id="guideEra" aria-label="Período"><option value="all">Todas as épocas</option><option value="classic">Clássicos até 1980</option><option value="classic90">Clássicos de 1981 a 1990</option><option value="nineties">Anos 1990</option><option value="twoThousands">Anos 2000</option><option value="recent">2010 em diante</option></select>
   <select id="guideGenre"><option value="">Todos os gêneros</option></select>
   <select id="guideStatus"><option value="Todos">Todas as situações</option><option value="nao_classificado">Não classificados</option><option value="quero_assistir">Quero assistir</option><option value="assistindo">Assistindo</option><option value="ja_assisti">Já assisti</option><option value="nao_assisti">Não assisti</option><option value="nao_tenho_interesse">Retirados da minha lista</option></select>
   <select id="guideSort"><option value="recent">Mais recentes primeiro</option><option value="old">Mais antigos primeiro</option><option value="title">Título A–Z</option></select>
  </div>
- <div class="guide-import-bar"><button type="button" class="btn primary" id="guideImport20Btn">Carregar catálogo inicial de 1.500 títulos</button><span class="guide-note" id="guideImport20Status" role="status" aria-live="polite">Importação automática em lotes, misturando filmes e séries, sem duplicar registros existentes.</span></div>
+ <div class="guide-import-bar"><button type="button" class="btn primary" id="guideImport20Btn">Importar mais 1.500 títulos</button><span class="guide-note" id="guideImport20Status" role="status" aria-live="polite">Importação automática em lotes, misturando filmes e séries, sem duplicar registros existentes.</span></div>
  <div class="guide-note" id="guideMessage" role="status">O catálogo inicial está sendo carregado.</div>
  <div id="guideList" class="guide-list"></div>
 </section>
@@ -855,8 +856,12 @@ function renderGuide(){
  const genres=[...new Set(guideCatalog.flatMap(x=>x.generos||[]))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  $('guideGenre').innerHTML='<option value="">Todos os gêneros</option>'+genres.map(g=>'<option value="'+escAttr(g)+'">'+esc(g)+'</option>').join('');
  $('guideGenre').value=genres.includes(oldGenre)?oldGenre:'';
- const q=norm($('guideSearch').value),type=$('guideType').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value;
- let rows=guideCatalog.filter(x=>(type==='Todos'||x.tipo===type)&&(!genre||(x.generos||[]).includes(genre))&&(!q||norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q)));
+ const q=norm($('guideSearch').value),type=$('guideType').value,era=$('guideEra').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value;
+ let rows=guideCatalog.filter(x=>{
+  const year=Number(x.ano_inicio)||0;
+  const period=era==='classic'?year>0&&year<=1980:era==='classic90'?year>=1981&&year<=1990:era==='nineties'?year>=1991&&year<=1999:era==='twoThousands'?year>=2000&&year<=2009:era==='recent'?year>=2010:true;
+  return (type==='Todos'||x.tipo===type)&&period&&(!genre||(x.generos||[]).includes(genre))&&(!q||norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q));
+ });
  const counts={ja_assisti:0,quero_assistir:0,assistindo:0,nao_assisti:0};guideStatuses.forEach(s=>{if(counts[s.status]!==undefined)counts[s.status]++});
  $('guideTotal').textContent=guideCatalogTotal.toLocaleString('pt-BR')+' títulos no catálogo';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';$('guideNotWatched').textContent=counts.nao_assisti+' não assistidos';
  if(status==='Todos')rows=rows.filter(x=>guideState(x.id)?.status!=='nao_tenho_interesse');else rows=rows.filter(x=>status==='nao_classificado'?!guideState(x.id):guideState(x.id)?.status===status);
@@ -898,8 +903,8 @@ $('guideTab').addEventListener('click',()=>showGuideSection('guide'));
 async function importGuideTwenty(){
  const button=$('guideImport20Btn'),status=$('guideImport20Status');
  if(!currentUser||isVisitor){toast('Entre na sua conta para adicionar títulos ao guia.');return;}
- await loadGuide();const target=Math.max(0,1500-guideCatalog.length);let totalAdded=0,page=1,rounds=0,stopped=false;
- button.disabled=true;button.textContent='Importando catálogo...';if(target===0){status.textContent='O guia já possui 1.500 títulos ou mais. Nenhuma importação necessária.';button.disabled=false;button.textContent='Catálogo já completo';return;}
+ await loadGuide();const target=1500;let totalAdded=0,page=1,rounds=0,stopped=false;
+ button.disabled=true;button.textContent='Importando catálogo...';if(target===0){status.textContent='Nenhum novo lote solicitado.';button.disabled=false;button.textContent='Importar mais 1.500 títulos';return;}
  try{
   while(totalAdded<target&&rounds<90&&!stopped){
    rounds++;status.textContent='Importando lote '+rounds+' · '+totalAdded+' de 1.500 títulos adicionados. Não feche esta página.';
@@ -908,7 +913,7 @@ async function importGuideTwenty(){
    const added=Number(data?.inserted||0);totalAdded+=added;
    page=Number(data?.next_page)>page?Number(data.next_page):page+1;
    if(data?.exhausted||added===0)stopped=true;
-   await loadGuide();status.textContent='Importados '+totalAdded.toLocaleString('pt-BR')+' novos títulos · catálogo atualizado: '+guideCatalogTotal.toLocaleString('pt-BR')+' de 1.500.';
+   await loadGuide();status.textContent='Importados '+totalAdded.toLocaleString('pt-BR')+' novos títulos · catálogo atualizado: '+guideCatalogTotal.toLocaleString('pt-BR')+' neste lote.';
   }
   await loadGuide();
   status.textContent='Processo concluído: '+totalAdded.toLocaleString('pt-BR')+' novos títulos adicionados. O catálogo agora tem '+guideCatalog.length.toLocaleString('pt-BR')+' títulos no total.'+(totalAdded<target?' A busca parou quando não encontrou mais títulos novos.':'');
@@ -917,10 +922,10 @@ async function importGuideTwenty(){
   await loadGuide().catch(()=>{});
   status.textContent='Importação interrompida após '+totalAdded+' títulos. Detalhe técnico: '+(error?.message||'erro desconhecido')+'. Os títulos já gravados foram preservados; corrija a configuração indicada e tente novamente.';
   toast('Importação interrompida. Os títulos já salvos foram preservados.');
- }finally{button.disabled=false;button.textContent='Continuar importação até 1.500 títulos';}
+ }finally{button.disabled=false;button.textContent='Importar mais 1.500 títulos';}
 }
 $('guideImport20Btn').addEventListener('click',importGuideTwenty);
-['guideSearch','guideType','guideGenre','guideStatus','guideSort'].forEach(id=>$(id).addEventListener(id==='guideSearch'?'input':'change',renderGuide));
+['guideSearch','guideType','guideEra','guideGenre','guideStatus','guideSort'].forEach(id=>$(id).addEventListener(id==='guideSearch'?'input':'change',renderGuide));
 
 function render(){
  rebuildCatalogNumberMap();
