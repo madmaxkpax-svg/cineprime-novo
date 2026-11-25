@@ -816,7 +816,7 @@ if(searchlightOverlay){
 
 
 /* Guia CinePrime: catálogo compartilhado e classificação privada por usuário. */
-let guideCatalog=[],guideStatuses=new Map(),guideLoaded=false;
+let guideCatalog=[],guideStatuses=new Map(),guideLoaded=false,guideRealtimeChannel=null,guideRefreshTimer=null,guideRefreshBusy=false;
 const guideStatusLabels={quero_assistir:'Quero assistir',assistindo:'Assistindo',ja_assisti:'Já assisti',nao_assisti:'Não assisti',nao_tenho_interesse:'Retirar da minha lista'};
 async function loadGuide(){
  const {data,error}=await db.from('guia_catalogo').select('*').order('ano_inicio',{ascending:false});
@@ -827,7 +827,23 @@ async function loadGuide(){
   if(statusError)throw statusError;
   (mine||[]).forEach(row=>guideStatuses.set(Number(row.catalogo_id),row));
  }
- guideLoaded=true;renderGuide();
+ guideLoaded=true;renderGuide();startGuideLiveUpdates();
+}
+async function refreshGuideLive(){
+ if(guideRefreshBusy||!currentUser||!guideLoaded)return;
+ guideRefreshBusy=true;
+ try{await loadGuide()}catch(error){console.warn('Atualização em tempo real do Guia:',error)}
+ finally{guideRefreshBusy=false}
+}
+function startGuideLiveUpdates(){
+ if(!currentUser||!guideLoaded)return;
+ if(!guideRealtimeChannel){
+  guideRealtimeChannel=db.channel('cineprime-guia-live')
+   .on('postgres_changes',{event:'*',schema:'public',table:'guia_catalogo'},()=>refreshGuideLive())
+   .on('postgres_changes',{event:'*',schema:'public',table:'guia_status_usuario',filter:'usuario_id=eq.'+currentUser.id},()=>refreshGuideLive())
+   .subscribe();
+ }
+ if(!guideRefreshTimer)guideRefreshTimer=setInterval(refreshGuideLive,12000);
 }
 function guideState(id){return guideStatuses.get(Number(id))||null}
 function renderGuide(){
@@ -839,7 +855,7 @@ function renderGuide(){
  const q=norm($('guideSearch').value),type=$('guideType').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value;
  let rows=guideCatalog.filter(x=>(type==='Todos'||x.tipo===type)&&(!genre||(x.generos||[]).includes(genre))&&(!q||norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q)));
  const counts={ja_assisti:0,quero_assistir:0,assistindo:0,nao_assisti:0};guideStatuses.forEach(s=>{if(counts[s.status]!==undefined)counts[s.status]++});
- $('guideTotal').textContent=guideCatalog.length+' títulos';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';$('guideNotWatched').textContent=counts.nao_assisti+' não assistidos';
+ $('guideTotal').textContent=guideCatalog.length.toLocaleString('pt-BR')+' títulos no catálogo';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';$('guideNotWatched').textContent=counts.nao_assisti+' não assistidos';
  if(status==='Todos')rows=rows.filter(x=>guideState(x.id)?.status!=='nao_tenho_interesse');else rows=rows.filter(x=>status==='nao_classificado'?!guideState(x.id):guideState(x.id)?.status===status);
  if(sort==='title')rows.sort((a,b)=>a.titulo.localeCompare(b.titulo,'pt-BR'));
  else if(sort==='old')rows.sort((a,b)=>(Number(a.ano_inicio)||9999)-(Number(b.ano_inicio)||9999));
@@ -889,10 +905,10 @@ async function importGuideTwenty(){
    const added=Number(data?.inserted||0);totalAdded+=added;
    page=Number(data?.next_page)>page?Number(data.next_page):page+1;
    if(data?.exhausted||added===0)stopped=true;
-   if(rounds%5===0)await loadGuide();
+   await loadGuide();status.textContent='Importados '+totalAdded.toLocaleString('pt-BR')+' novos títulos · catálogo atualizado: '+guideCatalog.length.toLocaleString('pt-BR')+' de 1.500.';
   }
   await loadGuide();
-  status.textContent='Processo concluído: '+totalAdded+' novos títulos adicionados. O catálogo agora tem '+guideCatalog.length+' títulos no total.'+(totalAdded<target?' A busca parou quando não encontrou mais títulos novos.':'');
+  status.textContent='Processo concluído: '+totalAdded.toLocaleString('pt-BR')+' novos títulos adicionados. O catálogo agora tem '+guideCatalog.length.toLocaleString('pt-BR')+' títulos no total.'+(totalAdded<target?' A busca parou quando não encontrou mais títulos novos.':'');
   toast(totalAdded+' títulos adicionados ao Guia Cinematográfico.');
  }catch(error){
   await loadGuide().catch(()=>{});
