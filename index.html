@@ -180,15 +180,15 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 
 /* Refletores CinePrime: camada independente aplicada sobre qualquer capa. */
 .cinema-intro>.topbar,.cinema-intro>.hero{position:relative;z-index:4}
-.searchlight-overlay{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
-.searchlight-overlay__fixture{position:absolute;bottom:0;width:4.5%;height:9%;background-image:url("assets/cineprime-searchlights-overlay-v1.png?v=6");background-repeat:no-repeat;background-size:556% 100%;z-index:3;will-change:transform;opacity:.9}
+.searchlight-overlay{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none;isolation:isolate}
+.searchlight-overlay__fixture{position:absolute;bottom:0;width:4.5%;height:9%;background-image:url("assets/cineprime-searchlights-overlay-v1.png?v=6");background-repeat:no-repeat;background-size:556% 100%;z-index:3;will-change:transform;opacity:.95}
 .searchlight-overlay__fixture--left{left:0;background-position:left bottom;transform-origin:8% 100%;animation:cineFixtureLeft 3.8s ease-in-out infinite alternate}
 .searchlight-overlay__fixture--right{right:0;background-position:right bottom;transform-origin:92% 100%;animation:cineFixtureRight 4.2s ease-in-out infinite alternate}
-.searchlight-overlay__beam{position:absolute;bottom:4%;width:62%;height:68%;opacity:.38;filter:blur(7px);mix-blend-mode:screen;z-index:1;will-change:transform,opacity;mask-image:linear-gradient(90deg,transparent 0%,#000 24%,#000 76%,transparent 100%)}
-.searchlight-overlay__beam:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,#fff8d9aa 48%,transparent);filter:blur(18px);opacity:.55}
-.searchlight-overlay__beam:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,#fff4c955 0%,transparent 68%);filter:blur(12px)}
-.searchlight-overlay__beam--left{left:0;clip-path:polygon(8% 100%,20% 100%,78% 0%,52% 0%);transform-origin:14% 100%;background:linear-gradient(0deg,#ffe5a87a 0%,#fff5d955 44%,transparent 100%);animation:cineBeamLeft 5.2s ease-in-out infinite alternate}
-.searchlight-overlay__beam--right{right:0;clip-path:polygon(80% 100%,92% 100%,48% 0%,22% 0%);transform-origin:86% 100%;background:linear-gradient(0deg,#ffe5a87a 0%,#fff5d955 44%,transparent 100%);animation:cineBeamRight 5.8s ease-in-out infinite alternate}
+.searchlight-overlay__beam{position:absolute;bottom:0;width:72%;height:82%;opacity:.68;filter:blur(3px);mix-blend-mode:screen;z-index:1;will-change:transform,opacity}
+.searchlight-overlay__beam:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 8%,#fff1c866 48%,transparent 88%);filter:blur(13px);opacity:.8}
+.searchlight-overlay__beam:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,#fff4c988 0%,#ffe6a833 28%,transparent 72%);filter:blur(9px)}
+.searchlight-overlay__beam--left{left:-4%;clip-path:polygon(4% 100%,22% 100%,82% 0%,52% 0%);transform-origin:12% 100%;background:linear-gradient(0deg,#ffe5a8bb 0%,#fff5d977 40%,#fff1d522 72%,transparent 100%);animation:cineBeamLeft 5.2s ease-in-out infinite alternate}
+.searchlight-overlay__beam--right{right:-4%;clip-path:polygon(78% 100%,96% 100%,48% 0%,18% 0%);transform-origin:88% 100%;background:linear-gradient(0deg,#ffe5a8bb 0%,#fff5d977 40%,#fff1d522 72%,transparent 100%);animation:cineBeamRight 5.8s ease-in-out infinite alternate}
 @keyframes cineBeamLeft{0%{transform:rotate(-7deg) scaleX(.88);opacity:.22}100%{transform:rotate(9deg) scaleX(1.12);opacity:.52}}
 @keyframes cineBeamRight{0%{transform:rotate(8deg) scaleX(.9);opacity:.2}100%{transform:rotate(-9deg) scaleX(1.12);opacity:.5}}
 @keyframes cineFixtureLeft{0%{transform:rotate(-7deg)}100%{transform:rotate(8deg)}}
