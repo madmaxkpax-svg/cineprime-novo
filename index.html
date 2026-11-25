@@ -294,7 +294,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 .guide-row{display:grid;grid-template-columns:48px minmax(0,1fr) minmax(225px,auto);gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
 .guide-poster{width:48px;height:68px;object-fit:cover;border-radius:5px;background:#222}
 .guide-poster-empty{display:grid;place-items:center;color:#b99a58;font-size:24px}
-.guide-info{min-width:0}.guide-info h3{font-size:15px;margin:0 0 4px}
+.guide-info{min-width:0}.guide-info h3{font-size:15px;margin:0 0 4px}.guide-collection-badge{display:inline-flex;align-items:center;gap:5px;margin:0 0 7px;padding:5px 8px;border:1px solid #d6b15e88;border-radius:999px;background:linear-gradient(110deg,#493719,#272013);color:#ffe3a0;font-size:10px;font-weight:900;letter-spacing:.055em;text-transform:uppercase}.guide-collection-badge small{font-size:9px;font-weight:700;color:#f7e8c5;opacity:.9}.guide-not-owned{display:inline-flex;margin:0 0 7px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:10px}
 .guide-meta{font-size:11px;color:var(--muted);margin-bottom:6px}
 .guide-synopsis{font-size:13px;line-height:1.45;color:var(--text);opacity:.9}
 .guide-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
@@ -391,6 +391,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
   <select id="guideType" aria-label="Tipo de conteúdo"><option value="Todos">Filmes e séries</option><option value="Filme">Somente filmes</option><option value="Série">Somente séries</option></select>
   <select id="guideEra" aria-label="Período"><option value="all">Todas as épocas</option><option value="classic">Clássicos até 1980</option><option value="classic90">Clássicos de 1981 a 1990</option><option value="nineties">Anos 1990</option><option value="twoThousands">Anos 2000</option><option value="recent">2010 em diante</option></select>
   <select id="guideGenre"><option value="">Todos os gêneros</option></select>
+  <select id="guideCollectionFilter" aria-label="Filtrar pela minha coleção"><option value="all">Coleção: todos</option><option value="owned">Tenho na coleção</option><option value="missing">Ainda não tenho</option></select>
   <select id="guideStatus"><option value="Todos">Todas as situações</option><option value="nao_classificado">Não classificados</option><option value="quero_assistir">Quero assistir</option><option value="assistindo">Assistindo</option><option value="ja_assisti">Já assisti</option><option value="nao_assisti">Não assisti</option><option value="nao_tenho_interesse">Retirados da minha lista</option></select>
   <select id="guideSort"><option value="recent">Mais recentes primeiro</option><option value="old">Mais antigos primeiro</option><option value="title">Título A–Z</option></select>
  </div>
@@ -720,7 +721,7 @@ async function loadFilms(){
  }
  // Abrir o catálogo diretamente na ordem personalizada, usando a preferência carregada da nuvem.
  $('sort').value='custom';
- render()
+ render();if(guideLoaded)renderGuide()
 }
 async function saveCustomOrder(){
  if(!currentUser){toast('Entre na conta para salvar sua ordem personalizada.');return}
@@ -929,17 +930,34 @@ function startGuideLiveUpdates(){
  if(!guideRefreshTimer)guideRefreshTimer=setInterval(refreshGuideLive,12000);
 }
 function guideState(id){return guideStatuses.get(Number(id))||null}
+function guideCollectionMatches(item){
+ if(item.tipo!=='Filme')return [];
+ const titleKeys=[item.titulo,item.titulo_original].filter(Boolean).map(norm);
+ const guideYear=Number(item.ano_inicio)||0;
+ return films.filter(f=>{
+  const filmTitle=norm(f.title);
+  if(!titleKeys.includes(filmTitle))return false;
+  const filmYear=Number(f.year)||0;
+  return !guideYear||!filmYear||guideYear===filmYear;
+ });
+}
+function guideCollectionLabel(matches){
+ const formats=[...new Set(matches.map(f=>f.format||'Mídia').filter(Boolean))];
+ const digital=matches.some(f=>!!(f.linkFilmeDigital||f.youtubeUrl));
+ if(digital&&!formats.includes('Digital'))formats.push('Digital');
+ return formats.join(' + ')||'Coleção';
+}
 function renderGuide(){
  if(!$('guideList'))return;
  const oldGenre=$('guideGenre').value;
  const genres=[...new Set(guideCatalog.flatMap(x=>x.generos||[]))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  $('guideGenre').innerHTML='<option value="">Todos os gêneros</option>'+genres.map(g=>'<option value="'+escAttr(g)+'">'+esc(g)+'</option>').join('');
  $('guideGenre').value=genres.includes(oldGenre)?oldGenre:'';
- const q=norm($('guideSearch').value),searchMode=$('guideSearchMode').value,type=$('guideType').value,era=$('guideEra').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value;
+ const q=norm($('guideSearch').value),searchMode=$('guideSearchMode').value,type=$('guideType').value,era=$('guideEra').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value,collectionFilter=$('guideCollectionFilter')?.value||'all';
  let rows=guideCatalog.filter(x=>{
   const year=Number(x.ano_inicio)||0;
   const period=era==='classic'?year>0&&year<=1980:era==='classic90'?year>=1981&&year<=1990:era==='nineties'?year>=1991&&year<=1999:era==='twoThousands'?year>=2000&&year<=2009:era==='recent'?year>=2010:true;
-  return (type==='Todos'||x.tipo===type)&&period&&(!genre||(x.generos||[]).includes(genre))&&(!q||(searchMode==='exact'?norm(x.titulo)===q:norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q)));
+  const owned=guideCollectionMatches(x).length>0;return (type==='Todos'||x.tipo===type)&&period&&(!genre||(x.generos||[]).includes(genre))&&(collectionFilter==='all'||(collectionFilter==='owned'?owned:!owned))&&(!q||(searchMode==='exact'?norm(x.titulo)===q:norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q)));
  });
  const counts={ja_assisti:0,quero_assistir:0,assistindo:0,nao_assisti:0};guideStatuses.forEach(s=>{if(counts[s.status]!==undefined)counts[s.status]++});
  $('guideTotal').textContent=guideCatalogTotal.toLocaleString('pt-BR')+' títulos no catálogo';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';$('guideNotWatched').textContent=counts.nao_assisti+' não assistidos';
@@ -949,11 +967,11 @@ function renderGuide(){
  else rows.sort((a,b)=>(Number(b.ano_inicio)||0)-(Number(a.ano_inicio)||0));
  $('guideMessage').textContent=currentUser?'Sua classificação é salva na sua conta e não altera sua coleção física ou digital.':'Entre na sua conta para salvar sua classificação pessoal.';
  $('guideList').innerHTML=rows.length?rows.map(item=>{
-  const state=guideState(item.id),active=state?.status||'',year=item.ano_fim&&item.ano_fim!==item.ano_inicio?item.ano_inicio+'–'+item.ano_fim:(item.ano_inicio||'Ano não informado');
+  const state=guideState(item.id),active=state?.status||'',year=item.ano_fim&&item.ano_fim!==item.ano_inicio?item.ano_inicio+'–'+item.ano_fim:(item.ano_inicio||'Ano não informado'),ownedMatches=guideCollectionMatches(item),collectionBadge=ownedMatches.length?'<div class="guide-collection-badge">✓ FAZ PARTE DA MINHA COLEÇÃO <small>'+esc(guideCollectionLabel(ownedMatches))+'</small></div>':'<div class="guide-not-owned">Ainda não está na minha coleção</div>';
   const cover=item.poster_url?'<img class="guide-poster" loading="lazy" src="'+escAttr(item.poster_url)+'" alt="Pôster de '+escAttr(item.titulo)+'">':'<div class="guide-poster guide-poster-empty">✦</div>';
   const progress=item.tipo==='Série'&&active==='assistindo'&&(state?.temporada_atual||state?.episodio_atual)?'<div class="guide-meta">Temporada '+(state.temporada_atual||'—')+' · Episódio '+(state.episodio_atual||'—')+'</div>':'';
   const buttons=['quero_assistir','assistindo','ja_assisti','nao_assisti','nao_tenho_interesse'].map(s=>'<button type="button" class="btn" data-guide-id="'+item.id+'" data-guide-status="'+s+'" aria-pressed="'+(active===s)+'" '+(!currentUser||isVisitor?'disabled':'')+'>'+guideStatusLabels[s]+'</button>').join('');
-  return '<article class="guide-row">'+cover+'<div class="guide-info"><h3>'+esc(item.titulo)+'</h3><div class="guide-meta">'+esc(item.tipo)+' · '+esc(year)+' · '+esc((item.generos||[]).join(' / ')||'Gênero não informado')+'</div><div class="guide-synopsis">'+esc(item.sinopse||'Sinopse ainda não cadastrada.')+'</div>'+progress+'</div><div class="guide-actions">'+buttons+'</div></article>';
+  return '<article class="guide-row">'+cover+'<div class="guide-info">'+collectionBadge+'<h3>'+esc(item.titulo)+'</h3><div class="guide-meta">'+esc(item.tipo)+' · '+esc(year)+' · '+esc((item.generos||[]).join(' / ')||'Gênero não informado')+'</div><div class="guide-synopsis">'+esc(item.sinopse||'Sinopse ainda não cadastrada.')+'</div>'+progress+'</div><div class="guide-actions">'+buttons+'</div></article>';
  }).join(''):'<div class="guide-empty">Nenhum título encontrado com esses filtros.</div>';
  $('guideList').querySelectorAll('[data-guide-id]').forEach(button=>button.addEventListener('click',()=>updateGuideStatus(Number(button.dataset.guideId),button.dataset.guideStatus)));
 }
@@ -1049,7 +1067,7 @@ async function addExternalGuideTitle(index,button){
 $('guideExternalForm').addEventListener('submit',searchGuideExternal);
 
 $('guideImport20Btn').addEventListener('click',importGuideTwenty);
-['guideSearch','guideType','guideEra','guideGenre','guideStatus','guideSort','guideSearchMode'].forEach(id=>$(id).addEventListener(id==='guideSearch'?'input':'change',renderGuide));
+['guideSearch','guideType','guideEra','guideGenre','guideStatus','guideSort','guideSearchMode','guideCollectionFilter'].forEach(id=>$(id).addEventListener(id==='guideSearch'?'input':'change',renderGuide));
 $('guideSearchClear').addEventListener('click',()=>{$('guideSearch').value='';$('guideSearchMode').value='contains';renderGuide();$('guideSearch').focus();});
 
 function render(){
