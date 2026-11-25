@@ -368,7 +368,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
   <div class="guide-counts"><span id="guideTotal">0 títulos</span><span id="guideWatched">0 assistidos</span><span id="guideWant">0 quero assistir</span><span id="guideWatching">0 assistindo</span><span id="guideNotWatched">0 não assistidos</span></div>
  </div>
  <div class="guide-toolbar">
-  <input id="guideSearch" type="search" placeholder="Buscar título, ano ou gênero..." aria-label="Buscar no guia">
+  <input id="guideSearch" type="search" placeholder="Digite o nome do filme ou série..." aria-label="Buscar título no guia"><select id="guideSearchMode" aria-label="Modo de pesquisa"><option value="contains">Pesquisa geral</option><option value="exact">Título exato</option></select><button type="button" id="guideSearchClear" class="btn" aria-label="Limpar pesquisa">Limpar</button>
   <select id="guideType" aria-label="Tipo de conteúdo"><option value="Todos">Filmes e séries</option><option value="Filme">Somente filmes</option><option value="Série">Somente séries</option></select>
   <select id="guideEra" aria-label="Período"><option value="all">Todas as épocas</option><option value="classic">Clássicos até 1980</option><option value="classic90">Clássicos de 1981 a 1990</option><option value="nineties">Anos 1990</option><option value="twoThousands">Anos 2000</option><option value="recent">2010 em diante</option></select>
   <select id="guideGenre"><option value="">Todos os gêneros</option></select>
@@ -906,11 +906,11 @@ function renderGuide(){
  const genres=[...new Set(guideCatalog.flatMap(x=>x.generos||[]))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  $('guideGenre').innerHTML='<option value="">Todos os gêneros</option>'+genres.map(g=>'<option value="'+escAttr(g)+'">'+esc(g)+'</option>').join('');
  $('guideGenre').value=genres.includes(oldGenre)?oldGenre:'';
- const q=norm($('guideSearch').value),type=$('guideType').value,era=$('guideEra').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value;
+ const q=norm($('guideSearch').value),searchMode=$('guideSearchMode').value,type=$('guideType').value,era=$('guideEra').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value;
  let rows=guideCatalog.filter(x=>{
   const year=Number(x.ano_inicio)||0;
   const period=era==='classic'?year>0&&year<=1980:era==='classic90'?year>=1981&&year<=1990:era==='nineties'?year>=1991&&year<=1999:era==='twoThousands'?year>=2000&&year<=2009:era==='recent'?year>=2010:true;
-  return (type==='Todos'||x.tipo===type)&&period&&(!genre||(x.generos||[]).includes(genre))&&(!q||norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q));
+  return (type==='Todos'||x.tipo===type)&&period&&(!genre||(x.generos||[]).includes(genre))&&(!q||(searchMode==='exact'?norm(x.titulo)===q:norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q)));
  });
  const counts={ja_assisti:0,quero_assistir:0,assistindo:0,nao_assisti:0};guideStatuses.forEach(s=>{if(counts[s.status]!==undefined)counts[s.status]++});
  $('guideTotal').textContent=guideCatalogTotal.toLocaleString('pt-BR')+' títulos no catálogo';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';$('guideNotWatched').textContent=counts.nao_assisti+' não assistidos';
@@ -975,7 +975,8 @@ async function importGuideTwenty(){
  }finally{button.disabled=false;button.textContent='Importar mais 1.500 títulos';}
 }
 $('guideImport20Btn').addEventListener('click',importGuideTwenty);
-['guideSearch','guideType','guideEra','guideGenre','guideStatus','guideSort'].forEach(id=>$(id).addEventListener(id==='guideSearch'?'input':'change',renderGuide));
+['guideSearch','guideType','guideEra','guideGenre','guideStatus','guideSort','guideSearchMode'].forEach(id=>$(id).addEventListener(id==='guideSearch'?'input':'change',renderGuide));
+$('guideSearchClear').addEventListener('click',()=>{$('guideSearch').value='';$('guideSearchMode').value='contains';renderGuide();$('guideSearch').focus();});
 
 function render(){
  rebuildCatalogNumberMap();
