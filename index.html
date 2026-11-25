@@ -816,12 +816,15 @@ if(searchlightOverlay){
 
 
 /* Guia CinePrime: catálogo compartilhado e classificação privada por usuário. */
-let guideCatalog=[],guideStatuses=new Map(),guideLoaded=false,guideRealtimeChannel=null,guideRefreshTimer=null,guideRefreshBusy=false;
+let guideCatalog=[],guideCatalogTotal=0,guideStatuses=new Map(),guideLoaded=false,guideRealtimeChannel=null,guideRefreshTimer=null,guideRefreshBusy=false;
 const guideStatusLabels={quero_assistir:'Quero assistir',assistindo:'Assistindo',ja_assisti:'Já assisti',nao_assisti:'Não assisti',nao_tenho_interesse:'Retirar da minha lista'};
 async function loadGuide(){
- const {data,error}=await db.from('guia_catalogo').select('*').order('ano_inicio',{ascending:false});
- if(error)throw error;
- guideCatalog=data||[];guideStatuses=new Map();
+ const [{data,error},{count:exactCount,error:countError}]=await Promise.all([
+  db.from('guia_catalogo').select('*').order('ano_inicio',{ascending:false}),
+  db.from('guia_catalogo').select('id',{count:'exact',head:true})
+ ]);
+ if(error)throw error;if(countError)throw countError;
+ guideCatalog=data||[];guideCatalogTotal=Number(exactCount||0);guideStatuses=new Map();
  if(currentUser){
   const {data:mine,error:statusError}=await db.from('guia_status_usuario').select('*').eq('usuario_id',currentUser.id);
   if(statusError)throw statusError;
@@ -855,7 +858,7 @@ function renderGuide(){
  const q=norm($('guideSearch').value),type=$('guideType').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value;
  let rows=guideCatalog.filter(x=>(type==='Todos'||x.tipo===type)&&(!genre||(x.generos||[]).includes(genre))&&(!q||norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q)));
  const counts={ja_assisti:0,quero_assistir:0,assistindo:0,nao_assisti:0};guideStatuses.forEach(s=>{if(counts[s.status]!==undefined)counts[s.status]++});
- $('guideTotal').textContent=guideCatalog.length.toLocaleString('pt-BR')+' títulos no catálogo';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';$('guideNotWatched').textContent=counts.nao_assisti+' não assistidos';
+ $('guideTotal').textContent=guideCatalogTotal.toLocaleString('pt-BR')+' títulos no catálogo';$('guideWatched').textContent=counts.ja_assisti+' assistidos';$('guideWant').textContent=counts.quero_assistir+' quero assistir';$('guideWatching').textContent=counts.assistindo+' assistindo';$('guideNotWatched').textContent=counts.nao_assisti+' não assistidos';
  if(status==='Todos')rows=rows.filter(x=>guideState(x.id)?.status!=='nao_tenho_interesse');else rows=rows.filter(x=>status==='nao_classificado'?!guideState(x.id):guideState(x.id)?.status===status);
  if(sort==='title')rows.sort((a,b)=>a.titulo.localeCompare(b.titulo,'pt-BR'));
  else if(sort==='old')rows.sort((a,b)=>(Number(a.ano_inicio)||9999)-(Number(b.ano_inicio)||9999));
@@ -905,7 +908,7 @@ async function importGuideTwenty(){
    const added=Number(data?.inserted||0);totalAdded+=added;
    page=Number(data?.next_page)>page?Number(data.next_page):page+1;
    if(data?.exhausted||added===0)stopped=true;
-   await loadGuide();status.textContent='Importados '+totalAdded.toLocaleString('pt-BR')+' novos títulos · catálogo atualizado: '+guideCatalog.length.toLocaleString('pt-BR')+' de 1.500.';
+   await loadGuide();status.textContent='Importados '+totalAdded.toLocaleString('pt-BR')+' novos títulos · catálogo atualizado: '+guideCatalogTotal.toLocaleString('pt-BR')+' de 1.500.';
   }
   await loadGuide();
   status.textContent='Processo concluído: '+totalAdded.toLocaleString('pt-BR')+' novos títulos adicionados. O catálogo agora tem '+guideCatalog.length.toLocaleString('pt-BR')+' títulos no total.'+(totalAdded<target?' A busca parou quando não encontrou mais títulos novos.':'');
