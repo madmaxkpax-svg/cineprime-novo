@@ -270,6 +270,22 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 .guide-heading p{color:var(--muted);margin:0;max-width:650px;line-height:1.5}
 .guide-counts{display:flex;gap:8px;flex-wrap:wrap}
 .guide-counts span{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 10px}
+
+.guide-external-search{margin:18px 0 20px;padding:16px;border:1px solid #8f713566;border-radius:14px;background:linear-gradient(135deg,#211d15,#121216 72%)}
+.guide-external-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.guide-external-head h3{margin:0 0 5px;font-size:17px;color:var(--gold)}
+.guide-external-head p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}
+.guide-external-source{font-size:10px;letter-spacing:.12em;color:#d8bd7a;border:1px solid #8f713566;border-radius:999px;padding:6px 9px;white-space:nowrap}
+.guide-external-form{display:grid;grid-template-columns:minmax(180px,1fr) 170px auto;gap:9px}
+.guide-external-results{display:grid;gap:8px;margin-top:10px}
+.guide-external-result{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:11px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:10px;background:#0c0c0f}
+.guide-external-result img{width:54px;height:78px;object-fit:cover;border-radius:5px;background:#222}
+.guide-external-result h4{margin:0 0 4px;font-size:14px}
+.guide-external-result p{margin:0;color:var(--muted);font-size:11px;line-height:1.4}
+.guide-external-result .btn{font-size:11px;white-space:nowrap}
+.guide-external-result .btn:disabled{opacity:.55;cursor:default}
+@media(max-width:650px){.guide-external-form{grid-template-columns:1fr 1fr}.guide-external-form input{grid-column:1/-1}.guide-external-form button{grid-column:1/-1}.guide-external-head{align-items:flex-start;flex-direction:column}.guide-external-result{grid-template-columns:48px minmax(0,1fr)}.guide-external-result img{width:48px;height:70px}.guide-external-result .btn{grid-column:2;justify-self:start}}
+
 .guide-toolbar{display:grid;grid-template-columns:minmax(200px,2fr) repeat(4,minmax(130px,1fr));gap:9px;margin:18px 0}
 .guide-note{font-size:12px;color:var(--muted);margin:8px 0 12px}
 .guide-list{border-top:1px solid var(--line)}
@@ -375,6 +391,16 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
   <select id="guideStatus"><option value="Todos">Todas as situações</option><option value="nao_classificado">Não classificados</option><option value="quero_assistir">Quero assistir</option><option value="assistindo">Assistindo</option><option value="ja_assisti">Já assisti</option><option value="nao_assisti">Não assisti</option><option value="nao_tenho_interesse">Retirados da minha lista</option></select>
   <select id="guideSort"><option value="recent">Mais recentes primeiro</option><option value="old">Mais antigos primeiro</option><option value="title">Título A–Z</option></select>
  </div>
+ <section class="guide-external-search" aria-labelledby="guideExternalTitle">
+  <div class="guide-external-head"><div><h3 id="guideExternalTitle">Buscar fora do Guia</h3><p>Pesquise diretamente no TMDB, incluindo filmes e séries que ainda não estão cadastrados.</p></div><span class="guide-external-source">CATÁLOGO EXTERNO · TMDB</span></div>
+  <form id="guideExternalForm" class="guide-external-form">
+   <input id="guideExternalQuery" type="search" placeholder="Ex.: Spartacus, O Mágico de Oz..." aria-label="Título para pesquisar no TMDB" required>
+   <select id="guideExternalType" aria-label="Tipo de conteúdo"><option value="all">Filmes e séries</option><option value="movie">Somente filmes</option><option value="series">Somente séries</option></select>
+   <button class="btn primary" id="guideExternalSearchBtn" type="submit">Buscar no TMDB</button>
+  </form>
+  <div id="guideExternalStatus" class="guide-note" role="status" aria-live="polite">A pesquisa externa não altera sua coleção. Você escolhe quais títulos deseja adicionar ao Guia.</div>
+  <div id="guideExternalResults" class="guide-external-results"></div>
+ </section>
  <div class="guide-import-bar"><button type="button" class="btn primary" id="guideImport20Btn">Importar mais 1.500 títulos</button><span class="guide-note" id="guideImport20Status" role="status" aria-live="polite">Importação automática em lotes, misturando filmes e séries, sem duplicar registros existentes.</span></div>
  <div class="guide-note" id="guideMessage" role="status">O catálogo inicial está sendo carregado.</div>
  <div id="guideList" class="guide-list"></div>
@@ -974,6 +1000,51 @@ async function importGuideTwenty(){
   toast('Importação interrompida. Os títulos já salvos foram preservados.');
  }finally{button.disabled=false;button.textContent='Importar mais 1.500 títulos';}
 }
+
+let guideExternalResults=[];
+function renderGuideExternalResults(){
+ const host=$('guideExternalResults');if(!host)return;
+ if(!guideExternalResults.length){host.innerHTML='';return;}
+ host.innerHTML=guideExternalResults.map((item,index)=>{
+  const exists=guideCatalog.some(row=>row.fonte==='TMDB'&&String(row.fonte_id)===String(item.fonte_id));
+  const poster=item.poster_url?'<img loading="lazy" src="'+escAttr(item.poster_url)+'" alt="Pôster de '+escAttr(item.titulo)+'">':'<div class="guide-poster guide-poster-empty">✦</div>';
+  const year=item.ano_inicio||'Ano não informado';
+  return '<article class="guide-external-result">'+poster+'<div><h4>'+esc(item.titulo)+'</h4><p>'+esc(item.tipo)+' · '+esc(String(year))+' · '+esc((item.generos||[]).join(' / ')||'Gênero não informado')+'</p><p>'+esc(item.sinopse||'Sinopse não disponível.')+'</p></div><button type="button" class="btn '+(exists?'':'primary')+'" data-external-add="'+index+'" '+(exists||!currentUser||isVisitor?'disabled':'')+'>'+(exists?'Já está no Guia':(!currentUser||isVisitor?'Entre para adicionar':'Adicionar ao Guia'))+'</button></article>';
+ }).join('');
+ host.querySelectorAll('[data-external-add]').forEach(button=>button.addEventListener('click',()=>addExternalGuideTitle(Number(button.dataset.externalAdd),button)));
+}
+async function searchGuideExternal(event){
+ event.preventDefault();
+ const query=$('guideExternalQuery').value.trim(),status=$('guideExternalStatus'),button=$('guideExternalSearchBtn');
+ if(!query){status.textContent='Digite o nome de um filme ou série.';return;}
+ button.disabled=true;button.textContent='Pesquisando...';status.textContent='Consultando o catálogo externo do TMDB...';$('guideExternalResults').innerHTML='';
+ try{
+  const {data,error}=await db.functions.invoke('tmdb-guide',{body:{action:'search',query,type:$('guideExternalType').value,page:1}});
+  if(error){let detail=error.message||'Falha ao consultar o TMDB';try{const response=error.context;if(response?.clone){const payload=await response.clone().json();if(payload?.error)detail=payload.error;}}catch{}throw new Error(detail);}
+  if(data?.error)throw new Error(data.error);
+  guideExternalResults=Array.isArray(data?.results)?data.results:[];
+  renderGuideExternalResults();
+  status.textContent=guideExternalResults.length?guideExternalResults.length+' resultado(s) encontrados. Confira o ano e o tipo antes de adicionar.':'Nenhum resultado encontrado. Tente o título original ou outra grafia.';
+ }catch(error){status.textContent='Não foi possível pesquisar: '+(error?.message||'erro desconhecido')+'.';}
+ finally{button.disabled=false;button.textContent='Buscar no TMDB';}
+}
+async function addExternalGuideTitle(index,button){
+ const item=guideExternalResults[index];if(!item)return;
+ if(!currentUser||isVisitor){toast('Entre na sua conta para adicionar títulos ao Guia.');return;}
+ const duplicate=guideCatalog.find(row=>row.fonte==='TMDB'&&String(row.fonte_id)===String(item.fonte_id));
+ if(duplicate){button.disabled=true;button.textContent='Já está no Guia';return;}
+ button.disabled=true;button.textContent='Adicionando...';
+ try{
+  const {data,error}=await db.from('guia_catalogo').insert(item).select().single();
+  if(error){
+   if(error.code==='23505'){await loadGuide();button.textContent='Já está no Guia';toast('Este título já estava cadastrado.');return;}
+   throw error;
+  }
+  guideCatalog.push(data);guideCatalogTotal++;renderGuide();renderGuideExternalResults();toast('“'+item.titulo+'” adicionado ao Guia Cinematográfico.');
+ }catch(error){button.disabled=false;button.textContent='Adicionar ao Guia';toast('Não foi possível adicionar: '+(error?.message||'erro desconhecido'));}
+}
+$('guideExternalForm').addEventListener('submit',searchGuideExternal);
+
 $('guideImport20Btn').addEventListener('click',importGuideTwenty);
 ['guideSearch','guideType','guideEra','guideGenre','guideStatus','guideSort','guideSearchMode'].forEach(id=>$(id).addEventListener(id==='guideSearch'?'input':'change',renderGuide));
 $('guideSearchClear').addEventListener('click',()=>{$('guideSearch').value='';$('guideSearchMode').value='contains';renderGuide();$('guideSearch').focus();});
