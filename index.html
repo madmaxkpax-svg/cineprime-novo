@@ -363,6 +363,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
  <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
+ <select id="sealFilter" aria-label="Filtrar por etiqueta de contagem"><option value="">Todos os selos</option><option value="counted">✓ Com etiqueta CONTADA</option><option value="not-counted">Sem etiqueta CONTADA</option></select>
  <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada · arraste os filmes</option></select>
 </div>
 <nav class="tabs" aria-label="Formato">
@@ -1057,8 +1058,16 @@ function render(){
  const genres=[...new Set(films.map(f=>f.genre).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  const sagas=[...new Set(films.map(f=>f.saga).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  $('genreFilter').innerHTML='<option value="">Todos os gêneros</option>'+genres.map(x=>`<option>${esc(x)}</option>`).join('');$('sagaFilter').innerHTML='<option value="">Todas as sagas</option>'+sagas.map(x=>`<option>${esc(x)}</option>`).join('');$('genreFilter').value=genres.includes(oldG)?oldG:'';$('sagaFilter').value=sagas.includes(oldS)?oldS:'';
- const q=norm($('search').value),g=$('genreFilter').value,s=$('sagaFilter').value,sort=$('sort').value;
- let arr=films.filter(f=>(activeFormat==='Todos'||f.format===activeFormat)&&(!g||f.genre===g)&&(!s||f.saga===s)&&(!q||norm([f.title,f.year,f.genre,f.saga,f.format,f.notes].join(' ')).includes(q)));
+ const q=norm($('search').value),g=$('genreFilter').value,s=$('sagaFilter').value,seal=$('sealFilter').value,sort=$('sort').value;
+ const countedTotal=films.filter(f=>f.adminStatus==='counted').length;
+ const notCountedTotal=films.length-countedTotal;
+ const sealFilter=$('sealFilter');
+ if(sealFilter){
+  const previous=sealFilter.value;
+  sealFilter.innerHTML='<option value="">Todos os selos ('+films.length+')</option><option value="counted">✓ Com etiqueta CONTADA ('+countedTotal+')</option><option value="not-counted">Sem etiqueta CONTADA ('+notCountedTotal+')</option>';
+  sealFilter.value=previous;
+ }
+ let arr=films.filter(f=>(activeFormat==='Todos'||f.format===activeFormat)&&(!g||f.genre===g)&&(!s||f.saga===s)&&(!seal||(seal==='counted'?f.adminStatus==='counted':f.adminStatus!=='counted'))&&(!q||norm([f.title,f.year,f.genre,f.saga,f.format,f.notes].join(' ')).includes(q)));
  if(sort==='title')arr.sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
  else if(sort==='year')arr.sort((a,b)=>(a.year||9999)-(b.year||9999));
  else if(sort==='newest')arr.sort((a,b)=>(b.added||0)-(a.added||0));
@@ -1193,7 +1202,7 @@ $('uploadCoverBtn').addEventListener('click',async()=>{
 $('coverFile').addEventListener('change',()=>{const file=$('coverFile').files?.[0];$('coverUploadStatus').textContent=file?`Arquivo selecionado: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB). Clique em “Enviar capa”.`:'Escolha uma imagem JPG, PNG, WEBP ou GIF (máximo 10 MB).'});
 
 $('filmForm').addEventListener('submit',async e=>{e.preventDefault();const linkFilmeDigital=$('linkFilmeDigital').value.trim(),linkTrailer=$('linkTrailer').value.trim(),linkMusica=$('linkMusica').value.trim();for(const [label,value] of [['Filme digital',linkFilmeDigital],['Trailer',linkTrailer],['Música do filme',linkMusica]]){if(value){try{const u=new URL(value);if(!['http:','https:'].includes(u.protocol))throw new Error()}catch{alert('Confira o endereço informado em: '+label+'. Use um link iniciado por https:// ou http://.');return}}}const f={title:$('title').value.trim(),year:$('year').value?Number($('year').value):'',format:$('format').value,genre:$('genre').value.trim(),saga:$('saga').value.trim(),cover:$('cover').value.trim(),linkFilmeDigital,linkTrailer,linkMusica,youtubeUrl:linkFilmeDigital,notes:$('notes').value.trim(),adminStatus:$('adminStatus').value};const dup=films.find(x=>Number(x.id)!==Number(editId)&&norm(x.title)===norm(f.title)&&String(x.year)===String(f.year)&&x.format===f.format);if(dup){alert('Este filme já está cadastrado com o mesmo título, ano e formato. Edite o registro existente.');return}const row=filmToRow(f);let error;if(editId!==null){const result=await db.from('filmes').update(row).eq('id',editId).select().single();error=result.error;if(!error){const idx=films.findIndex(x=>Number(x.id)===Number(editId));films[idx]=rowToFilm(result.data)}}else{const result=await db.from('filmes').insert(row).select().single();error=result.error;if(!error)films.push(rowToFilm(result.data))}if(error){alert('Não foi possível salvar no banco: '+error.message+'\n\nConfira as políticas de acesso do Supabase.');return}$('filmDialog').close();render();toast(editId!==null?'Cadastro atualizado na nuvem.':'Filme cadastrado na nuvem.');editId=null});
-$('addTop').onclick=openAdd;$('closeDialog').onclick=()=>$('filmDialog').close();$('cancelDialog').onclick=()=>$('filmDialog').close();$('sagaGalleryToggle').addEventListener('click',()=>{showSagaGallery=!showSagaGallery;render()});$('search').addEventListener('input',render);$('genreFilter').onchange=render;$('sagaFilter').onchange=render;$('sort').onchange=render;document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{activeFormat=t.dataset.format;render()});
+$('addTop').onclick=openAdd;$('closeDialog').onclick=()=>$('filmDialog').close();$('cancelDialog').onclick=()=>$('filmDialog').close();$('sagaGalleryToggle').addEventListener('click',()=>{showSagaGallery=!showSagaGallery;render()});$('search').addEventListener('input',render);$('genreFilter').onchange=render;$('sagaFilter').onchange=render;$('sealFilter').onchange=render;$('sort').onchange=render;document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{activeFormat=t.dataset.format;render()});
 
 // Central de importação: pesquisa vários títulos e exige conferência antes de gravar.
 $('importListBtn').addEventListener('click',()=>{
