@@ -863,8 +863,8 @@ $('guideTab').addEventListener('click',()=>showGuideSection('guide'));
 async function importGuideTwenty(){
  const button=$('guideImport20Btn'),status=$('guideImport20Status');
  if(!currentUser||isVisitor){toast('Entre na sua conta para adicionar títulos ao guia.');return;}
- const target=1500;let totalAdded=0,page=1,rounds=0,stopped=false;
- button.disabled=true;button.textContent='Importando catálogo...';
+ await loadGuide();const target=Math.max(0,1500-guideCatalog.length);let totalAdded=0,page=1,rounds=0,stopped=false;
+ button.disabled=true;button.textContent='Importando catálogo...';if(target===0){status.textContent='O guia já possui 1.500 títulos ou mais. Nenhuma importação necessária.';button.disabled=false;button.textContent='Catálogo já completo';return;}
  try{
   while(totalAdded<target&&rounds<90&&!stopped){
    rounds++;status.textContent='Importando lote '+rounds+' · '+totalAdded+' de 1.500 títulos adicionados. Não feche esta página.';
