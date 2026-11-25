@@ -921,7 +921,7 @@ async function importGuideTwenty(){
    await loadGuide();status.textContent='Importados '+totalAdded.toLocaleString('pt-BR')+' novos títulos · catálogo atualizado: '+guideCatalogTotal.toLocaleString('pt-BR')+' neste lote.';
   }
   await loadGuide();
-  status.textContent='Processo concluído: '+totalAdded.toLocaleString('pt-BR')+' novos títulos adicionados. O catálogo agora tem '+guideCatalog.length.toLocaleString('pt-BR')+' títulos no total.'+(totalAdded<target?' A busca parou quando não encontrou mais títulos novos.':'');
+  status.textContent='Processo concluído: '+totalAdded.toLocaleString('pt-BR')+' novos títulos adicionados. O catálogo agora tem '+guideCatalogTotal.toLocaleString('pt-BR')+' títulos no total.'+(totalAdded<target?' A busca parou quando não encontrou mais títulos novos.':'');
   toast(totalAdded+' títulos adicionados ao Guia Cinematográfico.');
  }catch(error){
   await loadGuide().catch(()=>{});
