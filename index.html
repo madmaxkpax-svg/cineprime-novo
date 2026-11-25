@@ -256,6 +256,11 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 .cineprime-depth-foreground{display:none}.cineprime-depth-canvas{position:absolute;z-index:1;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;opacity:.98;filter:drop-shadow(0 16px 24px #0009);transform:translate3d(calc(var(--cine-depth-x)*-18px),calc(var(--cine-depth-y)*-14px),0) scale(1.045);transition:transform .15s ease-out}
 .cineprime-depth-foreground.is-active{opacity:1}
 .cinema-intro>*:not(.cineprime-depth-foreground):not(.cineprime-depth-canvas){position:relative;z-index:2}
+/* Corrige a pilha: os refletores precisam ficar acima do fundo e abaixo do cabeçalho/textos. */
+.cinema-intro>.searchlight-overlay{position:absolute!important;inset:0;z-index:3!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important}
+.cinema-intro>.topbar,.cinema-intro>.hero{position:relative!important;z-index:4!important}
+.cinema-intro>.searchlight-overlay .searchlight-overlay__beam{display:block!important;visibility:visible!important;opacity:.78!important}
+.cinema-intro>.searchlight-overlay .searchlight-overlay__fixture{display:block!important;visibility:visible!important;opacity:1!important}
 .cinema-intro.cineprime-depth-enabled{background-position:calc(var(--cine-wallpaper-x,50%) + var(--cine-depth-x)*12px) calc(var(--cine-wallpaper-y,38%) + var(--cine-depth-y)*9px)!important;transition:background-position .15s ease-out}
 @media(prefers-reduced-motion:reduce){.cineprime-depth-foreground{transition:none}.cineprime-depth-canvas{transform:none!important}.cinema-intro.cineprime-depth-enabled{transition:none}}
 .cine-main-tabs{margin:18px 0}
