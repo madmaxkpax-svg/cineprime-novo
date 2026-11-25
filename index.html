@@ -246,6 +246,11 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 @media(max-width:640px){.wallpaper-editor-preview{min-height:180px}}
 
 /* Guia cinematográfico: lista editorial compacta. */
+.cinema-intro{--cine-depth-x:0;--cine-depth-y:0;position:relative;isolation:isolate}
+.cineprime-depth-foreground{position:absolute;z-index:1;inset:0;pointer-events:none;background-repeat:no-repeat;background-position:center bottom;background-size:contain;opacity:0;transform:translate3d(0,0,0);transition:opacity .35s ease;filter:drop-shadow(0 18px 24px #0009)}
+.cineprime-depth-foreground.is-active{opacity:1;transform:translate3d(calc(var(--cine-depth-x)*-9px),calc(var(--cine-depth-y)*-7px),0) scale(1.025)}
+.cinema-intro.cineprime-depth-enabled{background-position:calc(50% + var(--cine-depth-x)*5px) calc(38% + var(--cine-depth-y)*4px)!important;transition:background-position .15s ease-out}
+@media(prefers-reduced-motion:reduce){.cineprime-depth-foreground{transition:none}.cinema-intro.cineprime-depth-enabled{transition:none}}
 .cine-main-tabs{margin:18px 0}
 .guide-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin:28px 0 20px;flex-wrap:wrap}
 .guide-heading h2{font-size:clamp(24px,3vw,34px);margin:7px 0}
@@ -255,8 +260,10 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 .guide-toolbar{display:grid;grid-template-columns:minmax(200px,2fr) repeat(4,minmax(130px,1fr));gap:9px;margin:18px 0}
 .guide-note{font-size:12px;color:var(--muted);margin:8px 0 12px}
 .guide-list{border-top:1px solid var(--line)}
-.guide-row{display:grid;grid-template-columns:62px minmax(0,1fr) minmax(225px,auto);gap:14px;align-items:center;padding:13px 2px;border-bottom:1px solid var(--line)}
-.guide-poster{width:62px;height:88px;object-fit:cover;border-radius:7px;background:#222}
+.guide-import-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 8px}
+.guide-import-bar .guide-note{margin:0}
+.guide-row{display:grid;grid-template-columns:48px minmax(0,1fr) minmax(225px,auto);gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
+.guide-poster{width:48px;height:68px;object-fit:cover;border-radius:5px;background:#222}
 .guide-poster-empty{display:grid;place-items:center;color:#b99a58;font-size:24px}
 .guide-info{min-width:0}.guide-info h3{font-size:15px;margin:0 0 4px}
 .guide-meta{font-size:11px;color:var(--muted);margin-bottom:6px}
@@ -265,7 +272,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 .guide-actions button{font-size:10px;padding:7px 9px;white-space:nowrap}
 .guide-actions button[aria-pressed="true"]{border-color:var(--gold);background:#3a2f19;color:#f2d88f}
 .guide-empty{padding:35px 14px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
-@media(max-width:850px){.guide-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.guide-toolbar input{grid-column:1/-1}.guide-row{grid-template-columns:54px minmax(0,1fr)}.guide-poster{width:54px;height:78px}.guide-actions{grid-column:2;justify-content:flex-start}}
+@media(max-width:850px){.guide-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.guide-toolbar input{grid-column:1/-1}.guide-row{grid-template-columns:54px minmax(0,1fr)}.guide-poster{width:46px;height:66px}.guide-actions{grid-column:2;justify-content:flex-start}}
 @media(max-width:480px){.guide-toolbar{grid-template-columns:1fr 1fr}.guide-row{gap:10px}.guide-synopsis{font-size:12px}.guide-actions button{flex:1}}
 </style>
 </head>
@@ -355,6 +362,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
   <select id="guideStatus"><option value="Todos">Todas as situações</option><option value="nao_classificado">Não classificados</option><option value="quero_assistir">Quero assistir</option><option value="assistindo">Assistindo</option><option value="ja_assisti">Já assisti</option><option value="nao_assisti">Não assisti</option></select>
   <select id="guideSort"><option value="recent">Mais recentes primeiro</option><option value="old">Mais antigos primeiro</option><option value="title">Título A–Z</option></select>
  </div>
+ <div class="guide-import-bar"><button type="button" class="btn primary" id="guideImport20Btn">Buscar 20 novos títulos no TMDB</button><span class="guide-note" id="guideImport20Status" role="status" aria-live="polite">Os novos títulos serão gravados somente no catálogo do Guia Cinematográfico.</span></div>
  <div class="guide-note" id="guideMessage" role="status">O catálogo inicial está sendo carregado.</div>
  <div id="guideList" class="guide-list"></div>
 </section>
@@ -371,6 +379,8 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
    <div class="field"><label for="accentChoice">Cor de destaque</label><input id="accentChoice" type="color" value="#d6b15e"></div>
    <div class="field"><label for="backgroundColor">Cor do fundo</label><input id="backgroundColor" type="color" value="#0b0b0d"></div>
    <div class="field full"><label for="wallpaperUrl">Imagem de fundo atrás do título CinePrime (URL da imagem)</label><input id="wallpaperUrl" type="url" placeholder="https://.../imagem.jpg"><div class="help">Você pode trocar a imagem quando quiser. Ex.: uma imagem temática inspirada em O Iluminado, Scarface ou Poltergeist. Use um endereço direto de imagem.</div></div>
+   <div class="field full"><label for="wallpaperForegroundUrl">Imagem dos personagens em primeiro plano (PNG transparente)</label><input id="wallpaperForegroundUrl" type="url" placeholder="https://.../personagens-recortados.png"><div class="help">Use uma imagem PNG com fundo transparente e os personagens recortados. Ela ficará à frente do fundo para criar profundidade 3D.</div></div>
+   <div class="field full"><label><input id="wallpaper3dEnabled" type="checkbox" style="width:auto;vertical-align:middle;margin-right:8px">Ativar efeito 3D/paralaxe no papel de parede</label><div class="help">O fundo e os personagens terão movimentos sutis em velocidades diferentes. O efeito respeita a preferência por movimento reduzido do dispositivo.</div></div>
    <div class="field full"><label for="wallpaperFit">Como a imagem deve aparecer?</label><select id="wallpaperFit"><option value="contain">Mostrar imagem inteira — sem cortes</option><option value="cover">Preencher todo o espaço — pode cortar as bordas</option></select><div class="help">“Imagem inteira” encaixa a fotografia dentro do painel, preservando todas as bordas. “Preencher” ocupa o painel todo, mas pode cortar partes da imagem.</div></div>
    <div class="field full"><label>Pré-visualização interativa do papel de parede</label><div id="wallpaperEditorPreview" class="wallpaper-editor-preview" role="img" aria-label="Prévia do papel de parede. Arraste para reposicionar e use a roda do mouse para ajustar o zoom."><span class="preview-label">PRÉVIA DO CINEPRIME</span></div><div class="help">Segure e arraste a imagem com o mouse ou o dedo para reposicionar. Use a roda do mouse sobre a prévia para ajustar o zoom. Os controles abaixo acompanham os movimentos; nada será publicado até clicar em “Aplicar e salvar”.</div><button type="button" class="btn mini" id="wallpaperCenterBtn">Centralizar imagem e restaurar zoom</button></div>
    <div class="field full" style="border:1px solid var(--cine-accent,#b99a58);border-radius:12px;padding:14px;margin:8px 0;background:rgba(255,255,255,.035)">
@@ -482,14 +492,14 @@ function applySettings(){
  document.documentElement.style.setProperty('--genre-frame-text',visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor);
  document.documentElement.style.setProperty('--genre-frame-bg',visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor);
  document.documentElement.style.setProperty('--cine-stat-opacity',String(Math.max(0.15,Math.min(0.9,(Number(visualSettings.statOpacity??48))/100))));
- const intro=document.querySelector('.cinema-intro'); const topbar=document.querySelector('.topbar'); const u=(visualSettings.wallpaperUrl||'').trim(); const wallpaper=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:''; if(intro){intro.style.backgroundImage=wallpaper;intro.style.backgroundPosition=`${Number(visualSettings.wallpaperX??50)}% ${Number(visualSettings.wallpaperY??38)}%`;intro.style.backgroundSize=(visualSettings.wallpaperFit||'cover')==='contain'?'contain':(Number(visualSettings.wallpaperZoom||100)===100?'cover':`${Math.max(50,Math.min(220,Number(visualSettings.wallpaperZoom)||100))}% auto`);intro.style.backgroundColor=visualSettings.page||'#111216';} if(topbar)topbar.style.backgroundImage='none'; setCinemaQuote(visualSettings.quoteText||'',visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont,visualSettings.quoteColor||'#ffffff',visualSettings.quoteSize||'24px');
+ const intro=document.querySelector('.cinema-intro'); const topbar=document.querySelector('.topbar'); const u=(visualSettings.wallpaperUrl||'').trim(); const wallpaper=u?`url(\"${u.replace(/[\"\\]/g,'')}\")`:''; if(intro){intro.style.backgroundImage=wallpaper;intro.style.backgroundPosition=`${Number(visualSettings.wallpaperX??50)}% ${Number(visualSettings.wallpaperY??38)}%`;intro.style.backgroundSize=(visualSettings.wallpaperFit||'cover')==='contain'?'contain':(Number(visualSettings.wallpaperZoom||100)===100?'cover':`${Math.max(50,Math.min(220,Number(visualSettings.wallpaperZoom)||100))}% auto`);intro.style.backgroundColor=visualSettings.page||'#111216';} if(topbar)topbar.style.backgroundImage='none';applyCinePrimeDepth(); setCinemaQuote(visualSettings.quoteText||'',visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont,visualSettings.quoteColor||'#ffffff',visualSettings.quoteSize||'24px');
 }
 async function saveSettings(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();if(currentUser){const {error}=await db.from('cineprime_configuracoes_visuais').upsert({user_id:currentUser.id,configuracoes:visualSettings,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error){console.warn('Preferências visuais não sincronizadas; configure a tabela no Supabase:',error.message);return false;}return true;}return false}
 async function loadVisualSettings(){if(!currentUser)return;const {data,error}=await db.from('cineprime_configuracoes_visuais').select('configuracoes').eq('user_id',currentUser.id).maybeSingle();if(!error&&data?.configuracoes&&typeof data.configuracoes==='object'){visualSettings={...DEFAULT_SETTINGS,...normalizeWallpaperSettings(data.configuracoes)};localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));applySettings();}else if(error)console.warn('Preferências visuais da nuvem indisponíveis até configurar a tabela:',error.message)}
 function openSettings(){
  $('themeChoice').value=visualSettings.theme;$('backgroundChoice').value=visualSettings.background;
  $('accentChoice').value=visualSettings.accent;$('backgroundColor').value=visualSettings.page;
- $('columnsChoice').value=visualSettings.columns;$('wallpaperUrl').value=visualSettings.wallpaperUrl||'';$('wallpaperFit').value=visualSettings.wallpaperFit||'cover';$('quoteText').value=visualSettings.quoteText||'';$('quoteFont').value=visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont;$('quoteColor').value=visualSettings.quoteColor||'#ffffff';$('quoteSize').value=visualSettings.quoteSize||'24px';$('wallpaperX').value=visualSettings.wallpaperX??50;$('wallpaperY').value=visualSettings.wallpaperY??38;$('wallpaperZoom').value=visualSettings.wallpaperZoom??100;$('statOpacity').value=visualSettings.statOpacity??48;$('opacityCount').textContent=$('statOpacity').value;$('quoteCount').textContent=$('quoteText').value.length;$('zoomCount').textContent=$('wallpaperZoom').value;$('frameBorderColor').value=visualSettings.frameBorderColor||DEFAULT_SETTINGS.frameBorderColor;$('frameTextColor').value=visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor;$('frameBgColor').value=visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor;$('genrePrefix').value=visualSettings.genrePrefix||'';$('settingsDialog').showModal();updateWallpaperPreview();
+ $('columnsChoice').value=visualSettings.columns;$('wallpaperUrl').value=visualSettings.wallpaperUrl||'';$('wallpaperForegroundUrl').value=visualSettings.wallpaperForegroundUrl||'';$('wallpaper3dEnabled').checked=visualSettings.wallpaper3dEnabled!==false;$('wallpaperFit').value=visualSettings.wallpaperFit||'cover';$('quoteText').value=visualSettings.quoteText||'';$('quoteFont').value=visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont;$('quoteColor').value=visualSettings.quoteColor||'#ffffff';$('quoteSize').value=visualSettings.quoteSize||'24px';$('wallpaperX').value=visualSettings.wallpaperX??50;$('wallpaperY').value=visualSettings.wallpaperY??38;$('wallpaperZoom').value=visualSettings.wallpaperZoom??100;$('statOpacity').value=visualSettings.statOpacity??48;$('opacityCount').textContent=$('statOpacity').value;$('quoteCount').textContent=$('quoteText').value.length;$('zoomCount').textContent=$('wallpaperZoom').value;$('frameBorderColor').value=visualSettings.frameBorderColor||DEFAULT_SETTINGS.frameBorderColor;$('frameTextColor').value=visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor;$('frameBgColor').value=visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor;$('genrePrefix').value=visualSettings.genrePrefix||'';$('settingsDialog').showModal();updateWallpaperPreview();
 }
 // Prévia interativa do papel de parede: alterações ficam em rascunho até salvar.
 const wallpaperPreview=$('wallpaperEditorPreview');
@@ -502,11 +512,28 @@ function endWallpaperDrag(){wallpaperDrag=null;wallpaperPreview.classList.remove
 wallpaperPreview.addEventListener('pointerup',endWallpaperDrag);wallpaperPreview.addEventListener('pointercancel',endWallpaperDrag);wallpaperPreview.addEventListener('lostpointercapture',endWallpaperDrag);
 wallpaperPreview.addEventListener('wheel',e=>{e.preventDefault();const next=Math.max(100,Math.min(220,Number($('wallpaperZoom').value)+(e.deltaY<0?5:-5)));$('wallpaperZoom').value=String(next);updateWallpaperPreview();},{passive:false});
 $('wallpaperCenterBtn').addEventListener('click',()=>{$('wallpaperX').value='50';$('wallpaperY').value='38';$('wallpaperZoom').value='100';$('wallpaperFit').value='contain';updateWallpaperPreview();});
+// Camada de personagens em primeiro plano para o papel de parede 3D.
+let cinePrimeDepthLayer=null;
+function applyCinePrimeDepth(){
+ const intro=document.querySelector('.cinema-intro');if(!intro)return;
+ if(!cinePrimeDepthLayer){cinePrimeDepthLayer=document.createElement('div');cinePrimeDepthLayer.className='cineprime-depth-foreground';cinePrimeDepthLayer.setAttribute('aria-hidden','true');intro.appendChild(cinePrimeDepthLayer);}
+ const foreground=String(visualSettings.wallpaperForegroundUrl||'').trim();
+ cinePrimeDepthLayer.style.backgroundImage=foreground?'url("'+foreground.replace(/["\\\\]/g,'')+'")':'none';
+ cinePrimeDepthLayer.classList.toggle('is-active',Boolean(foreground)&&visualSettings.wallpaper3dEnabled!==false);
+ intro.classList.toggle('cineprime-depth-enabled',visualSettings.wallpaper3dEnabled!==false);
+}
+(function setupCinePrimeParallax(){
+ const intro=document.querySelector('.cinema-intro');if(!intro)return;
+ const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(reduce)return;
+ let frame=0,px=0,py=0;
+ intro.addEventListener('pointermove',event=>{if(!visualSettings.wallpaper3dEnabled)return;const rect=intro.getBoundingClientRect();px=((event.clientX-rect.left)/Math.max(1,rect.width)-.5)*2;py=((event.clientY-rect.top)/Math.max(1,rect.height)-.5)*2;if(frame)return;frame=requestAnimationFrame(()=>{frame=0;intro.style.setProperty('--cine-depth-x',String(px));intro.style.setProperty('--cine-depth-y',String(py));});});
+ intro.addEventListener('pointerleave',()=>{intro.style.setProperty('--cine-depth-x','0');intro.style.setProperty('--cine-depth-y','0');});
+})();
 $('settingsBtn').addEventListener('click',openSettings);
 $('closeSettings').onclick=()=>$('settingsDialog').close();
 $('resetSettings').onclick=async()=>{visualSettings={...DEFAULT_SETTINGS,order:[]};await saveSettings();openSettings();toast('Configurações padrão restauradas.')};
 $('settingsForm').addEventListener('submit',async e=>{
- e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value,wallpaperUrl:$('wallpaperUrl').value.trim(),quoteText:$('quoteText').value.slice(0,350),quoteFont:$('quoteFont').value,quoteColor:$('quoteColor').value,quoteSize:$('quoteSize').value,wallpaperX:Number($('wallpaperX').value),wallpaperY:Number($('wallpaperY').value),wallpaperZoom:Number($('wallpaperZoom').value),wallpaperFit:$('wallpaperFit').value,statOpacity:Number($('statOpacity').value),frameBorderColor:$('frameBorderColor').value,frameTextColor:$('frameTextColor').value,frameBgColor:$('frameBgColor').value,genrePrefix:$('genrePrefix').value.trim()};
+ e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value,wallpaperUrl:$('wallpaperUrl').value.trim(),wallpaperForegroundUrl:$('wallpaperForegroundUrl').value.trim(),wallpaper3dEnabled:$('wallpaper3dEnabled').checked,quoteText:$('quoteText').value.slice(0,350),quoteFont:$('quoteFont').value,quoteColor:$('quoteColor').value,quoteSize:$('quoteSize').value,wallpaperX:Number($('wallpaperX').value),wallpaperY:Number($('wallpaperY').value),wallpaperZoom:Number($('wallpaperZoom').value),wallpaperFit:$('wallpaperFit').value,statOpacity:Number($('statOpacity').value),frameBorderColor:$('frameBorderColor').value,frameTextColor:$('frameTextColor').value,frameBgColor:$('frameBgColor').value,genrePrefix:$('genrePrefix').value.trim()};
  const cloudSaved=await saveSettings();render();$('settingsDialog').close();toast(cloudSaved?'Aparência salva na nuvem.':'Aparência aplicada neste navegador; configure a tabela no Supabase para sincronizar.');
 });
 // Aprimoramento local de imagens com Real-ESRGAN x2 (ONNX Runtime Web).
@@ -800,6 +827,15 @@ function showGuideSection(section){
 }
 $('collectionTab').addEventListener('click',()=>showGuideSection('collection'));
 $('guideTab').addEventListener('click',()=>showGuideSection('guide'));
+async function importGuideTwenty(){
+ const button=$('guideImport20Btn'),status=$('guideImport20Status');
+ if(!currentUser||isVisitor){toast('Entre na sua conta para adicionar títulos ao guia.');return;}
+ button.disabled=true;button.textContent='Buscando títulos...';status.textContent='Consultando o TMDB e verificando duplicações...';
+ try{const {data,error}=await db.functions.invoke('tmdb-guide',{body:{action:'batch20',page:1}});if(error)throw error;if(data?.error)throw new Error(data.error);const inserted=Number(data?.inserted||0);await loadGuide();status.textContent=inserted===20?'20 novos títulos adicionados ao Guia Cinematográfico.':inserted+' novos títulos adicionados. '+(data?.message||'');toast(inserted+' novos títulos gravados no guia.');}
+ catch(error){status.textContent='Falha na importação: '+(error?.message||'erro desconhecido');toast('Não foi possível importar os títulos.');}
+ finally{button.disabled=false;button.textContent='Buscar 20 novos títulos no TMDB';}
+}
+$('guideImport20Btn').addEventListener('click',importGuideTwenty);
 ['guideSearch','guideType','guideGenre','guideStatus','guideSort'].forEach(id=>$(id).addEventListener(id==='guideSearch'?'input':'change',renderGuide));
 
 function render(){
