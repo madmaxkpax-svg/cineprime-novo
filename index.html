@@ -820,12 +820,17 @@ if(searchlightOverlay){
 let guideCatalog=[],guideCatalogTotal=0,guideStatuses=new Map(),guideLoaded=false,guideRealtimeChannel=null,guideRefreshTimer=null,guideRefreshBusy=false;
 const guideStatusLabels={quero_assistir:'Quero assistir',assistindo:'Assistindo',ja_assisti:'Já assisti',nao_assisti:'Não assisti',nao_tenho_interesse:'Retirar da minha lista'};
 async function loadGuide(){
- const [{data,error},{count:exactCount,error:countError}]=await Promise.all([
-  db.from('guia_catalogo').select('*').order('ano_inicio',{ascending:false}),
+ const [{count:exactCount,error:countError}]=await Promise.all([
   db.from('guia_catalogo').select('id',{count:'exact',head:true})
  ]);
- if(error)throw error;if(countError)throw countError;
- guideCatalog=data||[];guideCatalogTotal=Number(exactCount||0);guideStatuses=new Map();
+ if(countError)throw countError;
+ const total=Number(exactCount||0),pageSize=1000,allRows=[];
+ for(let from=0;from<total;from+=pageSize){
+  const {data,error}=await db.from('guia_catalogo').select('*').order('ano_inicio',{ascending:false}).order('id',{ascending:false}).range(from,Math.min(from+pageSize-1,total-1));
+  if(error)throw error;
+  allRows.push(...(data||[]));
+ }
+ guideCatalog=allRows;guideCatalogTotal=total;guideStatuses=new Map();
  if(currentUser){
   const {data:mine,error:statusError}=await db.from('guia_status_usuario').select('*').eq('usuario_id',currentUser.id);
   if(statusError)throw statusError;
