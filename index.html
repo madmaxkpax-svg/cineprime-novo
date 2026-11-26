@@ -371,7 +371,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
   <button class="btn" id="adminSealsBtn" type="button">⚙ Controle ADM · Selos</button>
  
   <button class="btn" id="ledToggle" type="button" aria-pressed="false">✦ LEDs OFF</button>
- <button class="btn" id="autoCoverBtn" type="button">✦ Buscar capas automaticamente</button><button class="btn" id="autoMetadataBtn" type="button">✦ Completar gêneros e frases</button>
+ <button class="btn" id="autoCoverBtn" type="button">✦ Buscar capas automaticamente</button><button class="btn" id="autoTrailerBtn" type="button">▶ Buscar todos os trailers</button><span id="autoTrailerProgress" class="help" role="status" aria-live="polite"></span><button class="btn" id="autoMetadataBtn" type="button">✦ Completar gêneros e frases</button>
  <div class="search"><input id="search" placeholder="Buscar título, saga, gênero ou ano..." aria-label="Buscar filmes"></div>
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
@@ -1228,6 +1228,48 @@ async function findAndSaveTrailer(id){
   film.linkTrailer=data.trailer_url;render();toast('Trailer oficial localizado e salvo para '+film.title+'.');
  }catch(error){console.error(error);toast(error.message||'Não foi possível localizar o trailer.');if(button){button.disabled=false;button.textContent='✦ BUSCAR TRAILER OFICIAL'}}
 }
+let bulkTrailerSearchRunning=false;
+const waitForTrailerSearch=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function findAllMissingTrailers(){
+ if(bulkTrailerSearchRunning)return;
+ if(isVisitor||!currentUser){toast('Entre como administrador para buscar trailers em lote.');return}
+ const key=getTmdbKey();if(!key){toast('Configure a credencial TMDB antes de iniciar a busca.');return}
+ const pending=films.filter(f=>!String(f.linkTrailer||'').trim());
+ if(!pending.length){$('autoTrailerProgress').textContent='Todos os filmes já possuem link de trailer.';toast('Nenhum trailer pendente na coleção.');return}
+ if(!confirm('Buscar trailers oficiais para '+pending.length+' filme(s) sem link? Os trailers já cadastrados serão preservados. A busca será feita um filme por vez.'))return;
+ bulkTrailerSearchRunning=true;
+ const button=$('autoTrailerBtn');button.disabled=true;
+ let saved=0,notFound=0,errors=0,processed=0;
+ $('autoTrailerProgress').textContent='Preparando busca...';
+ try{
+  for(const film of pending){
+   processed++;
+   $('autoTrailerProgress').textContent='Buscando '+processed+' de '+pending.length+': '+film.title+' · encontrados '+saved;
+   try{
+    const found=await requestOfficialTrailer(film);
+    const {data,error}=await db.from('filmes').update({trailer_url:found.url}).eq('id',film.id).select('id,trailer_url').single();
+    if(error)throw error;
+    if(!data?.trailer_url)throw new Error('O Supabase não confirmou o salvamento.');
+    const current=films.find(f=>String(f.id)===String(film.id));
+    if(current)current.linkTrailer=data.trailer_url;
+    saved++;
+   }catch(error){
+    const message=String(error?.message||'');
+    if(/não encontrou trailer|não foi encontrado|filme não encontrado/i.test(message))notFound++;
+    else{errors++;console.warn('Falha ao buscar trailer de '+film.title,error)}
+   }
+   $('autoTrailerProgress').textContent='Processados '+processed+'/'+pending.length+' · salvos '+saved+' · não encontrados '+notFound+' · falhas '+errors;
+   await waitForTrailerSearch(350);
+  }
+  render();
+  $('autoTrailerProgress').textContent='Concluído: '+saved+' trailer(s) salvos · '+notFound+' não encontrados · '+errors+' falhas.';
+  toast('Busca concluída. '+saved+' trailer(s) adicionados; os links existentes foram preservados.');
+ }finally{
+  bulkTrailerSearchRunning=false;button.disabled=false;
+ }
+}
+$('autoTrailerBtn').addEventListener('click',findAllMissingTrailers);
+
 $('findTrailerForForm').addEventListener('click',async()=>{
  const title=$('title').value.trim(),year=$('year').value?Number($('year').value):'';
  if(!title){$('trailerFormStatus').textContent='Informe o título do filme primeiro.';return}
