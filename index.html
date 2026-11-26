@@ -248,7 +248,7 @@ body.cine-tv .youtube-watch{min-height:48px;font-size:14px;}
 .trailer-kicker{font-size:10px;letter-spacing:.2em;color:#d6b15e;font-weight:800}
 .trailer-player-screen{width:100%;aspect-ratio:16/9;background:#000}
 .trailer-player-screen iframe{display:block;width:100%;height:100%;border:0}
-.trailer-player-foot{padding:10px 16px;color:#aaa6a0;font-size:11px;text-align:center}
+.trailer-player-foot{padding:10px 16px;color:#aaa6a0;font-size:11px;text-align:center}.trailer-player-foot a{color:#f5d27b;text-decoration:underline;margin-left:5px}
 .trailer-search-button{border-color:#8f7135!important;color:#f5d27b!important}
 @media(max-width:560px){.trailer-player-head{padding:10px 12px}.trailer-player-foot{font-size:10px}}
 
@@ -544,8 +544,8 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 </dialog>
 <dialog id="trailerPlayerDialog" class="trailer-player-dialog" aria-label="Reprodutor de trailer">
  <div class="trailer-player-head"><div><span class="trailer-kicker">CINEPRIME APRESENTA</span><h3 id="trailerPlayerTitle">Trailer do filme</h3></div><button type="button" class="btn" id="closeTrailerPlayer" aria-label="Fechar trailer">✕</button></div>
- <div class="trailer-player-screen"><iframe id="trailerPlayerFrame" title="Trailer do filme" src="about:blank" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
- <div class="trailer-player-foot">Trailer reproduzido pelo YouTube · Feche esta janela para voltar à sua coleção</div>
+ <div class="trailer-player-screen"><iframe id="trailerPlayerFrame" title="Trailer do filme" src="about:blank" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+ <div class="trailer-player-foot"><span id="trailerPlayerStatus" role="status">Trailer reproduzido pelo YouTube</span> · <a id="trailerExternalLink" href="#" target="_blank" rel="noopener noreferrer">Se não iniciar, abrir no YouTube</a></div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1143,8 +1143,11 @@ function openTrailerPlayer(id){
  const videoId=youtubeVideoId(film.linkTrailer);
  if(!videoId){window.open(film.linkTrailer,'_blank','noopener,noreferrer');return}
  $('trailerPlayerTitle').textContent=film.title+' · '+(film.year||'');
- $('trailerPlayerFrame').src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?autoplay=1&rel=0';
+ $('trailerPlayerStatus').textContent='Carregando trailer...';
+ $('trailerExternalLink').href='https://www.youtube.com/watch?v='+encodeURIComponent(videoId);
+ $('trailerPlayerFrame').src='about:blank';
  $('trailerPlayerDialog').showModal();
+ $('trailerPlayerFrame').src='https://www.youtube.com/embed/'+encodeURIComponent(videoId)+'?autoplay=1&rel=0&playsinline=1';
 }
 function closeTrailerPlayer(){$('trailerPlayerFrame').src='about:blank';if($('trailerPlayerDialog').open)$('trailerPlayerDialog').close()}
 $('closeTrailerPlayer').addEventListener('click',closeTrailerPlayer);
