@@ -390,7 +390,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
  <div class="guide-toolbar">
   <input id="guideSearch" type="search" placeholder="Digite o nome do filme ou série..." aria-label="Buscar título no guia"><select id="guideSearchMode" aria-label="Modo de pesquisa"><option value="contains">Pesquisa geral</option><option value="exact">Título exato</option></select><button type="button" id="guideSearchClear" class="btn" aria-label="Limpar pesquisa">Limpar</button>
   <select id="guideType" aria-label="Tipo de conteúdo"><option value="Todos">Filmes e séries</option><option value="Filme">Somente filmes</option><option value="Série">Somente séries</option></select>
-  <select id="guideEra" aria-label="Período"><option value="all">Todas as épocas</option><option value="classic">Clássicos até 1980</option><option value="classic90">Clássicos de 1981 a 1990</option><option value="nineties">Anos 1990</option><option value="twoThousands">Anos 2000</option><option value="recent">2010 em diante</option></select>
+  <select id="guideEra" aria-label="Filtrar por década"><option value="all">Todas as décadas</option></select>
   <select id="guideGenre"><option value="">Todos os gêneros</option></select>
   <select id="guideCollectionFilter" aria-label="Filtrar pela minha coleção"><option value="all">Coleção: todos</option><option value="owned">Tenho na coleção</option><option value="missing">Ainda não tenho</option></select>
   <select id="guideStatus"><option value="Todos">Todas as situações</option><option value="nao_classificado">Não classificados</option><option value="quero_assistir">Quero assistir</option><option value="assistindo">Assistindo</option><option value="ja_assisti">Já assisti</option><option value="nao_assisti">Não assisti</option><option value="nao_tenho_interesse">Retirados da minha lista</option></select>
@@ -950,14 +950,17 @@ function guideCollectionLabel(matches){
 }
 function renderGuide(){
  if(!$('guideList'))return;
- const oldGenre=$('guideGenre').value;
+ const oldGenre=$('guideGenre').value,oldEra=$('guideEra').value;
+ const decades=[...new Set(guideCatalog.map(x=>Number(x.ano_inicio)).filter(y=>Number.isFinite(y)&&y>0).map(y=>Math.floor(y/10)*10))].sort((a,b)=>a-b);
+ $('guideEra').innerHTML='<option value="all">Todas as décadas</option>'+decades.map(d=>'<option value="'+d+'">Década de '+d+'</option>').join('')+'<option value="unknown">Ano não informado</option>';
+ $('guideEra').value=oldEra==='all'||oldEra==='unknown'||decades.includes(Number(oldEra))?oldEra:'all';
  const genres=[...new Set(guideCatalog.flatMap(x=>x.generos||[]))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
  $('guideGenre').innerHTML='<option value="">Todos os gêneros</option>'+genres.map(g=>'<option value="'+escAttr(g)+'">'+esc(g)+'</option>').join('');
  $('guideGenre').value=genres.includes(oldGenre)?oldGenre:'';
  const q=norm($('guideSearch').value),searchMode=$('guideSearchMode').value,type=$('guideType').value,era=$('guideEra').value,genre=$('guideGenre').value,status=$('guideStatus').value,sort=$('guideSort').value,collectionFilter=$('guideCollectionFilter')?.value||'all';
  let rows=guideCatalog.filter(x=>{
   const year=Number(x.ano_inicio)||0;
-  const period=era==='classic'?year>0&&year<=1980:era==='classic90'?year>=1981&&year<=1990:era==='nineties'?year>=1991&&year<=1999:era==='twoThousands'?year>=2000&&year<=2009:era==='recent'?year>=2010:true;
+  const period=era==='all'?true:era==='unknown'?!year:Math.floor(year/10)*10===Number(era);
   const owned=guideCollectionMatches(x).length>0;return (type==='Todos'||x.tipo===type)&&period&&(!genre||(x.generos||[]).includes(genre))&&(collectionFilter==='all'||(x.tipo==='Filme'&&(collectionFilter==='owned'?owned:!owned)))&&(!q||(searchMode==='exact'?norm(x.titulo)===q:norm([x.titulo,x.titulo_original,x.ano_inicio,(x.generos||[]).join(' '),x.sinopse].join(' ')).includes(q)));
  });
  const counts={ja_assisti:0,quero_assistir:0,assistindo:0,nao_assisti:0};guideStatuses.forEach(s=>{if(counts[s.status]!==undefined)counts[s.status]++});
