@@ -725,84 +725,70 @@ async function loadFilms(){
  render();if(guideLoaded)renderGuide()
 }
 async function saveCustomOrder(){
- if(!currentUser){toast('Entre na conta para salvar sua ordem personalizada.');return}
- const {error}=await db.from('cineprime_preferencias').upsert({user_id:currentUser.id,ordem_filmes:customOrder,updated_at:new Date().toISOString()},{onConflict:'user_id'});
- if(error){console.error(error);toast('A ordem foi alterada nesta tela, mas não foi salva na nuvem. Execute o SQL de configuração indicado.');return}
- toast('Ordem personalizada salva na nuvem.')
+ if(!currentUser){toast('Entre na conta para salvar sua ordem personalizada.');return false}
+ try{
+  const payload={user_id:currentUser.id,ordem_filmes:customOrder.map(String),updated_at:new Date().toISOString()};
+  const {data,error}=await db.from('cineprime_preferencias').upsert(payload,{onConflict:'user_id'}).select('user_id,ordem_filmes').single();
+  if(error)throw error;
+  const saved=(data?.ordem_filmes||[]).map(String);
+  if(saved.length!==payload.ordem_filmes.length||saved.some((id,i)=>id!==payload.ordem_filmes[i]))throw new Error('O Supabase não confirmou a mesma sequência enviada.');
+  toast('Ordem salva e confirmada na nuvem.');
+  return true;
+ }catch(error){
+  console.error('Erro ao salvar a ordem personalizada:',error);
+  toast('Não foi possível salvar a ordem: '+(error?.message||'erro de conexão ou permissão'));
+  return false;
+ }
 }
 function enableFilmDragging(){
  const enabled=!isVisitor&&$('sort').value==='custom';
  $('grid').querySelectorAll('.film').forEach(card=>{
   card.draggable=false;
   card.classList.toggle('can-reorder',enabled);
-  card.title=enabled?'Use o puxador ⠿ para reorganizar este filme':'Selecione “Minha ordem personalizada” para mover os cards';
+  card.title=enabled?'Segure o puxador ⠿ e solte o filme na posição desejada':'Selecione “Minha ordem personalizada” para mover os cards';
  });
 }
 let pointerFilmDrag=null;
 $('grid').addEventListener('pointerdown',e=>{
  const handle=e.target.closest('.film-drag-handle');
- if(!handle||isVisitor||$('sort').value!=='custom')return;
+ if(!handle||isVisitor||$('sort').value!=='custom'||(e.button!==undefined&&e.button!==0))return;
  const card=handle.closest('.film');if(!card)return;
  e.preventDefault();
- pointerFilmDrag={card,pointerId:e.pointerId};
- handle.setPointerCapture?.(e.pointerId);
+ pointerFilmDrag={card,pointerId:e.pointerId,moved:false};
  card.classList.add('dragging');
 });
-$('grid').addEventListener('pointermove',e=>{
+document.addEventListener('pointermove',e=>{
  if(!pointerFilmDrag||pointerFilmDrag.pointerId!==e.pointerId)return;
+ const card=pointerFilmDrag.card;
  const under=document.elementFromPoint(e.clientX,e.clientY);
  const target=under?.closest?.('.film');
- $('grid').querySelectorAll('.film').forEach(c=>c.classList.remove('drop-before','drop-after'));
- if(!target||target===pointerFilmDrag.card||target.parentNode!==pointerFilmDrag.card.parentNode)return;
- const r=target.getBoundingClientRect(),after=e.clientY>r.top+r.height/2;
- target.parentNode.insertBefore(pointerFilmDrag.card,after?target.nextSibling:target);
- target.classList.add(after?'drop-after':'drop-before');
-});
-async function finishPointerFilmDrag(e){
+ if(!target||target===card||target.parentElement!==card.parentElement)return;
+ if(e.cancelable)e.preventDefault();
+ const rect=target.getBoundingClientRect();
+ const dx=Math.abs(e.clientX-(rect.left+rect.width/2));
+ const dy=Math.abs(e.clientY-(rect.top+rect.height/2));
+ const after=dx>dy?e.clientX>rect.left+rect.width/2:e.clientY>rect.top+rect.height/2;
+ const next=after?target.nextElementSibling:target;
+ if(next===card||(!after&&card.nextElementSibling===target)||(after&&target.nextElementSibling===card))return;
+ target.parentElement.insertBefore(card,next);
+ pointerFilmDrag.moved=true;
+}, {passive:false});
+async function finishFilmPointerDrag(e){
  if(!pointerFilmDrag||pointerFilmDrag.pointerId!==e.pointerId)return;
- const card=pointerFilmDrag.card;pointerFilmDrag=null;
+ const {card,moved}=pointerFilmDrag;pointerFilmDrag=null;
  card.classList.remove('dragging');
- $('grid').querySelectorAll('.film').forEach(c=>c.classList.remove('drop-before','drop-after'));
+ if(!moved)return;
  const visibleOrder=[...$('grid').querySelectorAll('.film')].map(c=>String(c.dataset.filmId));
  const visible=new Set(visibleOrder);
- customOrder=[...visibleOrder,...films.map(f=>String(f.id)).filter(id=>!visible.has(id))];
- await saveCustomOrder();
+ const previous=customOrder.map(String);
+ const hidden=previous.filter(id=>!visible.has(id));
+ const already=new Set([...visibleOrder,...hidden]);
+ customOrder=[...visibleOrder,...hidden,...films.map(f=>String(f.id)).filter(id=>!already.has(id))];
+ const saved=await saveCustomOrder();
+ if(saved)render();
 }
-$('grid').addEventListener('pointerup',finishPointerFilmDrag);
-$('grid').addEventListener('pointercancel',finishPointerFilmDrag);
-$('grid').addEventListener('dragstart',e=>{
- const card=e.target.closest('.film');
- if(isVisitor||!card||$('sort').value!=='custom') {e.preventDefault();return}
- card.classList.add('dragging');
- e.dataTransfer.effectAllowed='move';
- e.dataTransfer.setData('text/plain',card.dataset.filmId);
-});
-$('grid').addEventListener('dragover',e=>{
- if(isVisitor||$('sort').value!=='custom')return;
- const dragging=$('grid').querySelector('.film.dragging');
- const target=e.target.closest('.film');
- if(!dragging||!target||dragging===target)return;
- e.preventDefault();
- const r=target.getBoundingClientRect();
- const after=(e.clientY-r.top)>r.height/2;
- target.parentNode.insertBefore(dragging,after?target.nextSibling:target);
-});
-$('grid').addEventListener('drop',e=>{
- if(isVisitor||$('sort').value!=='custom')return;
- e.preventDefault();
- // A ordem final é salva no evento dragend, depois que o navegador conclui o movimento.
-});
-$('grid').addEventListener('dragend',async e=>{
- const card=e.target.closest('.film');
- if(!card)return;
- card.classList.remove('dragging');
- if(isVisitor||$('sort').value!=='custom')return;
- const visibleOrder=[...$('grid').querySelectorAll('.film')].map(card=>String(card.dataset.filmId));
- const visible=new Set(visibleOrder);
- customOrder=[...visibleOrder,...films.map(f=>String(f.id)).filter(id=>!visible.has(id)&&!visibleOrder.includes(id))];
- await saveCustomOrder();
- render();
-});
+document.addEventListener('pointerup',finishFilmPointerDrag);
+document.addEventListener('pointercancel',finishFilmPointerDrag);
 function setAuthView(signedIn){
  $('authScreen').style.display=signedIn?'none':'grid';
  $('appShell').style.display=signedIn?'block':'none';
@@ -1131,20 +1117,6 @@ function render(){
    ||a.title.localeCompare(b.title,'pt-BR');
  });
  else arr.sort((a,b)=>numberFor(a).localeCompare(numberFor(b)));
- if(sort==='custom'){
-  const ordered=[],sagaGroups=new Map(),placed=new Set();
-  arr.forEach(f=>{
-   const saga=String(f.saga||'').trim();
-   if(!saga){ordered.push(f);return}
-   const key=norm(saga);
-   if(sagaGroups.has(key))return;
-   const members=arr.filter(x=>norm(String(x.saga||''))===key);
-   members.sort((a,b)=>(Number(a.year)||9999)-(Number(b.year)||9999)||a.title.localeCompare(b.title,'pt-BR'));
-   sagaGroups.set(key,members);
-   ordered.push(...members);
-  });
-  arr=ordered;
- }
  $('resultCount').textContent=arr.length+' '+(arr.length===1?'título':'títulos');$('listTitle').textContent=activeFormat==='Todos'?'Minha coleção':'Minha coleção · '+activeFormat;
  const posterQuote=f=>{const text=String(f.notes||'').replace(/\s+/g,' ').trim();return text?`<div class="poster-quote" aria-label="${escAttr(text)}" style="--poster-quote-duration:${Math.max(16,Math.min(52,Math.ceil(text.length*.22)))}s;--poster-quote-color:${escAttr(visualSettings.quoteColor||'#fff')};--poster-quote-font:${escAttr(visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont)}"><div class="poster-quote__track"><span class="poster-quote__item">${esc(text)}</span><span class="poster-quote__item" aria-hidden="true">${esc(text)}</span></div></div>`:''};
  const filmCard=f=>{const adminBadge=!isVisitor?(f.adminStatus?`<span class="admin-cover-status${f.adminStatus==='maintenance'?' admin-cover-status--maintenance':''}">${f.adminStatus==='counted'?'✓ Contada':'⚠ Manutenção'}</span>`:(sealFilter==='untagged'?`<span class="admin-cover-status admin-cover-status--maintenance" style="background:#8a651c;border-color:#f0ce77">○ SEM ETIQUETA</span>`:'')):'';return `<article class="film" data-film-id="${escAttr(f.id)}" data-genre="${escAttr(f.genre||'')}" style="--led-color:${ledColorForGenre(f.genre)}"><div class="poster"><button type="button" class="film-drag-handle" aria-label="Arrastar filme para reorganizar" title="Arraste para mudar a posição">⠿</button>${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" draggable="false" ondragstart="return false" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}${adminBadge}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div>${posterQuote(f)}${f.linkFilmeDigital?`<a class="youtube-watch" href="${escAttr(f.linkFilmeDigital)}" target="_blank" rel="noopener noreferrer">▶ FILME DIGITAL</a>`:''}${f.linkTrailer?`<a class="resource-link resource-trailer" href="${escAttr(f.linkTrailer)}" target="_blank" rel="noopener noreferrer">▶ TRAILER</a>`:''}${f.linkMusica?`<a class="resource-link resource-music" href="${escAttr(f.linkMusica)}" target="_blank" rel="noopener noreferrer">♫ MÚSICA DO FILME</a>`:''}${isVisitor?'':`<div class="filmactions"><button class="btn mini admin-status-button" onclick="openStatusDialog(${Number(f.id)})">Sinal</button><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div>`}</div></article>`};
@@ -1157,7 +1129,7 @@ function render(){
   $('listTitle').textContent='Sagas e Franquias';
   $('grid').innerHTML=collections.length?collections.map(([name,items])=>{items.sort((a,b)=>(Number(a.year)||9999)-(Number(b.year)||9999)||a.title.localeCompare(b.title,'pt-BR'));return `<section class="genre-gallery"><div class="genre-frame"><span class="genre-rule"></span><span class="genre-icon">🎬</span><h3>${esc(name)} · ${items.length} filmes</h3><span class="genre-rule"></span></div><div class="genre-gallery-grid">${items.map(filmCard).join('')}</div></section>`}).join(''):`<div class="empty"><b>Nenhuma franquia com dois ou mais filmes neste filtro.</b>Altere os filtros ou volte à coleção completa.</div>`;
  }
- else if(sort==='custom'||g||q||s){$('grid').innerHTML=`<div class="genre-gallery-grid">${arr.map(filmCard).join('')}</div>`}
+ else if(sort==='custom'||g||q||s||d){$('grid').innerHTML=`<div class="genre-gallery-grid">${arr.map(filmCard).join('')}</div>`}
  else {const grouped=new Map();arr.forEach(f=>{const key=f.genre.trim()||'Gênero não informado';if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(f)});const orderedGenres=[...grouped.keys()].sort((a,b)=>a.localeCompare(b,'pt-BR'));$('grid').innerHTML=orderedGenres.map(name=>`<section class="genre-gallery"><div class="genre-frame"><span class="genre-rule"></span><span class="genre-icon">${genreIcon(name)}</span><h3>${esc((visualSettings.genrePrefix?visualSettings.genrePrefix+' · ':'')+name)}</h3><span class="genre-rule"></span></div><div class="genre-gallery-grid">${grouped.get(name).map(filmCard).join('')}</div></section>`).join('')}
  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.format===activeFormat));
  enableFilmDragging();
