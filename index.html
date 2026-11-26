@@ -365,7 +365,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
  <select id="genreFilter" aria-label="Filtrar por gênero"><option value="">Todos os gêneros</option></select>
  <select id="sagaFilter" aria-label="Filtrar por franquia"><option value="">Todas as sagas</option></select>
 
- <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Franquia / saga</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada · arraste os filmes</option></select>
+ <select id="sort"><option value="number">Ordenar: número</option><option value="saga">Sagas / ano de lançamento</option><option value="title">Título A–Z</option><option value="year">Ano crescente</option><option value="newest">Adicionados recentemente</option><option value="custom">Minha ordem personalizada · arraste os filmes</option></select>
 </div>
 <div class="seal-filter-panel" role="group" aria-label="Filtro de etiquetas"><span class="seal-filter-title">VISUALIZAR CAPAS:</span><select id="collectionSealFilter" aria-label="Filtrar capas por etiqueta"><option value="all">Todas as capas</option><option value="tagged">Somente com etiqueta</option><option value="untagged">Somente sem etiqueta</option></select><span class="seal-filter-help">Use “Sinal” na capa para adicionar, alterar ou remover a etiqueta.</span></div>
 <nav class="tabs" aria-label="Formato">
@@ -488,7 +488,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
    <div class="field"><label for="year">Ano de lançamento</label><input id="year" type="number" min="1888" max="2100" placeholder="Ex.: 2019"></div>
    <div class="field"><label for="format">Formato *</label><select id="format" required><option>DVD</option><option>Blu-ray</option><option selected>Digital</option><option>Versão autorada</option></select></div>
    <div class="field"><label for="genre">Gênero</label><input id="genre" list="genres" placeholder="Ex.: Ação"><datalist id="genres"><option>Ação</option><option>Aventura</option><option>Ficção científica</option><option>Terror</option><option>Drama</option><option>Faroeste</option><option>Suspense</option><option>Comédia</option></datalist></div>
-   <div class="field"><label for="saga">Franquia / saga</label><input id="saga" placeholder="Ex.: Rambo"></div>
+   <div class="field"><label for="saga">Franquia / saga</label><input id="saga" placeholder="Ex.: Rambo"><div class="help">Use exatamente o mesmo nome em todos os filmes da franquia. O CinePrime agrupará as capas e ordenará pelo ano de lançamento.</div></div>
    <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes oficiais no TMDB. Informe sua chave API v3 ou seu token de leitura v4. A mesma credencial será reutilizada na importação em lote.</div><div class="field" style="margin-top:8px"><label for="tmdbKey">Credencial da API TMDB</label><input id="tmdbKey" type="password" placeholder="Cole sua chave API v3 ou token de leitura v4"><div class="help">A chave fica salva apenas neste navegador. Obtenha sua credencial em themoviedb.org/settings/api. Ela fica salva apenas neste navegador. Não compartilhe.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label>Enviar capa diretamente do computador</label><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="flex:1;min-width:200px"><button type="button" class="btn primary" id="uploadCoverBtn">⬆ Enviar capa</button></div><div id="coverUploadStatus" class="help" role="status" aria-live="polite" style="margin-top:6px">Escolha uma imagem JPG, PNG, WEBP ou GIF (máximo 10 MB). O arquivo será enviado ao armazenamento do CinePrime.</div><div id="coverUploadPreview" style="margin-top:8px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. Ao enviar pelo botão acima, o CinePrime preencherá este campo automaticamente. O app mantém a proporção vertical do pôster.</div></div>
    <div class="field full"><label for="linkFilmeDigital">Link para assistir ao filme digital (opcional)</label><input id="linkFilmeDigital" type="url" inputmode="url" placeholder="https://..."><div class="help">Cole o endereço da sua cópia digital, se houver.</div></div>
    <div class="field full help"><strong>Preferência de áudio:</strong> sempre original. Não utilizar trailers dublados. Para músicas, manter a gravação original. A seleção automática de vídeos será implementada em uma próxima etapa; por enquanto, os links são informados manualmente.</div>
@@ -720,7 +720,7 @@ async function loadFilms(){
   }catch(e){console.warn('Preferência de ordem não carregada:',e)}
  }
  // Abrir o catálogo diretamente na ordem personalizada, usando a preferência carregada da nuvem.
- $('sort').value='custom';
+ $('sort').value='saga';
  render();if(guideLoaded)renderGuide()
 }
 async function saveCustomOrder(){
@@ -1105,6 +1105,15 @@ function render(){
   const collections=[...grouped.entries()].filter(([,items])=>items.length>=2).sort((a,b)=>a[0].localeCompare(b[0],'pt-BR'));
   $('listTitle').textContent='Sagas e Franquias';
   $('grid').innerHTML=collections.length?collections.map(([name,items])=>{items.sort((a,b)=>(Number(a.year)||9999)-(Number(b.year)||9999)||a.title.localeCompare(b.title,'pt-BR'));return `<section class="genre-gallery"><div class="genre-frame"><span class="genre-rule"></span><span class="genre-icon">🎬</span><h3>${esc(name)} · ${items.length} filmes</h3><span class="genre-rule"></span></div><div class="genre-gallery-grid">${items.map(filmCard).join('')}</div></section>`}).join(''):`<div class="empty"><b>Nenhuma franquia com dois ou mais filmes neste filtro.</b>Altere os filtros ou volte à coleção completa.</div>`;
+ }
+ else if(sort==='saga'){
+  const grouped=new Map();
+  arr.filter(f=>String(f.saga||'').trim()).forEach(f=>{const key=String(f.saga).trim();if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(f)});
+  const collections=[...grouped.entries()].sort((a,b)=>a[0].localeCompare(b[0],'pt-BR'));
+  const releaseSort=(a,b)=>(Number(a.year)||9999)-(Number(b.year)||9999)||a.title.localeCompare(b.title,'pt-BR');
+  collections.forEach(([,items])=>items.sort(releaseSort));
+  const withoutSaga=arr.filter(f=>!String(f.saga||'').trim()).sort(releaseSort);
+  $('grid').innerHTML=collections.map(([name,items])=>`<section class="genre-gallery"><div class="genre-frame"><span class="genre-rule"></span><span class="genre-icon">🎬</span><h3>${esc(name)} · ${items.length} filmes</h3><span class="genre-rule"></span></div><div class="genre-gallery-grid">${items.map(filmCard).join('')}</div></section>`).join('')+(withoutSaga.length?`<section class="genre-gallery"><div class="genre-frame"><span class="genre-rule"></span><span class="genre-icon">🎞</span><h3>Filmes sem saga cadastrada · ${withoutSaga.length}</h3><span class="genre-rule"></span></div><div class="genre-gallery-grid">${withoutSaga.map(filmCard).join('')}</div></section>`:'');
  }
  else if(sort==='custom'||g||q||s){$('grid').innerHTML=`<div class="genre-gallery-grid">${arr.map(filmCard).join('')}</div>`}
  else {const grouped=new Map();arr.forEach(f=>{const key=f.genre.trim()||'Gênero não informado';if(!grouped.has(key))grouped.set(key,[]);grouped.get(key).push(f)});const orderedGenres=[...grouped.keys()].sort((a,b)=>a.localeCompare(b,'pt-BR'));$('grid').innerHTML=orderedGenres.map(name=>`<section class="genre-gallery"><div class="genre-frame"><span class="genre-rule"></span><span class="genre-icon">${genreIcon(name)}</span><h3>${esc((visualSettings.genrePrefix?visualSettings.genrePrefix+' · ':'')+name)}</h3><span class="genre-rule"></span></div><div class="genre-gallery-grid">${grouped.get(name).map(filmCard).join('')}</div></section>`).join('')}
