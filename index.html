@@ -493,7 +493,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 </dialog>
 
 <dialog id="filmDialog">
- <form id="filmForm">
+ <form id="filmForm" autocomplete="off">
   <div class="modalhead"><h3 id="dialogTitle">Adicionar filme</h3><button type="button" class="btn" id="closeDialog">✕</button></div>
   <div class="modalbody">
    <div class="field full"><label for="title">Título em português *</label><input id="title" required maxlength="120" placeholder="Ex.: Rambo: Até o Fim"></div>
@@ -501,7 +501,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
    <div class="field"><label for="format">Formato *</label><select id="format" required><option>DVD</option><option>Blu-ray</option><option selected>Digital</option><option>Versão autorada</option></select></div>
    <div class="field"><label for="genre">Gênero</label><input id="genre" list="genres" placeholder="Ex.: Ação"><datalist id="genres"><option>Ação</option><option>Aventura</option><option>Ficção científica</option><option>Terror</option><option>Drama</option><option>Faroeste</option><option>Suspense</option><option>Comédia</option></datalist></div>
    <div class="field"><label for="saga">Franquia / saga</label><input id="saga" placeholder="Ex.: Rambo"></div>
-   <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes oficiais no TMDB. Informe sua chave API v3 ou seu token de leitura v4. A mesma credencial será reutilizada na importação em lote.</div><div class="field" style="margin-top:8px"><label for="tmdbKey">Credencial da API TMDB</label><input id="tmdbKey" type="password" placeholder="Cole sua chave API v3 ou token de leitura v4"><div class="help">A chave fica salva apenas neste navegador. Obtenha sua credencial em themoviedb.org/settings/api. Ela fica salva apenas neste navegador. Não compartilhe.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label>Enviar capa diretamente do computador</label><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="flex:1;min-width:200px"><button type="button" class="btn primary" id="uploadCoverBtn">⬆ Enviar capa</button></div><div id="coverUploadStatus" class="help" role="status" aria-live="polite" style="margin-top:6px">Escolha uma imagem JPG, PNG, WEBP ou GIF (máximo 10 MB). O arquivo será enviado ao armazenamento do CinePrime.</div><div id="coverUploadPreview" style="margin-top:8px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. Ao enviar pelo botão acima, o CinePrime preencherá este campo automaticamente. O app mantém a proporção vertical do pôster.</div></div>
+   <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes oficiais no TMDB. Informe sua chave API v3 ou seu token de leitura v4. A mesma credencial será reutilizada na importação em lote.</div><div class="field" style="margin-top:8px"><label for="tmdbKey">Credencial da API TMDB</label><input id="tmdbKey" type="text" name="cineprime_tmdb_credential" autocomplete="off" autocapitalize="off" spellcheck="false" style="-webkit-text-security:disc" placeholder="Cole sua chave API v3 ou token de leitura v4" aria-label="Credencial da API TMDB"><div class="help">A chave fica salva apenas neste navegador. Obtenha sua credencial em themoviedb.org/settings/api. Ela fica salva apenas neste navegador. Não compartilhe.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label>Enviar capa diretamente do computador</label><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="flex:1;min-width:200px"><button type="button" class="btn primary" id="uploadCoverBtn">⬆ Enviar capa</button></div><div id="coverUploadStatus" class="help" role="status" aria-live="polite" style="margin-top:6px">Escolha uma imagem JPG, PNG, WEBP ou GIF (máximo 10 MB). O arquivo será enviado ao armazenamento do CinePrime.</div><div id="coverUploadPreview" style="margin-top:8px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. Ao enviar pelo botão acima, o CinePrime preencherá este campo automaticamente. O app mantém a proporção vertical do pôster.</div></div>
    <div class="field full"><label for="linkFilmeDigital">Link para assistir ao filme digital (opcional)</label><input id="linkFilmeDigital" type="url" inputmode="url" placeholder="https://..."><div class="help">Cole o endereço da sua cópia digital, se houver.</div></div>
    <div class="field full help"><strong>Preferência de áudio:</strong> sempre original. Não utilizar trailers dublados. Para músicas, manter a gravação original. A seleção automática de vídeos será implementada em uma próxima etapa; por enquanto, os links são informados manualmente.</div>
    <div class="field full"><label for="linkTrailer">Link do trailer (opcional)</label><input id="linkTrailer" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..."><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn mini trailer-search-button" id="findTrailerForForm">✦ Buscar trailer oficial no TMDB</button><span class="help" id="trailerFormStatus" role="status" aria-live="polite"></span></div><div class="help">A busca prioriza vídeos do YouTube identificados como oficiais pelo TMDB. Confira o resultado antes de salvar. Você também pode colar manualmente o link.</div></div>
@@ -545,7 +545,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 <dialog id="trailerPlayerDialog" class="trailer-player-dialog" aria-label="Reprodutor de trailer">
  <div class="trailer-player-head"><div><span class="trailer-kicker">CINEPRIME APRESENTA</span><h3 id="trailerPlayerTitle">Trailer do filme</h3></div><button type="button" class="btn" id="closeTrailerPlayer" aria-label="Fechar trailer">✕</button></div>
  <div class="trailer-player-screen"><iframe id="trailerPlayerFrame" title="Trailer do filme" src="about:blank" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
- <div class="trailer-player-foot"><span id="trailerPlayerStatus" role="status">Trailer reproduzido pelo YouTube</span> · <a id="trailerExternalLink" href="#" target="_blank" rel="noopener noreferrer">Se não iniciar, abrir no YouTube</a></div>
+ <div class="trailer-player-foot"><span id="trailerPlayerStatus" role="status">Se o vídeo não iniciar aqui, use a opção ao lado.</span> · <a id="trailerExternalLink" href="#" target="_blank" rel="noopener noreferrer">▶ Abrir no YouTube</a></div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1136,23 +1136,65 @@ function render(){
  $('resultCount').textContent=arr.length+' '+(arr.length===1?'título':'títulos');$('listTitle').textContent=activeFormat==='Todos'?'Minha coleção':'Minha coleção · '+activeFormat;
  const posterQuote=f=>{const text=String(f.notes||'').replace(/\s+/g,' ').trim();return text?`<div class="poster-quote" aria-label="${escAttr(text)}" style="--poster-quote-duration:${Math.max(16,Math.min(52,Math.ceil(text.length*.22)))}s;--poster-quote-color:${escAttr(visualSettings.quoteColor||'#fff')};--poster-quote-font:${escAttr(visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont)}"><div class="poster-quote__track"><span class="poster-quote__item">${esc(text)}</span><span class="poster-quote__item" aria-hidden="true">${esc(text)}</span></div></div>`:''};
 function youtubeVideoId(url){
- try{const u=new URL(url);if(u.hostname==='youtu.be')return u.pathname.split('/').filter(Boolean)[0]||'';if(u.hostname.includes('youtube.com')){if(u.pathname==='/watch')return u.searchParams.get('v')||'';const m=u.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/);return m?m[1]:''}}catch{}return '';
+ try{
+  const u=new URL(url),host=u.hostname.toLowerCase().replace(/^www\./,'');
+  if(host==='youtu.be')return u.pathname.split('/').filter(Boolean)[0]||'';
+  if(['youtube.com','m.youtube.com','music.youtube.com','youtube-nocookie.com'].includes(host)){
+   if(u.pathname==='/watch')return u.searchParams.get('v')||'';
+   const m=u.pathname.match(/^\/(?:embed|shorts|live|v)\/([^/?]+)/);return m?m[1]:'';
+  }
+ }catch{}
+ return '';
 }
-function openTrailerPlayer(id){
+let trailerPlayerInstance=null,trailerPlayerApiPromise=null,trailerPlayerFallbackTimer=null;
+function loadYouTubePlayerApi(){
+ if(window.YT?.Player)return Promise.resolve(window.YT);
+ if(trailerPlayerApiPromise)return trailerPlayerApiPromise;
+ trailerPlayerApiPromise=new Promise((resolve,reject)=>{
+  const previous=window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady=()=>{try{if(typeof previous==='function')previous()}catch(e){console.warn(e)}resolve(window.YT)};
+  let script=document.querySelector('script[data-cineprime-youtube-api]');
+  if(!script){script=document.createElement('script');script.src='https://www.youtube.com/iframe_api';script.async=true;script.dataset.cineprimeYoutubeApi='1';script.onerror=()=>reject(new Error('Não foi possível carregar o reprodutor do YouTube.'));document.head.appendChild(script)}
+  setTimeout(()=>{if(!window.YT?.Player)reject(new Error('O reprodutor do YouTube demorou a responder.'))},10000);
+ });
+ return trailerPlayerApiPromise;
+}
+async function openTrailerPlayer(id){
  const film=films.find(f=>Number(f.id)===Number(id));if(!film?.linkTrailer)return;
  const videoId=youtubeVideoId(film.linkTrailer);
- if(!videoId){window.open(film.linkTrailer,'_blank','noopener,noreferrer');return}
+ if(!videoId){$('trailerPlayerTitle').textContent=film.title;$('trailerPlayerStatus').textContent='Este link não é um endereço reconhecido do YouTube.';$('trailerExternalLink').href=film.linkTrailer;$('trailerPlayerDialog').showModal();return}
  $('trailerPlayerTitle').textContent=film.title+' · '+(film.year||'');
  $('trailerPlayerStatus').textContent='Carregando trailer...';
  $('trailerExternalLink').href='https://www.youtube.com/watch?v='+encodeURIComponent(videoId);
+ if(trailerPlayerFallbackTimer)clearTimeout(trailerPlayerFallbackTimer);
+ if(trailerPlayerInstance){try{trailerPlayerInstance.destroy()}catch(e){}trailerPlayerInstance=null}
  $('trailerPlayerFrame').src='about:blank';
  $('trailerPlayerDialog').showModal();
- $('trailerPlayerFrame').src='https://www.youtube.com/embed/'+encodeURIComponent(videoId)+'?autoplay=1&rel=0&playsinline=1';
+ try{
+  const YT=await loadYouTubePlayerApi();
+  if(!$('trailerPlayerDialog').open)return;
+  trailerPlayerInstance=new YT.Player('trailerPlayerFrame',{
+   videoId,
+   playerVars:{autoplay:1,rel:0,playsinline:1,origin:location.origin},
+   events:{
+    onReady:event=>{event.target.playVideo();$('trailerPlayerStatus').textContent='Trailer carregado.'},
+    onStateChange:event=>{if(event.data===1)$('trailerPlayerStatus').textContent='Reproduzindo trailer.'},
+    onError:event=>{
+     const blocked=[101,150,153].includes(event.data);
+     $('trailerPlayerStatus').textContent=blocked?'Este vídeo não permite reprodução dentro de outros sites. Clique em “Abrir no YouTube”.':'O YouTube não conseguiu reproduzir este vídeo. Tente abrir diretamente no YouTube.';
+    }
+   }
+  });
+ }catch(error){
+  console.warn('Player oficial do YouTube indisponível:',error);
+  $('trailerPlayerStatus').textContent='Não foi possível carregar o player incorporado. Use “Abrir no YouTube”.';
+  $('trailerPlayerFrame').src='https://www.youtube.com/embed/'+encodeURIComponent(videoId)+'?autoplay=1&rel=0&playsinline=1';
+ }
 }
-function closeTrailerPlayer(){$('trailerPlayerFrame').src='about:blank';if($('trailerPlayerDialog').open)$('trailerPlayerDialog').close()}
+function closeTrailerPlayer(){if(trailerPlayerFallbackTimer)clearTimeout(trailerPlayerFallbackTimer);if(trailerPlayerInstance){try{trailerPlayerInstance.destroy()}catch(e){}trailerPlayerInstance=null}$('trailerPlayerFrame').src='about:blank';if($('trailerPlayerDialog').open)$('trailerPlayerDialog').close()}
 $('closeTrailerPlayer').addEventListener('click',closeTrailerPlayer);
 $('trailerPlayerDialog').addEventListener('click',e=>{if(e.target===$('trailerPlayerDialog'))closeTrailerPlayer()});
-$('trailerPlayerDialog').addEventListener('close',()=>$('trailerPlayerFrame').src='about:blank');
+$('trailerPlayerDialog').addEventListener('close',()=>{if(trailerPlayerInstance){try{trailerPlayerInstance.destroy()}catch(e){}trailerPlayerInstance=null}$('trailerPlayerFrame').src='about:blank'});
 async function requestOfficialTrailer(film){
  const key=getTmdbKey();if(!key)throw new Error('Informe primeiro sua credencial TMDB nas configurações de busca de capas.');
  const search=await tmdbSearchMovies(film.title,key);
