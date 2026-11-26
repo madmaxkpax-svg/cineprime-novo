@@ -241,6 +241,17 @@ body.cine-tv .youtube-watch{min-height:48px;font-size:14px;}
 .resource-link{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:7px;padding:10px 12px;border:1px solid #8f7135;border-radius:9px;background:#242019;color:#f4dfaa;text-decoration:none;font-size:12px;font-weight:850;letter-spacing:.06em}
 .resource-link:hover,.resource-link:focus-visible{filter:brightness(1.18);outline:3px solid #ffd36a;outline-offset:3px}
 .resource-trailer{border-color:#b94a4a;background:#321719;color:#ffe5e5}
+.trailer-player-dialog{width:min(900px,calc(100% - 24px));max-width:900px;background:#09090b;border:1px solid #9b793b;border-radius:16px;padding:0;overflow:hidden;color:#f7f0e2}
+.trailer-player-dialog::backdrop{background:#000d;backdrop-filter:blur(7px)}
+.trailer-player-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:linear-gradient(90deg,#1b1711,#101014);border-bottom:1px solid #8f713555}
+.trailer-player-head h3{margin:3px 0 0;font:600 clamp(17px,3vw,23px) Cinzel,Georgia,serif}
+.trailer-kicker{font-size:10px;letter-spacing:.2em;color:#d6b15e;font-weight:800}
+.trailer-player-screen{width:100%;aspect-ratio:16/9;background:#000}
+.trailer-player-screen iframe{display:block;width:100%;height:100%;border:0}
+.trailer-player-foot{padding:10px 16px;color:#aaa6a0;font-size:11px;text-align:center}
+.trailer-search-button{border-color:#8f7135!important;color:#f5d27b!important}
+@media(max-width:560px){.trailer-player-head{padding:10px 12px}.trailer-player-foot{font-size:10px}}
+
 .resource-music{border-color:#4e8d78;background:#142b25;color:#d8fff0}
 body.cine-tv .resource-link{min-height:48px;font-size:14px}
 
@@ -493,7 +504,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
    <div class="field full"><label>Buscar capa automaticamente</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input id="coverSearchTitle" placeholder="Título do filme para pesquisar" style="flex:1;min-width:180px"><button type="button" class="btn primary" id="searchCoverBtn">Buscar capas</button></div><div class="help">Pesquisa cartazes oficiais no TMDB. Informe sua chave API v3 ou seu token de leitura v4. A mesma credencial será reutilizada na importação em lote.</div><div class="field" style="margin-top:8px"><label for="tmdbKey">Credencial da API TMDB</label><input id="tmdbKey" type="password" placeholder="Cole sua chave API v3 ou token de leitura v4"><div class="help">A chave fica salva apenas neste navegador. Obtenha sua credencial em themoviedb.org/settings/api. Ela fica salva apenas neste navegador. Não compartilhe.</div></div><div id="coverResults" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px"></div></div><div class="field full"><label>Enviar capa diretamente do computador</label><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="coverFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="flex:1;min-width:200px"><button type="button" class="btn primary" id="uploadCoverBtn">⬆ Enviar capa</button></div><div id="coverUploadStatus" class="help" role="status" aria-live="polite" style="margin-top:6px">Escolha uma imagem JPG, PNG, WEBP ou GIF (máximo 10 MB). O arquivo será enviado ao armazenamento do CinePrime.</div><div id="coverUploadPreview" style="margin-top:8px"></div></div><div class="field full"><label for="cover">URL da capa selecionada (opcional)</label><input id="cover" type="url" placeholder="https://..."><div class="help">Você também pode colar um endereço direto de imagem. Ao enviar pelo botão acima, o CinePrime preencherá este campo automaticamente. O app mantém a proporção vertical do pôster.</div></div>
    <div class="field full"><label for="linkFilmeDigital">Link para assistir ao filme digital (opcional)</label><input id="linkFilmeDigital" type="url" inputmode="url" placeholder="https://..."><div class="help">Cole o endereço da sua cópia digital, se houver.</div></div>
    <div class="field full help"><strong>Preferência de áudio:</strong> sempre original. Não utilizar trailers dublados. Para músicas, manter a gravação original. A seleção automática de vídeos será implementada em uma próxima etapa; por enquanto, os links são informados manualmente.</div>
-   <div class="field full"><label for="linkTrailer">Link do trailer (opcional)</label><input id="linkTrailer" type="url" inputmode="url" placeholder="https://..."><div class="help">Preferência CinePrime: utilizar trailer com áudio original, sem dublagem em português. A busca automática futura deverá priorizar canais oficiais; confira o idioma antes de salvar. Você pode colar manualmente outro link.</div></div>
+   <div class="field full"><label for="linkTrailer">Link do trailer (opcional)</label><input id="linkTrailer" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..."><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn mini trailer-search-button" id="findTrailerForForm">✦ Buscar trailer oficial no TMDB</button><span class="help" id="trailerFormStatus" role="status" aria-live="polite"></span></div><div class="help">A busca prioriza vídeos do YouTube identificados como oficiais pelo TMDB. Confira o resultado antes de salvar. Você também pode colar manualmente o link.</div></div>
    <div class="field full"><label for="linkMusica">Link da música ou trilha sonora (opcional)</label><input id="linkMusica" type="url" inputmode="url" placeholder="https://..."><div class="help">Priorizar a música e a trilha sonora em sua versão original. Não substituir por versões dubladas ou adaptações em português. Você pode colar manualmente o link de sua preferência.</div></div>
    <input id="youtubeUrl" type="hidden">
    <div class="field full"><label for="notes">Frase de efeito / notas pessoais (opcional)</label><textarea id="notes" rows="2" placeholder="Esta frase aparecerá no rodapé da capa..."></textarea></div>
@@ -530,6 +541,11 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
   <div class="field full"><div id="bulkResults" style="display:grid;gap:9px"></div></div>
  </div>
  <div class="modalfoot"><button type="button" class="btn" id="cancelImportList">Fechar</button><button type="button" class="btn primary" id="saveBulkBtn" disabled>Adicionar selecionados</button></div>
+</dialog>
+<dialog id="trailerPlayerDialog" class="trailer-player-dialog" aria-label="Reprodutor de trailer">
+ <div class="trailer-player-head"><div><span class="trailer-kicker">CINEPRIME APRESENTA</span><h3 id="trailerPlayerTitle">Trailer do filme</h3></div><button type="button" class="btn" id="closeTrailerPlayer" aria-label="Fechar trailer">✕</button></div>
+ <div class="trailer-player-screen"><iframe id="trailerPlayerFrame" title="Trailer do filme" src="about:blank" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+ <div class="trailer-player-foot">Trailer reproduzido pelo YouTube · Feche esta janela para voltar à sua coleção</div>
 </dialog>
 <div class="toast" id="toast" role="status"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1119,7 +1135,63 @@ function render(){
  else arr.sort((a,b)=>numberFor(a).localeCompare(numberFor(b)));
  $('resultCount').textContent=arr.length+' '+(arr.length===1?'título':'títulos');$('listTitle').textContent=activeFormat==='Todos'?'Minha coleção':'Minha coleção · '+activeFormat;
  const posterQuote=f=>{const text=String(f.notes||'').replace(/\s+/g,' ').trim();return text?`<div class="poster-quote" aria-label="${escAttr(text)}" style="--poster-quote-duration:${Math.max(16,Math.min(52,Math.ceil(text.length*.22)))}s;--poster-quote-color:${escAttr(visualSettings.quoteColor||'#fff')};--poster-quote-font:${escAttr(visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont)}"><div class="poster-quote__track"><span class="poster-quote__item">${esc(text)}</span><span class="poster-quote__item" aria-hidden="true">${esc(text)}</span></div></div>`:''};
- const filmCard=f=>{const adminBadge=!isVisitor?(f.adminStatus?`<span class="admin-cover-status${f.adminStatus==='maintenance'?' admin-cover-status--maintenance':''}">${f.adminStatus==='counted'?'✓ Contada':'⚠ Manutenção'}</span>`:(sealFilter==='untagged'?`<span class="admin-cover-status admin-cover-status--maintenance" style="background:#8a651c;border-color:#f0ce77">○ SEM ETIQUETA</span>`:'')):'';return `<article class="film" data-film-id="${escAttr(f.id)}" data-genre="${escAttr(f.genre||'')}" style="--led-color:${ledColorForGenre(f.genre)}"><div class="poster"><button type="button" class="film-drag-handle" aria-label="Arrastar filme para reorganizar" title="Arraste para mudar a posição">⠿</button>${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" draggable="false" ondragstart="return false" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}${adminBadge}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div>${posterQuote(f)}${f.linkFilmeDigital?`<a class="youtube-watch" href="${escAttr(f.linkFilmeDigital)}" target="_blank" rel="noopener noreferrer">▶ FILME DIGITAL</a>`:''}${f.linkTrailer?`<a class="resource-link resource-trailer" href="${escAttr(f.linkTrailer)}" target="_blank" rel="noopener noreferrer">▶ TRAILER</a>`:''}${f.linkMusica?`<a class="resource-link resource-music" href="${escAttr(f.linkMusica)}" target="_blank" rel="noopener noreferrer">♫ MÚSICA DO FILME</a>`:''}${isVisitor?'':`<div class="filmactions"><button class="btn mini admin-status-button" onclick="openStatusDialog(${Number(f.id)})">Sinal</button><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div>`}</div></article>`};
+function youtubeVideoId(url){
+ try{const u=new URL(url);if(u.hostname==='youtu.be')return u.pathname.split('/').filter(Boolean)[0]||'';if(u.hostname.includes('youtube.com')){if(u.pathname==='/watch')return u.searchParams.get('v')||'';const m=u.pathname.match(/^\/(?:embed|shorts|live)\/([^/?]+)/);return m?m[1]:''}}catch{}return '';
+}
+function openTrailerPlayer(id){
+ const film=films.find(f=>Number(f.id)===Number(id));if(!film?.linkTrailer)return;
+ const videoId=youtubeVideoId(film.linkTrailer);
+ if(!videoId){window.open(film.linkTrailer,'_blank','noopener,noreferrer');return}
+ $('trailerPlayerTitle').textContent=film.title+' · '+(film.year||'');
+ $('trailerPlayerFrame').src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(videoId)+'?autoplay=1&rel=0';
+ $('trailerPlayerDialog').showModal();
+}
+function closeTrailerPlayer(){$('trailerPlayerFrame').src='about:blank';if($('trailerPlayerDialog').open)$('trailerPlayerDialog').close()}
+$('closeTrailerPlayer').addEventListener('click',closeTrailerPlayer);
+$('trailerPlayerDialog').addEventListener('click',e=>{if(e.target===$('trailerPlayerDialog'))closeTrailerPlayer()});
+$('trailerPlayerDialog').addEventListener('close',()=>$('trailerPlayerFrame').src='about:blank');
+async function requestOfficialTrailer(film){
+ const key=getTmdbKey();if(!key)throw new Error('Informe primeiro sua credencial TMDB nas configurações de busca de capas.');
+ const search=await tmdbSearchMovies(film.title,key);
+ const results=(search.results||[]).filter(x=>x.id);
+ if(!results.length)throw new Error('Filme não encontrado no TMDB.');
+ const targetYear=Number(film.year)||0;
+ results.sort((a,b)=>{
+  const score=x=>(norm(x.title||x.original_title)===norm(film.title)?100:0)+(targetYear&&x.release_date?Math.max(0,20-Math.abs(Number(x.release_date.slice(0,4))-targetYear)*3):0);
+  return score(b)-score(a);
+ });
+ for(const movie of results.slice(0,3)){
+  const isV4=key.split('.').length===3,params=new URLSearchParams({language:'en-US'});
+  if(!isV4)params.set('api_key',key);
+  const response=await fetch('https://api.themoviedb.org/3/movie/'+movie.id+'/videos?'+params.toString(),{headers:isV4?{Authorization:'Bearer '+key,Accept:'application/json'}:{Accept:'application/json'}});
+  const data=await response.json();if(!response.ok)throw new Error(data.status_message||'Não foi possível consultar os trailers no TMDB.');
+  const videos=(data.results||[]).filter(v=>v.site==='YouTube'&&v.type==='Trailer'&&v.official===true&&v.key);
+  const chosen=videos.find(v=>v.iso_639_1===movie.original_language)||videos.find(v=>v.iso_639_1==='en')||videos[0];
+  if(chosen)return {url:'https://www.youtube.com/watch?v='+chosen.key,title:chosen.name||'Trailer oficial'};
+ }
+ throw new Error('O TMDB não encontrou trailer do YouTube marcado como oficial para este filme.');
+}
+async function findAndSaveTrailer(id){
+ if(isVisitor||!currentUser){toast('Entre como administrador para buscar e salvar trailers.');return}
+ const film=films.find(f=>Number(f.id)===Number(id));if(!film)return;
+ const button=document.querySelector('.film[data-film-id="'+CSS.escape(String(id))+'"] .trailer-search-button');
+ if(button){button.disabled=true;button.textContent='BUSCANDO...'}
+ try{
+  const found=await requestOfficialTrailer(film);
+  const {data,error}=await db.from('filmes').update({trailer_url:found.url}).eq('id',film.id).select('id,trailer_url').single();
+  if(error)throw error;if(!data?.trailer_url)throw new Error('O banco não confirmou o link do trailer.');
+  film.linkTrailer=data.trailer_url;render();toast('Trailer oficial localizado e salvo para '+film.title+'.');
+ }catch(error){console.error(error);toast(error.message||'Não foi possível localizar o trailer.');if(button){button.disabled=false;button.textContent='✦ BUSCAR TRAILER OFICIAL'}}
+}
+$('findTrailerForForm').addEventListener('click',async()=>{
+ const title=$('title').value.trim(),year=$('year').value?Number($('year').value):'';
+ if(!title){$('trailerFormStatus').textContent='Informe o título do filme primeiro.';return}
+ const button=$('findTrailerForForm');button.disabled=true;$('trailerFormStatus').textContent='Procurando trailer oficial...';
+ try{const found=await requestOfficialTrailer({title,year});$('linkTrailer').value=found.url;$('trailerFormStatus').textContent='Encontrado: '+found.title+'. Confira e salve o filme.'}
+ catch(error){$('trailerFormStatus').textContent=error.message||'Não foi possível localizar.'}
+ finally{button.disabled=false}
+});
+ const filmCard=f=>{const adminBadge=!isVisitor?(f.adminStatus?`<span class="admin-cover-status${f.adminStatus==='maintenance'?' admin-cover-status--maintenance':''}">${f.adminStatus==='counted'?'✓ Contada':'⚠ Manutenção'}</span>`:(sealFilter==='untagged'?`<span class="admin-cover-status admin-cover-status--maintenance" style="background:#8a651c;border-color:#f0ce77">○ SEM ETIQUETA</span>`:'')):'';return `<article class="film" data-film-id="${escAttr(f.id)}" data-genre="${escAttr(f.genre||'')}" style="--led-color:${ledColorForGenre(f.genre)}"><div class="poster"><button type="button" class="film-drag-handle" aria-label="Arrastar filme para reorganizar" title="Arraste para mudar a posição">⠿</button>${f.cover?`<img src="${escAttr(f.cover)}" alt="Capa de ${escAttr(f.title)}" loading="lazy" draggable="false" ondragstart="return false" onerror="this.remove();this.parentElement.insertAdjacentHTML('beforeend','<div class=&quot;placeholder&quot;>✦</div>')">`:`<div class="placeholder">✦</div>`}${adminBadge}<span class="number">JC-${numberFor(f)}</span><span class="format">${esc(f.format)}</span></div><div class="filmcontent"><h4>${esc(f.title)}</h4><div class="year">${f.year||'Ano não informado'}</div><div class="meta">${esc([f.genre,f.saga].filter(Boolean).join(' · ')||'Gênero não informado')}</div>${posterQuote(f)}${f.linkFilmeDigital?`<a class="youtube-watch" href="${escAttr(f.linkFilmeDigital)}" target="_blank" rel="noopener noreferrer">▶ FILME DIGITAL</a>`:''}${f.linkTrailer?`<button type="button" class="resource-link resource-trailer" onclick="openTrailerPlayer(${Number(f.id)})">▶ ASSISTIR TRAILER</button>`:(!isVisitor?`<button type="button" class="resource-link resource-trailer trailer-search-button" onclick="findAndSaveTrailer(${Number(f.id)})">✦ BUSCAR TRAILER OFICIAL</button>`:'')}${f.linkMusica?`<a class="resource-link resource-music" href="${escAttr(f.linkMusica)}" target="_blank" rel="noopener noreferrer">♫ MÚSICA DO FILME</a>`:''}${isVisitor?'':`<div class="filmactions"><button class="btn mini admin-status-button" onclick="openStatusDialog(${Number(f.id)})">Sinal</button><button class="btn mini" onclick="editFilm(${Number(f.id)})">Editar</button><button class="btn mini" onclick="deleteFilm(${Number(f.id)})">Excluir</button></div>`}</div></article>`};
  const genreIcon=name=>{const n=norm(name);if(n.includes('terror'))return '☠';if(n.includes('acao')||n.includes('ação'))return '⚔';if(n.includes('aventura'))return '⌖';if(n.includes('ficcao')||n.includes('ficção')||n.includes('cient'))return '✦';if(n.includes('drama'))return '◈';if(n.includes('faroeste')||n.includes('western'))return '♜';if(n.includes('suspense')||n.includes('thriller'))return '◉';if(n.includes('comedia')||n.includes('comédia'))return '☻';if(n.includes('anim'))return '✿';if(n.includes('romance'))return '♡';if(n.includes('document'))return '▤';return '✦'};
  const sagaButton=$('sagaGalleryToggle');if(sagaButton){sagaButton.setAttribute('aria-pressed',String(showSagaGallery));sagaButton.textContent=showSagaGallery?'▦ Voltar à coleção':'▦ Sagas e Franquias';sagaButton.classList.toggle('primary',showSagaGallery)}
  if(!arr.length){$('grid').innerHTML=`<div class="empty"><b>${films.length?'Nenhum título encontrado':'Sua coleção começa aqui'}</b>${films.length?'Tente alterar a busca ou os filtros.':'Adicione DVDs, Blu-rays ou filmes digitais para montar seu catálogo.'}<div style="margin-top:15px"><button class="btn primary" onclick="openAdd()">＋ Cadastrar filme</button></div></div>`}
