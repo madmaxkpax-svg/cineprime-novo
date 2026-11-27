@@ -1384,7 +1384,7 @@ $('adminSealList').addEventListener('click',e=>{
 ['closeStatusDialog','cancelStatusDialog'].forEach(id=>$(id).addEventListener('click',()=>{$('statusDialog').close();statusFilmId=null}));
 async function deleteFilm(id){if(isVisitor)return;const f=films.find(x=>Number(x.id)===Number(id));if(!f||!confirm('Excluir "'+f.title+'" da coleção?'))return;const {error}=await db.from('filmes').delete().eq('id',id);if(error){toast('Erro ao excluir: '+error.message);return}films=films.filter(x=>Number(x.id)!==Number(id));render();toast('Filme removido da coleção.')}
 const TMDB_KEY_STORAGE='cineprimeTmdbApiKey';
-function getTmdbKey(){return (localStorage.getItem(TMDB_KEY_STORAGE)||'').trim()}
+function getTmdbKey(){const stored=(localStorage.getItem(TMDB_KEY_STORAGE)||'').trim();if(stored)return stored;const field=$('tmdbKey');const entered=(field?.value||'').trim();if(entered){localStorage.setItem(TMDB_KEY_STORAGE,entered);return entered}return ''}
 function saveTmdbKey(value){const key=(value||'').trim();if(key)localStorage.setItem(TMDB_KEY_STORAGE,key);return key}
 
 const CAROUSEL_BUCKET='cineprime-carousel';
@@ -1457,7 +1457,8 @@ async function importCarouselUrl(url){
 async function searchCarouselTmdbImages(){
  const title=$('carouselTmdbSearch').value.trim(),key=getTmdbKey();
  if(!title)throw new Error('Digite o nome do filme.');
- if(!key)throw new Error('Configure sua credencial TMDB nas configurações de busca.');
+ if(!key)throw new Error('A credencial TMDB não está salva neste navegador. Abra o cadastro de qualquer filme, localize “Credencial da API TMDB”, informe sua chave ou token e tente novamente.');
+ saveTmdbKey(key);
  $('carouselManagerStatus').textContent='Pesquisando filme no TMDB...';$('carouselTmdbResults').innerHTML='';
  const search=await tmdbSearchMovies(title,key),results=(search.results||[]).filter(x=>x.id);
  if(!results.length)throw new Error('Filme não encontrado no TMDB.');
@@ -1479,7 +1480,7 @@ $('carouselImageFiles').addEventListener('change',async e=>{
  e.target.value='';
 });
 $('importCarouselUrl').addEventListener('click',async()=>{try{await importCarouselUrl($('carouselImageUrl').value.trim());$('carouselImageUrl').value=''}catch(e){$('carouselManagerStatus').textContent=e.message}});
-$('searchCarouselTmdb').addEventListener('click',async()=>{try{await searchCarouselTmdbImages()}catch(e){$('carouselManagerStatus').textContent=e.message}});
+$('searchCarouselTmdb').addEventListener('click',async()=>{const button=$('searchCarouselTmdb');button.disabled=true;button.textContent='Buscando...';$('carouselManagerStatus').textContent='Conectando ao TMDB e procurando imagens...';try{await searchCarouselTmdbImages()}catch(e){$('carouselManagerStatus').textContent='Não foi possível concluir a busca: '+(e?.message||'erro desconhecido')}finally{button.disabled=false;button.textContent='Buscar imagens'}});
 
 $('tmdbKey').value=getTmdbKey();
 $('tmdbKey').addEventListener('input',()=>saveTmdbKey($('tmdbKey').value));
