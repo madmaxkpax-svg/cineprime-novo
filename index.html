@@ -376,6 +376,16 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 /* Substituição definitiva dos refletores pela película de imagens */
 .cinema-intro>.searchlight-overlay{display:none!important;visibility:hidden!important;opacity:0!important}
 .neon-control-panel{display:none!important}
+/* Ajuste definitivo do player: compacto e fora do cabeçalho administrativo */
+#cineMusicPlayer{top:auto!important;bottom:14px!important;right:14px!important;left:auto!important;width:300px!important;min-width:0!important;max-width:calc(100vw - 28px)!important;padding:5px 7px!important;gap:6px!important;border-radius:10px!important}
+#cineMusicPlayer .cine-music-avatar{width:34px!important;height:38px!important}
+#cineMusicPlayer .cine-music-title{font-size:11px!important;margin:2px 0!important}
+#cineMusicPlayer .cine-music-controls{gap:3px!important;flex-wrap:wrap!important}
+#cineMusicPlayer button{width:23px!important;height:22px!important;font-size:10px!important}
+#cineMusicPlayer .cine-music-toggle{width:26px!important;height:24px!important}
+#cineMusicPlayer .cine-music-manage{width:auto!important;padding:0 5px!important}
+#cineMusicPlayer .cine-music-size{width:21px!important;height:21px!important}
+@media(max-width:600px){#cineMusicPlayer{right:8px!important;bottom:8px!important;width:min(290px,calc(100vw - 16px))!important}}
 </style>
 </head>
 <body>
@@ -1027,11 +1037,10 @@ $('cineMusicPrev').addEventListener('click',cineMusicPrev);
 (function setupCineMusicWindow(){
  const panel=$('cineMusicPlayer'),handle=$('cineMusicFilm');
  if(!panel||!handle)return;
- let width=320,pos={top:Math.max(12,innerHeight-142),right:16};
- try{const saved=JSON.parse(localStorage.getItem('cineprime_music_window')||'{}');if(Number.isFinite(saved.width))width=Math.min(360,Math.max(280,saved.width));if(Number.isFinite(saved.top)&&saved.top>100)pos.top=saved.top;if(Number.isFinite(saved.right))pos.right=saved.right;}catch{}
- function apply(){width=Math.min(Math.max(280,width),Math.max(280,innerWidth-24));pos.top=Math.max(8,Math.min(pos.top,innerHeight-100));pos.right=Math.max(8,Math.min(pos.right,innerWidth-120));panel.style.setProperty('--cine-music-width',width+'px');panel.style.top=pos.top+'px';panel.style.right=pos.right+'px';panel.style.left='auto';panel.style.setProperty('--cine-music-video',Math.round(Math.min(240,Math.max(140,width*.5)))+'px');try{localStorage.setItem('cineprime_music_window',JSON.stringify({width,top:pos.top,right:pos.right}))}catch{}}
- $('cineMusicSmaller').addEventListener('click',()=>{width=Math.max(280,width-20);apply();try{cineMusicPlayer?.setSize?.(Math.round(Math.min(240,Math.max(140,width*.5))),Math.round(Math.min(240,Math.max(140,width*.5))))}catch{}});
- $('cineMusicLarger').addEventListener('click',()=>{width=Math.min(360,width+20);apply();try{cineMusicPlayer?.setSize?.(Math.round(Math.min(240,Math.max(140,width*.5))),Math.round(Math.min(240,Math.max(140,width*.5))))}catch{}});
+ let width=300,pos={top:16,right:14};
+ function apply(){width=300;panel.style.setProperty('--cine-music-width',width+'px');panel.style.top='auto';panel.style.bottom='14px';panel.style.right='14px';panel.style.left='auto';panel.style.setProperty('--cine-music-video','140px');try{localStorage.setItem('cineprime_music_window',JSON.stringify({width,position:'bottom-right'}))}catch{}}
+ $('cineMusicSmaller').addEventListener('click',()=>{width=280;panel.style.width='280px';apply();});
+ $('cineMusicLarger').addEventListener('click',()=>{width=300;panel.style.width='300px';apply();});
  let drag=null;
  handle.addEventListener('pointerdown',e=>{if(e.target.closest('button,a'))return;const r=panel.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,top:r.top,right:innerWidth-r.right};panel.classList.add('cine-music-dragging');handle.setPointerCapture?.(e.pointerId);e.preventDefault()});
  handle.addEventListener('pointermove',e=>{if(!drag)return;pos.top=drag.top+(e.clientY-drag.y);pos.right=drag.right-(e.clientX-drag.x);apply()});
