@@ -549,7 +549,13 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
  </form>
 </dialog>
 
-<dialog id="cineMusicManagerDialog"><div class="modalhead"><h3>Playlist musical por filme</h3><button type="button" class="btn" id="cineMusicManagerClose">✕</button></div><div class="modalbody" style="grid-template-columns:1fr"><div class="field full"><label for="cineMusicManagerFilm">Filme relacionado ao papel de parede</label><input id="cineMusicManagerFilm" readonly></div><div class="field full"><label for="cineMusicTrackName">Nome da música</label><input id="cineMusicTrackName" maxlength="140" placeholder="Ex.: Gonna Fly Now"></div><div class="field full"><label for="cineMusicTrackUrl">Link do YouTube</label><input id="cineMusicTrackUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></div><div class="field full" style="display:flex;gap:8px;flex-direction:row"><button class="btn primary" id="cineMusicAdd" type="button">Adicionar à playlist</button><span id="cineMusicManagerStatus" class="help" role="status"></span></div><div class="field full"><h4 style="margin:0">Programação cadastrada</h4><div id="cineMusicManagerList" style="display:grid;gap:8px"></div></div><div class="field full help">Cadastre links de faixas oficiais ou gravações autorizadas. Visitantes podem ouvir, mas não editar nem excluir músicas.</div></div></dialog>
+<dialog id="cineMusicManagerDialog"><div class="modalhead"><h3>Playlist musical por filme</h3><button type="button" class="btn" id="cineMusicManagerClose">✕</button></div><div class="modalbody" style="grid-template-columns:1fr"><div class="field full"><label for="cineMusicManagerFilm">Filme relacionado ao papel de parede</label><input id="cineMusicManagerFilm" readonly></div><div class="field full" style="border:1px solid var(--line);border-radius:10px;padding:12px">
+<h4 style="margin:0 0 8px">Buscar músicas automaticamente</h4>
+<div class="field"><label for="cineMusicSearchType">Tipo de trilha</label><select id="cineMusicSearchType"><option value="soundtrack">Trilha sonora do filme</option><option value="songs">Canções populares do filme</option><option value="instrumental">Temas instrumentais e score original</option></select></div>
+<div class="field" style="margin-top:8px"><label for="cineMusicApiKey">Chave da API do YouTube</label><input id="cineMusicApiKey" type="password" autocomplete="off" placeholder="Cole sua chave da YouTube Data API v3"><div class="help">A chave é salva somente neste navegador. Restrinja-a ao domínio do CinePrime no Google Cloud. <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">Abrir credenciais do Google Cloud</a>.</div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn primary" id="cineMusicSearchBtn">🔎 Buscar músicas</button><span class="help" id="cineMusicSearchStatus" role="status" aria-live="polite"></span></div>
+<div id="cineMusicSearchResults" style="display:grid;gap:8px;margin-top:10px"></div>
+</div><div class="field full"><label for="cineMusicTrackName">Nome da música</label><input id="cineMusicTrackName" maxlength="140" placeholder="Ex.: Gonna Fly Now"></div><div class="field full"><label for="cineMusicTrackUrl">Link do YouTube</label><input id="cineMusicTrackUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></div><div class="field full" style="display:flex;gap:8px;flex-direction:row"><button class="btn primary" id="cineMusicAdd" type="button">Adicionar à playlist</button><span id="cineMusicManagerStatus" class="help" role="status"></span></div><div class="field full"><h4 style="margin:0">Programação cadastrada</h4><div id="cineMusicManagerList" style="display:grid;gap:8px"></div></div><div class="field full help">Cadastre links de faixas oficiais ou gravações autorizadas. Visitantes podem ouvir, mas não editar nem excluir músicas.</div></div></dialog>
 <dialog id="filmDialog">
  <form id="filmForm" autocomplete="off">
   <div class="modalhead"><h3 id="dialogTitle">Adicionar filme</h3><button type="button" class="btn" id="closeDialog">✕</button></div>
@@ -932,6 +938,43 @@ function cineMusicRenderManager(){
   await cineMusicLoadPlaylist();cineMusicRenderManager();$('cineMusicManagerStatus').textContent='Música removida.';
  }));
 }
+const CINE_YT_KEY_STORAGE='cineprime_youtube_data_api_key';
+$('cineMusicApiKey').value=localStorage.getItem(CINE_YT_KEY_STORAGE)||'';
+async function cineMusicSearch(){
+ const film=cineMusicCurrentFilm(),key=$('cineMusicApiKey').value.trim(),kind=$('cineMusicSearchType').value;
+ const status=$('cineMusicSearchStatus'),results=$('cineMusicSearchResults');
+ if(!film){status.textContent='Defina o filme do papel de parede.';return}
+ if(!key){status.textContent='Informe a chave da YouTube Data API v3.';return}
+ localStorage.setItem(CINE_YT_KEY_STORAGE,key);
+ const suffix=kind==='instrumental'?'original motion picture score instrumental soundtrack':kind==='songs'?'songs from the movie soundtrack':'official movie soundtrack songs';
+ const query=film+' '+suffix;
+ status.textContent='Pesquisando no YouTube...';results.innerHTML='';
+ $('cineMusicSearchBtn').disabled=true;
+ try{
+  const params=new URLSearchParams({part:'snippet',type:'video',maxResults:'10',q:query,videoEmbeddable:'true',safeSearch:'moderate',regionCode:'BR',relevanceLanguage:'en',key});
+  const response=await fetch('https://www.googleapis.com/youtube/v3/search?'+params.toString());
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error?.message||'Falha na pesquisa do YouTube.');
+  const items=(data.items||[]).filter(item=>item.id?.videoId);
+  if(!items.length){status.textContent='Nenhum resultado encontrado para este tipo de trilha.';return}
+  status.textContent=items.length+' resultado(s). Escolha os que deseja adicionar.';
+  results.innerHTML=items.map(item=>{
+   const id=item.id.videoId,sn=item.snippet||{},thumb=sn.thumbnails?.medium?.url||sn.thumbnails?.default?.url||'';
+   return '<div style="display:flex;gap:9px;align-items:center;border:1px solid var(--line);border-radius:9px;padding:8px"><img src="'+escAttr(thumb)+'" alt="" style="width:92px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;flex:none"><div style="min-width:0;flex:1"><strong style="display:block;font-size:12px;line-height:1.35">'+esc(sn.title||'Vídeo do YouTube')+'</strong><div class="help">'+esc(sn.channelTitle||'Canal')+'</div><button type="button" class="btn mini" data-add-youtube="'+escAttr(id)+'" data-add-title="'+escAttr(sn.title||'Trilha sonora')+'" style="margin-top:6px">＋ Adicionar à playlist</button></div></div>';
+  }).join('');
+  results.querySelectorAll('[data-add-youtube]').forEach(btn=>btn.addEventListener('click',async()=>{
+   if(!currentUser||isVisitor)return;
+   btn.disabled=true;btn.textContent='Salvando...';
+   const videoUrl='https://www.youtube.com/watch?v='+btn.dataset.addYoutube;
+   const {error}=await db.from('cineprime_music_tracks').insert({owner_id:currentUser.id,wallpaper_key:norm(film),film_title:film,track_title:btn.dataset.addTitle,youtube_url:videoUrl,position:cineMusicTracks.length});
+   if(error){btn.disabled=false;btn.textContent='Tentar novamente';status.textContent='Erro ao salvar: '+error.message;return}
+   await cineMusicLoadPlaylist();btn.textContent='✓ Adicionada';status.textContent='Música adicionada à playlist.';
+  }));
+ }catch(error){status.textContent='Erro na busca: '+error.message}
+ finally{$('cineMusicSearchBtn').disabled=false}
+}
+$('cineMusicSearchBtn').addEventListener('click',cineMusicSearch);
+
 function cineMusicOpenManager(){
  if(!currentUser||isVisitor){toast('Somente o administrador pode editar a playlist.');return}
  const title=cineMusicCurrentFilm();
