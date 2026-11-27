@@ -186,18 +186,18 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 
 /* Nova faixa de película: substitui os canhões de luz no cabeçalho. */
 .searchlight-overlay,.neon-control-panel{display:none!important}
-.cine-filmstrip{position:relative;z-index:6;width:100%;margin:14px 0 2px;padding:19px 0;overflow:hidden;background:linear-gradient(180deg,#09090beF,#171317f2 50%,#09090bef);border-top:1px solid #d6b15e80;border-bottom:1px solid #d6b15e80;box-shadow:0 8px 22px #0008}
+.cinema-quote{margin:0 0 2px!important;padding:7px 18px!important}
+.cine-filmstrip{position:relative;z-index:6;width:100%;margin:2px 0 0;padding:14px 0;overflow:hidden;background:linear-gradient(180deg,#09090beF,#171317f2 50%,#09090bef);border-top:1px solid #d6b15e80;border-bottom:1px solid #d6b15e80;box-shadow:0 8px 22px #0008}
 .cine-filmstrip[hidden]{display:none!important}
 .cine-filmstrip:before,.cine-filmstrip:after{content:"";position:absolute;left:0;right:0;height:11px;z-index:2;background:radial-gradient(ellipse at center,#0a0a0c 0 43%,transparent 47%) 0 0/28px 11px repeat-x;pointer-events:none}
 .cine-filmstrip:before{top:3px}.cine-filmstrip:after{bottom:3px}
 .cine-filmstrip-window{overflow:hidden;width:100%;mask-image:linear-gradient(90deg,transparent,#000 2%,#000 98%,transparent)}
-.cine-filmstrip-track{display:flex;align-items:center;gap:9px;width:max-content;animation:cineFilmstripMove 65s linear infinite}
-.cine-filmstrip:hover .cine-filmstrip-track{animation-play-state:paused}
-.cine-filmstrip-item{display:block;width:clamp(150px,18vw,230px);height:112px;flex:none;overflow:hidden;border:1px solid #d6b15e75;border-radius:4px;background:#09090b}
+.cine-filmstrip-track{display:flex;align-items:center;gap:8px;width:max-content;animation:cineFilmstripMove 34s linear infinite!important;will-change:transform}
+.cine-filmstrip:hover .cine-filmstrip-track{animation-play-state:paused!important}
+.cine-filmstrip-item{display:block;width:clamp(118px,14vw,178px);height:84px;flex:none;overflow:hidden;border:1px solid #d6b15e75;border-radius:4px;background:#09090b}
 .cine-filmstrip-item img{display:block;width:100%;height:100%;object-fit:cover}
 @keyframes cineFilmstripMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media(prefers-reduced-motion:reduce){.cine-filmstrip-track{animation:none}}
-@media(max-width:760px){.cine-filmstrip{margin-top:10px;padding:17px 0}.cine-filmstrip-item{width:155px;height:88px}}
+@media(max-width:760px){.cinema-quote{padding:6px 12px!important}.cine-filmstrip{margin-top:1px;padding:13px 0}.cine-filmstrip-item{width:132px;height:76px}}
 /* Refletores CinePrime: camada independente aplicada sobre qualquer capa. */
 .cinema-intro>.topbar,.cinema-intro>.hero{position:relative;z-index:4}
 .searchlight-overlay{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none;isolation:isolate}
