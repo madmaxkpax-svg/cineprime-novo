@@ -350,7 +350,14 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 @media(max-width:480px){.guide-toolbar{grid-template-columns:1fr 1fr}.guide-row{gap:10px}.guide-synopsis{font-size:12px}.guide-actions button{flex:1}}
 
 
-#cineMusicPlayer{position:fixed!important;z-index:9999!important;top:16px!important;right:16px!important;left:auto!important;transform:none!important;width:var(--cine-music-width,350px);min-width:270px;max-width:calc(100vw - 24px);margin:0;display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #d6b15e88;border-radius:14px;background:linear-gradient(135deg,#111318ed,#08090bea);box-shadow:0 8px 26px #0009;backdrop-filter:blur(9px);color:#f5f0e7}
+#cineMusicPlayer{position:fixed!important;z-index:9999!important;top:16px!important;right:16px!important;left:auto!important;transform:none!important;width:var(--cine-music-width,320px);min-width:280px;max-width:calc(100vw - 24px);margin:0;display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid #d6b15e88;border-radius:12px;background:linear-gradient(135deg,#111318ed,#08090bea);box-shadow:0 8px 26px #0009;backdrop-filter:blur(9px);color:#f5f0e7}
+#cineMusicPlayer .cine-music-avatar{width:36px;height:40px}
+#cineMusicPlayer .cine-music-title{font-size:11px;margin:2px 0}
+#cineMusicPlayer .cine-music-controls{gap:3px;flex-wrap:wrap}
+#cineMusicPlayer button{width:24px;height:23px;font-size:11px}
+#cineMusicPlayer .cine-music-toggle{width:27px;height:25px}
+#cineMusicPlayer .cine-music-manage{padding:0 5px}
+#cineMusicPlayer .cine-music-size{width:22px;height:22px}
 #cineMusicPlayer[hidden]{display:none!important}
 #cineMusicPlayer .cine-music-avatar{width:44px;height:48px;flex:none;object-fit:cover;object-position:center 38%;border-radius:9px;border:1px solid #d6b15e99}
 #cineMusicPlayer .cine-music-info{min-width:0;flex:1}
@@ -1020,11 +1027,11 @@ $('cineMusicPrev').addEventListener('click',cineMusicPrev);
 (function setupCineMusicWindow(){
  const panel=$('cineMusicPlayer'),handle=$('cineMusicFilm');
  if(!panel||!handle)return;
- let width=350,pos={top:16,right:16};
- try{const saved=JSON.parse(localStorage.getItem('cineprime_music_window')||'{}');if(Number.isFinite(saved.width))width=Math.min(620,Math.max(270,saved.width));if(Number.isFinite(saved.top))pos.top=saved.top;if(Number.isFinite(saved.right))pos.right=saved.right;}catch{}
- function apply(){width=Math.min(Math.max(270,width),Math.max(270,innerWidth-24));pos.top=Math.max(8,Math.min(pos.top,innerHeight-90));pos.right=Math.max(8,Math.min(pos.right,innerWidth-120));panel.style.setProperty('--cine-music-width',width+'px');panel.style.top=pos.top+'px';panel.style.right=pos.right+'px';panel.style.left='auto';panel.style.setProperty('--cine-music-video',Math.round(Math.min(320,Math.max(150,width*.62)))+'px');try{localStorage.setItem('cineprime_music_window',JSON.stringify({width,top:pos.top,right:pos.right}))}catch{}}
- $('cineMusicSmaller').addEventListener('click',()=>{width=Math.max(270,width-40);apply();try{cineMusicPlayer?.setSize?.(Math.round(Math.min(320,Math.max(150,width*.62))),Math.round(Math.min(320,Math.max(150,width*.62))))}catch{}});
- $('cineMusicLarger').addEventListener('click',()=>{width=Math.min(620,width+40);apply();try{cineMusicPlayer?.setSize?.(Math.round(Math.min(320,Math.max(150,width*.62))),Math.round(Math.min(320,Math.max(150,width*.62))))}catch{}});
+ let width=320,pos={top:Math.max(12,innerHeight-142),right:16};
+ try{const saved=JSON.parse(localStorage.getItem('cineprime_music_window')||'{}');if(Number.isFinite(saved.width))width=Math.min(360,Math.max(280,saved.width));if(Number.isFinite(saved.top)&&saved.top>100)pos.top=saved.top;if(Number.isFinite(saved.right))pos.right=saved.right;}catch{}
+ function apply(){width=Math.min(Math.max(280,width),Math.max(280,innerWidth-24));pos.top=Math.max(8,Math.min(pos.top,innerHeight-100));pos.right=Math.max(8,Math.min(pos.right,innerWidth-120));panel.style.setProperty('--cine-music-width',width+'px');panel.style.top=pos.top+'px';panel.style.right=pos.right+'px';panel.style.left='auto';panel.style.setProperty('--cine-music-video',Math.round(Math.min(240,Math.max(140,width*.5)))+'px');try{localStorage.setItem('cineprime_music_window',JSON.stringify({width,top:pos.top,right:pos.right}))}catch{}}
+ $('cineMusicSmaller').addEventListener('click',()=>{width=Math.max(280,width-20);apply();try{cineMusicPlayer?.setSize?.(Math.round(Math.min(240,Math.max(140,width*.5))),Math.round(Math.min(240,Math.max(140,width*.5))))}catch{}});
+ $('cineMusicLarger').addEventListener('click',()=>{width=Math.min(360,width+20);apply();try{cineMusicPlayer?.setSize?.(Math.round(Math.min(240,Math.max(140,width*.5))),Math.round(Math.min(240,Math.max(140,width*.5))))}catch{}});
  let drag=null;
  handle.addEventListener('pointerdown',e=>{if(e.target.closest('button,a'))return;const r=panel.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,top:r.top,right:innerWidth-r.right};panel.classList.add('cine-music-dragging');handle.setPointerCapture?.(e.pointerId);e.preventDefault()});
  handle.addEventListener('pointermove',e=>{if(!drag)return;pos.top=drag.top+(e.clientY-drag.y);pos.right=drag.right-(e.clientX-drag.x);apply()});
