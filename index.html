@@ -337,6 +337,23 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 @media(max-width:850px){.guide-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.guide-toolbar input{grid-column:1/-1}.guide-row{grid-template-columns:54px minmax(0,1fr)}.guide-poster{width:46px;height:66px}.guide-actions{grid-column:2;justify-content:flex-start}}
 @media(max-width:480px){.guide-toolbar{grid-template-columns:1fr 1fr}.guide-row{gap:10px}.guide-synopsis{font-size:12px}.guide-actions button{flex:1}}
 
+
+#cineMusicPlayer{position:absolute;z-index:8;top:104px;right:22px;width:min(300px,calc(100% - 32px));display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #d6b15e88;border-radius:14px;background:linear-gradient(135deg,#111318ed,#08090bea);box-shadow:0 8px 26px #0009;backdrop-filter:blur(9px);color:#f5f0e7}
+#cineMusicPlayer[hidden]{display:none!important}
+#cineMusicPlayer .cine-music-avatar{width:64px;height:72px;flex:none;object-fit:cover;object-position:center 38%;border-radius:9px;border:1px solid #d6b15e99}
+#cineMusicPlayer .cine-music-info{min-width:0;flex:1}
+#cineMusicPlayer .cine-music-film{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:#d6b15e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cineMusicPlayer .cine-music-title{font-size:12px;font-weight:750;line-height:1.25;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cineMusicPlayer .cine-music-controls{display:flex;align-items:center;gap:5px}
+#cineMusicPlayer button{border:1px solid #ffffff24;background:#ffffff0d;color:#f7e6bc;border-radius:7px;width:27px;height:25px;padding:0;line-height:1}
+#cineMusicPlayer button:hover{background:#d6b15e2b}
+#cineMusicPlayer .cine-music-toggle{width:32px;height:29px;background:#d6b15e;color:#17130b;font-weight:900}
+#cineMusicPlayer .cine-music-manage{width:auto;padding:0 7px;font-size:10px}
+#cineMusicPlayer .cine-music-state{font-size:9px;color:#aaa6a0;margin-top:3px}
+#cineMusicPlayer .cine-music-open{font-size:10px;color:#d6b15e;text-decoration:none;margin-left:4px}
+#cineMusicPlayer .cine-music-hidden-player{position:absolute;width:200px;height:200px;left:-10000px;top:auto;pointer-events:none}
+@media(max-width:760px){#cineMusicPlayer{position:relative;top:auto;right:auto;width:100%;max-width:340px;margin:8px 0 8px auto}.cinema-intro{padding-bottom:12px}}
+
 /* Substituição definitiva dos refletores pela película de imagens */
 .cinema-intro>.searchlight-overlay{display:none!important;visibility:hidden!important;opacity:0!important}
 .neon-control-panel{display:none!important}
@@ -386,6 +403,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 </header>
 <section class="hero"><div><div class="cineprime-signature" aria-label="Assinatura de Marco Montanet">Marco Montanet</div></div></section>
 <div id="cinemaQuote" class="cinema-quote" aria-label="Frase de impacto" hidden><div class="cinema-quote__track"><span class="cinema-quote__item"></span><span class="cinema-quote__item" aria-hidden="true"></span></div></div>
+<aside id="cineMusicPlayer" aria-label="Player musical CinePrime" hidden><img class="cine-music-avatar" src="./john-cusack-boombox.webp" alt="John Cusack segurando um rádio boombox"><div class="cine-music-info"><div class="cine-music-film" id="cineMusicFilm">Trilha sonora do filme</div><div class="cine-music-title" id="cineMusicTitle">Nenhuma música cadastrada</div><div class="cine-music-controls"><button type="button" id="cineMusicPrev" aria-label="Música anterior" title="Anterior">◀</button><button type="button" class="cine-music-toggle" id="cineMusicPlay" aria-label="Reproduzir" title="Reproduzir">▶</button><button type="button" id="cineMusicStop" aria-label="Parar música" title="Parar">■</button><button type="button" id="cineMusicNext" aria-label="Próxima música" title="Próxima">▶|</button><button type="button" class="cine-music-manage" id="cineMusicManage" title="Gerenciar playlist" hidden>Editar</button></div><div class="cine-music-state" id="cineMusicState" role="status">Desligado</div><a class="cine-music-open" id="cineMusicOpen" href="#" target="_blank" rel="noopener noreferrer" hidden>Abrir no YouTube</a></div><div class="cine-music-hidden-player" id="cineMusicYoutube"></div></aside>
 <div id="cineprimeFilmstrip" class="cine-filmstrip" aria-label="Imagens do filme em destaque" hidden>
  <div class="cine-filmstrip-window"><div id="cineprimeFilmstripTrack" class="cine-filmstrip-track"></div></div>
 </div>
@@ -531,6 +549,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
  </form>
 </dialog>
 
+<dialog id="cineMusicManagerDialog"><div class="modalhead"><h3>Playlist musical por filme</h3><button type="button" class="btn" id="cineMusicManagerClose">✕</button></div><div class="modalbody" style="grid-template-columns:1fr"><div class="field full"><label for="cineMusicManagerFilm">Filme relacionado ao papel de parede</label><input id="cineMusicManagerFilm" readonly></div><div class="field full"><label for="cineMusicTrackName">Nome da música</label><input id="cineMusicTrackName" maxlength="140" placeholder="Ex.: Gonna Fly Now"></div><div class="field full"><label for="cineMusicTrackUrl">Link do YouTube</label><input id="cineMusicTrackUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></div><div class="field full" style="display:flex;gap:8px;flex-direction:row"><button class="btn primary" id="cineMusicAdd" type="button">Adicionar à playlist</button><span id="cineMusicManagerStatus" class="help" role="status"></span></div><div class="field full"><h4 style="margin:0">Programação cadastrada</h4><div id="cineMusicManagerList" style="display:grid;gap:8px"></div></div><div class="field full help">Cadastre links de faixas oficiais ou gravações autorizadas. Visitantes podem ouvir, mas não editar nem excluir músicas.</div></div></dialog>
 <dialog id="filmDialog">
  <form id="filmForm" autocomplete="off">
   <div class="modalhead"><h3 id="dialogTitle">Adicionar filme</h3><button type="button" class="btn" id="closeDialog">✕</button></div>
