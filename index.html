@@ -1077,7 +1077,7 @@ $('visitorButton').addEventListener('click',async()=>{
   const {data,error}=await db.functions.invoke('cineprime-visitor',{body:{password}});
   if(error)throw error;
   if(!data||!Array.isArray(data.films))throw new Error(data?.error||'Resposta inválida do serviço visitante.');
-  films=data.films.map(rowToFilm);currentUser=null;isVisitor=true;customOrder=Array.isArray(data.customOrder)?data.customOrder.map(String):[];const orderedIds=new Set(customOrder);customOrder.push(...films.map(f=>String(f.id)).filter(id=>!orderedIds.has(id)));showSagaGallery=false;
+  films=data.films.map(rowToFilm);currentUser=null;isVisitor=true;/* A Edge Function já entrega os filmes na ordem personalizada do ADM. Use a sequência recebida como fonte única para evitar divergência entre a lista e o vetor de IDs. */customOrder=films.map(f=>String(f.id));showSagaGallery=false;
   if(data.visualSettings && typeof data.visualSettings==='object'){
    visualSettings={...DEFAULT_SETTINGS,...normalizeWallpaperSettings(data.visualSettings)};
    localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));
