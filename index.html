@@ -637,7 +637,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
  <div class="modalbody">
   <div class="field full"><label for="visitorNewPassword">Nova senha</label><div style="display:flex;gap:6px;align-items:center"><input id="visitorNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Digite a nova senha (mínimo 8 caracteres)" style="flex:1;min-width:0"><button type="button" class="btn" id="toggleVisitorNewPassword" aria-label="Mostrar senha" title="Mostrar senha">👁</button></div></div>
   <div class="field full"><label for="visitorConfirmPassword">Confirmar nova senha</label><div style="display:flex;gap:6px;align-items:center"><input id="visitorConfirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Digite novamente a nova senha" style="flex:1;min-width:0"><button type="button" class="btn" id="toggleVisitorConfirmPassword" aria-label="Mostrar confirmação" title="Mostrar confirmação">👁</button></div></div>
-  <div class="field full"><div id="visitorPasswordStatus" class="help" role="status" aria-live="polite">A senha antiga deixará de funcionar assim que a nova for salva.</div></div>
+  <div class="field full"><div id="visitorPasswordStatus" class="help" role="status" aria-live="polite">A senha antiga deixará de funcionar assim que a nova for salva.</div><div class="help" style="margin-top:5px;color:#d6b15e">Rascunho salvo somente neste navegador para você consultar a última senha. Ela fica armazenada em texto neste perfil do navegador; evite usar em computador compartilhado.</div></div>
  </div>
  <div class="modalfoot"><button type="button" class="btn" id="cancelVisitorPasswordReset">Cancelar</button><button type="button" class="btn primary" id="saveVisitorPasswordReset">Salvar nova senha</button></div>
 </dialog>
@@ -1093,10 +1093,25 @@ function setupPasswordEye(inputId,buttonId){
 }
 setupPasswordEye('visitorNewPassword','toggleVisitorNewPassword');
 setupPasswordEye('visitorConfirmPassword','toggleVisitorConfirmPassword');
+const VISITOR_PASSWORD_DRAFT_KEY='cineprime_visitor_password_draft_v1';
+function readVisitorPasswordDraft(){
+ try{return localStorage.getItem(VISITOR_PASSWORD_DRAFT_KEY)||''}
+ catch(error){console.warn('Não foi possível ler o rascunho local da senha visitante:',error);return ''}
+}
+function saveVisitorPasswordDraft(password){
+ try{localStorage.setItem(VISITOR_PASSWORD_DRAFT_KEY,password);return true}
+ catch(error){console.warn('Não foi possível salvar o rascunho local da senha visitante:',error);return false}
+}
+$('visitorNewPassword').addEventListener('input',()=>{
+ const password=$('visitorNewPassword').value;
+ saveVisitorPasswordDraft(password);
+});
 $('resetVisitorPasswordBtn').addEventListener('click',()=>{
  if(!currentUser||isVisitor){toast('Entre como administrador para redefinir a senha.');return;}
- $('visitorNewPassword').value='';$('visitorConfirmPassword').value='';
- $('visitorPasswordStatus').textContent='A senha antiga deixará de funcionar assim que a nova for salva.';
+ const draft=readVisitorPasswordDraft();
+ $('visitorNewPassword').value=draft;
+ $('visitorConfirmPassword').value=draft;
+ $('visitorPasswordStatus').textContent=draft?'Última senha salva carregada do rascunho deste navegador.':'Digite a nova senha. Ela ficará no rascunho deste navegador.';
  $('saveVisitorPasswordReset').disabled=false;
  $('visitorPasswordDialog').showModal();
  $('visitorNewPassword').focus();
@@ -1117,10 +1132,11 @@ $('saveVisitorPasswordReset').addEventListener('click',async()=>{
   const {data,error}=await db.functions.invoke('cineprime-visitor-reset',{body:{password}});
   if(error)throw error;
   if(!data?.success)throw new Error(data?.error||'O serviço não confirmou a alteração.');
-  status.textContent='Senha do visitante redefinida com sucesso.';
-  toast('Senha do visitante atualizada.');
-  $('visitorNewPassword').value='';$('visitorConfirmPassword').value='';
-  setTimeout(closeVisitorPasswordDialog,900);
+  saveVisitorPasswordDraft(password);
+  $('visitorNewPassword').value=password;
+  $('visitorConfirmPassword').value=password;
+  status.textContent='Senha do visitante redefinida com sucesso. A última senha ficou no rascunho deste navegador.';
+  toast('Senha do visitante atualizada e mantida no rascunho.');
  }catch(error){
   console.error('Erro ao redefinir senha do visitante:',error);
   status.textContent='Não foi possível salvar a senha: '+(error?.message||'erro desconhecido');
