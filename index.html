@@ -338,7 +338,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 @media(max-width:480px){.guide-toolbar{grid-template-columns:1fr 1fr}.guide-row{gap:10px}.guide-synopsis{font-size:12px}.guide-actions button{flex:1}}
 
 
-#cineMusicPlayer{position:absolute!important;z-index:20!important;top:8px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(390px,calc(100% - 32px));display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #d6b15e88;border-radius:14px;background:linear-gradient(135deg,#111318ed,#08090bea);box-shadow:0 8px 26px #0009;backdrop-filter:blur(9px);color:#f5f0e7}
+#cineMusicPlayer{position:relative!important;z-index:5!important;top:auto!important;left:auto!important;right:auto!important;transform:none!important;width:min(430px,calc(100% - 24px));margin:12px auto 16px;display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #d6b15e88;border-radius:14px;background:linear-gradient(135deg,#111318ed,#08090bea);box-shadow:0 8px 26px #0009;backdrop-filter:blur(9px);color:#f5f0e7}
 #cineMusicPlayer[hidden]{display:none!important}
 #cineMusicPlayer .cine-music-avatar{width:64px;height:72px;flex:none;object-fit:cover;object-position:center 38%;border-radius:9px;border:1px solid #d6b15e99}
 #cineMusicPlayer .cine-music-info{min-width:0;flex:1}
@@ -351,8 +351,8 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 #cineMusicPlayer .cine-music-manage{width:auto;padding:0 7px;font-size:10px}
 #cineMusicPlayer .cine-music-state{font-size:9px;color:#aaa6a0;margin-top:3px}
 #cineMusicPlayer .cine-music-open{font-size:10px;color:#d6b15e;text-decoration:none;margin-left:4px}
-#cineMusicPlayer .cine-music-hidden-player{position:absolute;width:200px;height:200px;left:-10000px;top:auto;pointer-events:none}
-@media(max-width:760px){#cineMusicPlayer{position:relative!important;top:auto!important;left:auto!important;right:auto!important;transform:none!important;width:100%;max-width:390px;margin:8px auto}.cinema-intro{padding-bottom:12px}}
+#cineMusicPlayer .cine-music-hidden-player{display:none;flex:none;width:200px;height:200px;overflow:hidden;border-radius:10px;background:#000}#cineMusicPlayer.cine-music-playing .cine-music-hidden-player{display:block}#cineMusicPlayer.cine-music-playing{flex-wrap:wrap}#cineMusicPlayer.cine-music-playing .cine-music-info{flex:1 1 180px}
+@media(max-width:760px){#cineMusicPlayer{position:relative!important;top:auto!important;left:auto!important;right:auto!important;transform:none!important;width:calc(100% - 20px);max-width:430px;margin:10px auto}.cinema-intro{padding-bottom:12px}}
 
 /* Substituição definitiva dos refletores pela película de imagens */
 .cinema-intro>.searchlight-overlay{display:none!important;visibility:hidden!important;opacity:0!important}
@@ -894,14 +894,13 @@ function setAuthView(signedIn){
 
 /* Playlist musical por papel de parede — links YouTube cadastrados pelo administrador. */
 let cineMusicTracks=[],cineMusicIndex=0,cineMusicPlayer=null,cineMusicApiPromise=null,cineMusicCurrentKey='';
-// Anexa o player ao cabeçalho para centralizá-lo em relação à largura total da barra.
-const cineMusicAside=$('cineMusicPlayer');const cineTopbar=document.querySelector('.cinema-intro .topbar');if(cineMusicAside&&cineTopbar)cineTopbar.appendChild(cineMusicAside);
+// O player permanece no fluxo do cabeçalho cinematográfico, centralizado abaixo da área principal; não sobrepõe os botões de navegação.
 function cineMusicVideoId(url){try{const u=new URL(url);if(u.hostname==='youtu.be')return u.pathname.split('/').filter(Boolean)[0]||'';if(u.searchParams.get('v'))return u.searchParams.get('v');const m=u.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/);return m?.[1]||''}catch{return''}}
 function cineMusicCurrentFilm(){return String(visualSettings.carouselFilmTitle||'').trim()}
 function cineMusicRender(){
  const title=cineMusicCurrentFilm(),player=$('cineMusicPlayer');
  player.hidden=false;
- $('cineMusicFilm').textContent=title?'TRILHA SONORA · '+title:'TRILHA SONORA · CINEPRIME';
+ $('cineMusicFilm').textContent=title&&!/^https?:\/\//i.test(title)?'TRILHA SONORA · '+title:'TRILHA SONORA · CINEPRIME';
  $('cineMusicManage').hidden=!currentUser||isVisitor;
  const track=cineMusicTracks[cineMusicIndex];
  $('cineMusicTitle').textContent=track?track.track_title:'Nenhuma música cadastrada';
@@ -971,19 +970,19 @@ async function cineMusicPlay(){
  try{
   await cineMusicLoadApi();
   if(!cineMusicPlayer){
-   cineMusicPlayer=new YT.Player('cineMusicYoutube',{height:'200',width:'200',videoId:videoId,playerVars:{autoplay:1,controls:0,playsinline:1,rel:0,iv_load_policy:3},events:{
-    onReady:event=>{event.target.playVideo();$('cineMusicState').textContent='Reproduzindo';$('cineMusicPlay').textContent='Ⅱ';},
+   const playerElement=$('cineMusicPlayer');playerElement.classList.add('cine-music-playing');cineMusicPlayer=new YT.Player('cineMusicYoutube',{height:'200',width:'200',videoId:videoId,playerVars:{autoplay:1,controls:1,playsinline:1,rel:0,iv_load_policy:3,enablejsapi:1,origin:location.origin},events:{
+    onReady:event=>{playerElement.classList.add('cine-music-playing');event.target.playVideo();$('cineMusicState').textContent='Solicitando reprodução…';$('cineMusicPlay').textContent='Ⅱ';},
     onStateChange:event=>{if(event.data===YT.PlayerState.PLAYING){$('cineMusicState').textContent='Reproduzindo · '+cineMusicTracks[cineMusicIndex]?.track_title;$('cineMusicPlay').textContent='Ⅱ';}else if(event.data===YT.PlayerState.PAUSED){$('cineMusicState').textContent='Pausado';$('cineMusicPlay').textContent='▶';}else if(event.data===YT.PlayerState.ENDED){cineMusicNext(true)}},
-    onError:()=>{$('cineMusicState').textContent='Este vídeo não permite reprodução incorporada. Use “Abrir no YouTube”.';$('cineMusicOpen').hidden=false;}
+    onError:event=>{playerElement.classList.remove('cine-music-playing');$('cineMusicState').textContent='O YouTube bloqueou a reprodução incorporada (erro '+event.data+'). Use “Abrir no YouTube”.';$('cineMusicOpen').hidden=false;}
    }});
-  }else{cineMusicPlayer.loadVideoById(videoId);$('cineMusicState').textContent='Reproduzindo';$('cineMusicPlay').textContent='Ⅱ';}
+  }else{ $('cineMusicPlayer').classList.add('cine-music-playing');cineMusicPlayer.loadVideoById(videoId);$('cineMusicState').textContent='Carregando vídeo…';$('cineMusicPlay').textContent='Ⅱ';}
  }catch(error){$('cineMusicState').textContent=error.message+' Use “Abrir no YouTube”.';}
 }
 function cineMusicPauseToggle(){
  if(!cineMusicPlayer){cineMusicPlay();return}
  try{const state=cineMusicPlayer.getPlayerState();if(state===YT.PlayerState.PLAYING){cineMusicPlayer.pauseVideo();$('cineMusicState').textContent='Pausado';$('cineMusicPlay').textContent='▶';}else{cineMusicPlayer.playVideo();$('cineMusicState').textContent='Reproduzindo';$('cineMusicPlay').textContent='Ⅱ';}}catch{cineMusicPlay()}
 }
-function cineMusicStop(){if(cineMusicPlayer)try{cineMusicPlayer.stopVideo()}catch{}$('cineMusicState').textContent='Parado';$('cineMusicPlay').textContent='▶';}
+function cineMusicStop(){if(cineMusicPlayer)try{cineMusicPlayer.stopVideo()}catch{}$('cineMusicPlayer').classList.remove('cine-music-playing');$('cineMusicState').textContent='Parado';$('cineMusicPlay').textContent='▶';}
 function cineMusicNext(autoplay=false){if(!cineMusicTracks.length)return;cineMusicIndex=(cineMusicIndex+1)%cineMusicTracks.length;cineMusicRender();if(autoplay||cineMusicPlayer)cineMusicPlay()}
 function cineMusicPrev(){if(!cineMusicTracks.length)return;try{if(cineMusicPlayer&&cineMusicPlayer.getCurrentTime()>4){cineMusicPlayer.seekTo(0,true);return}}catch{}cineMusicIndex=(cineMusicIndex-1+cineMusicTracks.length)%cineMusicTracks.length;cineMusicRender();if(cineMusicPlayer)cineMusicPlay()}
 $('cineMusicPlay').addEventListener('click',cineMusicPauseToggle);
