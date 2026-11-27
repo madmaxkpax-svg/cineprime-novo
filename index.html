@@ -652,7 +652,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 <dialog id="visitorPasswordDialog" style="width:min(420px,94vw)">
  <div class="modalhead"><h3 style="margin:0">Redefinir senha do visitante</h3><button type="button" class="btn" id="closeVisitorPasswordDialog" aria-label="Fechar">✕</button></div>
  <div class="modalbody">
-  <div class="field full"><label for="visitorNewPassword">Nova senha</label><div style="display:flex;gap:6px;align-items:center"><input id="visitorNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Digite a nova senha (mínimo 8 caracteres)" style="flex:1;min-width:0"><button type="button" class="btn" id="toggleVisitorNewPassword" aria-label="Mostrar senha" title="Mostrar senha">👁</button></div></div>
+  <div class="field full"><label for="visitorNewPassword">Nova senha</label><div style="display:flex;gap:6px;align-items:center"><input id="visitorNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Digite a nova senha (mínimo 8 caracteres)" style="flex:1;min-width:0"><button type="button" class="btn" id="toggleVisitorNewPassword" aria-label="Mostrar senha" title="Mostrar senha">👁</button></div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:7px"><button type="button" class="btn" id="revealSavedVisitorPassword">👁 Mostrar senha salva</button><button type="button" class="btn" id="copyVisitorPassword">📋 Copiar senha</button><button type="button" class="btn" id="copyVisitorLink">🔗 Copiar link de acesso</button></div></div>
   <div class="field full"><label for="visitorConfirmPassword">Confirmar nova senha</label><div style="display:flex;gap:6px;align-items:center"><input id="visitorConfirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Digite novamente a nova senha" style="flex:1;min-width:0"><button type="button" class="btn" id="toggleVisitorConfirmPassword" aria-label="Mostrar confirmação" title="Mostrar confirmação">👁</button></div></div>
   <div class="field full"><div id="visitorPasswordStatus" class="help" role="status" aria-live="polite">A senha antiga deixará de funcionar assim que a nova for salva.</div><div class="help" style="margin-top:5px;color:#d6b15e">Rascunho salvo somente neste navegador para você consultar a última senha. Ela fica armazenada em texto neste perfil do navegador; evite usar em computador compartilhado.</div></div>
  </div>
@@ -1109,6 +1109,22 @@ function setupPasswordEye(inputId,buttonId){
 }
 setupPasswordEye('visitorNewPassword','toggleVisitorNewPassword');
 setupPasswordEye('visitorConfirmPassword','toggleVisitorConfirmPassword');
+$('revealSavedVisitorPassword').addEventListener('click',()=>{
+ const input=$('visitorNewPassword'),show=input.type==='password';
+ input.type=show?'text':'password';
+ $('revealSavedVisitorPassword').textContent=show?'🙈 Ocultar senha salva':'👁 Mostrar senha salva';
+ $('toggleVisitorNewPassword').textContent=show?'🙈':'👁';
+});
+async function copyVisitorText(value,successMessage){
+ if(!value){$('visitorPasswordStatus').textContent='Não há informação salva para copiar.';return;}
+ try{
+  if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(value);
+  else{const temp=document.createElement('textarea');temp.value=value;temp.style.position='fixed';temp.style.opacity='0';document.body.appendChild(temp);temp.select();const ok=document.execCommand('copy');temp.remove();if(!ok)throw new Error('Cópia não disponível neste navegador.');}
+  $('visitorPasswordStatus').textContent=successMessage;toast(successMessage);
+ }catch(error){$('visitorPasswordStatus').textContent='Não foi possível copiar automaticamente. '+(error?.message||'');}
+}
+$('copyVisitorPassword').addEventListener('click',()=>copyVisitorText(readVisitorPasswordDraft(),'Senha copiada. Compartilhe apenas com quem deve ter acesso.'));
+$('copyVisitorLink').addEventListener('click',()=>copyVisitorText(window.location.origin+window.location.pathname,'Link de acesso copiado. Envie o link junto com a senha ao visitante.'));
 const VISITOR_PASSWORD_DRAFT_KEY='cineprime_visitor_password_draft_v1';
 function readVisitorPasswordDraft(){
  try{return localStorage.getItem(VISITOR_PASSWORD_DRAFT_KEY)||''}
@@ -1118,16 +1134,17 @@ function saveVisitorPasswordDraft(password){
  try{localStorage.setItem(VISITOR_PASSWORD_DRAFT_KEY,password);return true}
  catch(error){console.warn('Não foi possível salvar o rascunho local da senha visitante:',error);return false}
 }
-$('visitorNewPassword').addEventListener('input',()=>{
- const password=$('visitorNewPassword').value;
- saveVisitorPasswordDraft(password);
-});
+// A senha só é gravada no rascunho depois que o servidor confirma a alteração.
 $('resetVisitorPasswordBtn').addEventListener('click',()=>{
  if(!currentUser||isVisitor){toast('Entre como administrador para redefinir a senha.');return;}
  const draft=readVisitorPasswordDraft();
  $('visitorNewPassword').value=draft;
  $('visitorConfirmPassword').value=draft;
- $('visitorPasswordStatus').textContent=draft?'Última senha salva carregada do rascunho deste navegador.':'Digite a nova senha. Ela ficará no rascunho deste navegador.';
+ $('visitorNewPassword').type='password';
+ $('toggleVisitorNewPassword').textContent='👁';
+ $('toggleVisitorNewPassword').setAttribute('aria-label','Mostrar senha');
+ $('revealSavedVisitorPassword').textContent='👁 Mostrar senha salva';
+ $('visitorPasswordStatus').textContent=draft?'Última senha salva carregada deste navegador. Use “Mostrar senha salva” para conferir ou “Copiar senha” para compartilhar.':'Ainda não há senha salva neste navegador. Digite uma senha e clique em “Salvar nova senha”.';
  $('saveVisitorPasswordReset').disabled=false;
  $('visitorPasswordDialog').showModal();
  $('visitorNewPassword').focus();
