@@ -161,6 +161,12 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
   .cinema-intro{min-height:520px}
   .cinema-intro .hero{padding-top:36px;padding-bottom:24px}
 }
+/* Capas um pouco menores em telas estreitas, mantendo a proporção original */
+@media(max-width:460px){
+  .genre-gallery-grid{justify-items:center}
+  .genre-gallery-grid .film{width:100%;max-width:360px;justify-self:center}
+}
+
 
 .stats.stats-below{position:relative;margin:22px 0 26px;gap:14px}
 .stats.stats-below .stat{background:rgba(18,20,27,var(--cine-stat-opacity,.38));backdrop-filter:blur(5px);border-color:#ffffff35;box-shadow:0 8px 24px #0003}
