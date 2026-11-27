@@ -1385,7 +1385,7 @@ function saveTmdbKey(value){const key=(value||'').trim();if(key)localStorage.set
 
 const CAROUSEL_BUCKET='cineprime-carousel';
 let carouselImages=[],carouselManagerFilmKey='';
-function carouselKey(title){return String(title||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100)}
+function carouselKey(title){return String(title||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,100)}
 function carouselPublicUrl(path){return db.storage.from(CAROUSEL_BUCKET).getPublicUrl(path).data.publicUrl}
 function renderFilmstrip(){
  const wrap=$('cineprimeFilmstrip'),track=$('cineprimeFilmstripTrack');
@@ -1420,7 +1420,7 @@ function renderCarouselManager(){
 async function storeCarouselFile(file,sourceUrl=''){
  if(!currentUser)throw new Error('Entre como administrador para enviar imagens.');
  if(carouselImages.length>=20)throw new Error('Este filme já possui 20 imagens.');
- if(!file||!/^image\\/(jpeg|png|webp|avif)$/.test(file.type))throw new Error('Formato inválido. Use JPG, PNG, WEBP ou AVIF.');
+ if(!file||!/^image\/(jpeg|png|webp|avif)$/.test(file.type))throw new Error('Formato inválido. Use JPG, PNG, WEBP ou AVIF.');
  if(file.size>8*1024*1024)throw new Error('A imagem ultrapassa o limite de 8 MB.');
  const ext=({ 'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/avif':'avif'})[file.type]||'jpg';
  const path=currentUser.id+'/'+carouselManagerFilmKey+'/'+Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
