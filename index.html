@@ -635,8 +635,8 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 <dialog id="visitorPasswordDialog" style="width:min(420px,94vw)">
  <div class="modalhead"><h3 style="margin:0">Redefinir senha do visitante</h3><button type="button" class="btn" id="closeVisitorPasswordDialog" aria-label="Fechar">✕</button></div>
  <div class="modalbody">
-  <div class="field full"><label for="visitorNewPassword">Nova senha</label><input id="visitorNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Digite a nova senha (mínimo 8 caracteres)"></div>
-  <div class="field full"><label for="visitorConfirmPassword">Confirmar nova senha</label><input id="visitorConfirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Digite novamente a nova senha"></div>
+  <div class="field full"><label for="visitorNewPassword">Nova senha</label><div style="display:flex;gap:6px;align-items:center"><input id="visitorNewPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Digite a nova senha (mínimo 8 caracteres)" style="flex:1;min-width:0"><button type="button" class="btn" id="toggleVisitorNewPassword" aria-label="Mostrar senha" title="Mostrar senha">👁</button></div></div>
+  <div class="field full"><label for="visitorConfirmPassword">Confirmar nova senha</label><div style="display:flex;gap:6px;align-items:center"><input id="visitorConfirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Digite novamente a nova senha" style="flex:1;min-width:0"><button type="button" class="btn" id="toggleVisitorConfirmPassword" aria-label="Mostrar confirmação" title="Mostrar confirmação">👁</button></div></div>
   <div class="field full"><div id="visitorPasswordStatus" class="help" role="status" aria-live="polite">A senha antiga deixará de funcionar assim que a nova for salva.</div></div>
  </div>
  <div class="modalfoot"><button type="button" class="btn" id="cancelVisitorPasswordReset">Cancelar</button><button type="button" class="btn primary" id="saveVisitorPasswordReset">Salvar nova senha</button></div>
@@ -1079,6 +1079,18 @@ db.auth.onAuthStateChange((event,session)=>{
   $('newPassword').focus();
  }
 });
+function setupPasswordEye(inputId,buttonId){
+ const input=$(inputId),button=$(buttonId);
+ button.addEventListener('click',()=>{
+  const show=input.type==='password';
+  input.type=show?'text':'password';
+  button.textContent=show?'🙈':'👁';
+  button.setAttribute('aria-label',show?'Ocultar senha':'Mostrar senha');
+  button.title=show?'Ocultar senha':'Mostrar senha';
+ });
+}
+setupPasswordEye('visitorNewPassword','toggleVisitorNewPassword');
+setupPasswordEye('visitorConfirmPassword','toggleVisitorConfirmPassword');
 $('resetVisitorPasswordBtn').addEventListener('click',()=>{
  if(!currentUser||isVisitor){toast('Entre como administrador para redefinir a senha.');return;}
  $('visitorNewPassword').value='';$('visitorConfirmPassword').value='';
