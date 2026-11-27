@@ -376,6 +376,12 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 /* Substituição definitiva dos refletores pela película de imagens */
 .cinema-intro>.searchlight-overlay{display:none!important;visibility:hidden!important;opacity:0!important}
 .neon-control-panel{display:none!important}
+/* Transparência discreta quando o player não está em uso */
+#cineMusicPlayer{opacity:.42;transition:opacity .28s ease,background-color .28s ease,box-shadow .28s ease}
+#cineMusicPlayer:hover,
+#cineMusicPlayer:focus-within{opacity:1}
+@media(hover:none){#cineMusicPlayer{opacity:.72}#cineMusicPlayer:focus-within{opacity:1}}
+@media(prefers-reduced-motion:reduce){#cineMusicPlayer{transition:none}}
 /* Player posicionado na faixa superior vazia indicada pelo usuário */
 #cineMusicPlayer{position:fixed!important;top:12px!important;left:50px!important;right:auto!important;bottom:auto!important;transform:none!important;width:470px!important;min-width:0!important;max-width:calc(100vw - 64px)!important;padding:5px 8px!important;gap:6px!important;border-radius:10px!important;z-index:9999!important}
 #cineMusicPlayer .cine-music-avatar{width:34px!important;height:38px!important}
