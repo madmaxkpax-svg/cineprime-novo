@@ -1050,7 +1050,7 @@ $('visitorButton').addEventListener('click',async()=>{
    applySettings();
   }
   $('sort').value='number';setAuthView(true);render();
-  $('visitorPassword').value='';await loadCarouselImages();toast('Acesso visitante liberado. Catálogo em modo somente leitura.');
+  $('visitorPassword').value='';await loadCarouselImages();await cineMusicLoadPlaylist();toast('Acesso visitante liberado. Catálogo em modo somente leitura.');
  }catch(err){
   console.error(err);$('authMessage').textContent='Não foi possível liberar o acesso. '+(err.message||'Confira a palavra-chave ou a configuração do serviço.');
  }finally{$('visitorButton').disabled=false}
