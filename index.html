@@ -338,7 +338,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 @media(max-width:480px){.guide-toolbar{grid-template-columns:1fr 1fr}.guide-row{gap:10px}.guide-synopsis{font-size:12px}.guide-actions button{flex:1}}
 
 
-#cineMusicPlayer{position:absolute;z-index:8;top:2px;left:50%;right:auto;transform:translateX(-50%);width:min(340px,calc(100% - 32px));display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #d6b15e88;border-radius:14px;background:linear-gradient(135deg,#111318ed,#08090bea);box-shadow:0 8px 26px #0009;backdrop-filter:blur(9px);color:#f5f0e7}
+#cineMusicPlayer{position:absolute!important;z-index:20!important;top:-132px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(390px,calc(100% - 32px));display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #d6b15e88;border-radius:14px;background:linear-gradient(135deg,#111318ed,#08090bea);box-shadow:0 8px 26px #0009;backdrop-filter:blur(9px);color:#f5f0e7}
 #cineMusicPlayer[hidden]{display:none!important}
 #cineMusicPlayer .cine-music-avatar{width:64px;height:72px;flex:none;object-fit:cover;object-position:center 38%;border-radius:9px;border:1px solid #d6b15e99}
 #cineMusicPlayer .cine-music-info{min-width:0;flex:1}
@@ -352,7 +352,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 #cineMusicPlayer .cine-music-state{font-size:9px;color:#aaa6a0;margin-top:3px}
 #cineMusicPlayer .cine-music-open{font-size:10px;color:#d6b15e;text-decoration:none;margin-left:4px}
 #cineMusicPlayer .cine-music-hidden-player{position:absolute;width:200px;height:200px;left:-10000px;top:auto;pointer-events:none}
-@media(max-width:760px){#cineMusicPlayer{position:relative;top:auto;left:auto;right:auto;transform:none;width:100%;max-width:340px;margin:8px 0 8px auto}.cinema-intro{padding-bottom:12px}}
+@media(max-width:760px){#cineMusicPlayer{position:relative!important;top:auto!important;left:auto!important;right:auto!important;transform:none!important;width:100%;max-width:390px;margin:8px auto}.cinema-intro{padding-bottom:12px}}
 
 /* Substituição definitiva dos refletores pela película de imagens */
 .cinema-intro>.searchlight-overlay{display:none!important;visibility:hidden!important;opacity:0!important}
@@ -894,6 +894,8 @@ function setAuthView(signedIn){
 
 /* Playlist musical por papel de parede — links YouTube cadastrados pelo administrador. */
 let cineMusicTracks=[],cineMusicIndex=0,cineMusicPlayer=null,cineMusicApiPromise=null,cineMusicCurrentKey='';
+// Anexa o player ao cabeçalho para centralizá-lo em relação à largura total da barra.
+const cineMusicAside=$('cineMusicPlayer');const cineTopbar=document.querySelector('.cinema-intro .topbar');if(cineMusicAside&&cineTopbar)cineTopbar.appendChild(cineMusicAside);
 function cineMusicVideoId(url){try{const u=new URL(url);if(u.hostname==='youtu.be')return u.pathname.split('/').filter(Boolean)[0]||'';if(u.searchParams.get('v'))return u.searchParams.get('v');const m=u.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/);return m?.[1]||''}catch{return''}}
 function cineMusicCurrentFilm(){return String(visualSettings.carouselFilmTitle||'').trim()}
 function cineMusicRender(){
