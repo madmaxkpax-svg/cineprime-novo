@@ -888,8 +888,10 @@ function setAuthView(signedIn){
   $('logoutBtn').textContent=isVisitor?'Sair da visita':'Sair';
   $('footerAccessText').textContent=isVisitor?'Modo visitante · catálogo completo em somente leitura.':'Seus dados ficam salvos na nuvem, na sua conta CinePrime.';
   document.body.classList.toggle('cine-visitor',isVisitor);
+  ['settingsBtn','importListBtn','addTop','adminSealsBtn','ledToggle','autoCoverBtn','autoTrailerBtn','autoMetadataBtn'].forEach(id=>{const el=$(id);if(el)el.hidden=isVisitor;});
  }else{
   document.body.classList.remove('cine-visitor');
+  ['settingsBtn','importListBtn','addTop','adminSealsBtn','ledToggle','autoCoverBtn','autoTrailerBtn','autoMetadataBtn'].forEach(id=>{const el=$(id);if(el)el.hidden=false;});
  }
 }
 
@@ -1063,12 +1065,13 @@ $('visitorButton').addEventListener('click',async()=>{
   const {data,error}=await db.functions.invoke('cineprime-visitor',{body:{password}});
   if(error)throw error;
   if(!data||!Array.isArray(data.films))throw new Error(data?.error||'Resposta inválida do serviço visitante.');
-  films=data.films.map(rowToFilm);currentUser=null;isVisitor=true;customOrder=[];
+  films=data.films.map(rowToFilm);currentUser=null;isVisitor=true;customOrder=Array.isArray(data.customOrder)?data.customOrder.map(String):[];showSagaGallery=false;
   if(data.visualSettings && typeof data.visualSettings==='object'){
-   visualSettings={...DEFAULT_SETTINGS,...data.visualSettings};
+   visualSettings={...DEFAULT_SETTINGS,...normalizeWallpaperSettings(data.visualSettings)};
+   localStorage.setItem(SETTINGS_KEY,JSON.stringify(visualSettings));
    applySettings();
   }
-  $('sort').value='number';setAuthView(true);render();
+  $('sort').value=customOrder.length?'custom':'number';setAuthView(true);render();
   $('visitorPassword').value='';await loadCarouselImages();await cineMusicLoadPlaylist();toast('Acesso visitante liberado. Catálogo em modo somente leitura.');
  }catch(err){
   console.error(err);$('authMessage').textContent='Não foi possível liberar o acesso. '+(err.message||'Confira a palavra-chave ou a configuração do serviço.');
