@@ -186,18 +186,18 @@ body.cine-leds-on .film:hover::before{box-shadow:0 0 7px var(--led-color),0 0 18
 
 /* Nova faixa de película: substitui os canhões de luz no cabeçalho. */
 .searchlight-overlay,.neon-control-panel{display:none!important}
-.cinema-quote{margin:0 0 2px!important;padding:7px 18px!important}
-.cine-filmstrip{position:relative;z-index:6;width:100%;margin:2px 0 0;padding:14px 0;overflow:hidden;background:linear-gradient(180deg,#09090beF,#171317f2 50%,#09090bef);border-top:1px solid #d6b15e80;border-bottom:1px solid #d6b15e80;box-shadow:0 8px 22px #0008}
+.cinema-quote{margin:0!important;padding:5px 18px!important}
+.cine-filmstrip{--cine-filmstrip-duration:34s;position:relative;z-index:6;width:100%;margin:0;padding:15px 0;overflow:hidden;background:linear-gradient(180deg,#09090b,#171317 50%,#09090b);border-top:1px solid #d6b15e80;border-bottom:1px solid #d6b15e80;box-shadow:0 8px 22px #0008}
 .cine-filmstrip[hidden]{display:none!important}
-.cine-filmstrip:before,.cine-filmstrip:after{content:"";position:absolute;left:0;right:0;height:11px;z-index:2;background:radial-gradient(ellipse at center,#0a0a0c 0 43%,transparent 47%) 0 0/28px 11px repeat-x;pointer-events:none}
-.cine-filmstrip:before{top:3px}.cine-filmstrip:after{bottom:3px}
+.cine-filmstrip:before,.cine-filmstrip:after{content:"";position:absolute;left:0;right:0;height:9px;z-index:3;background:radial-gradient(ellipse at center,#e8e2d3 0 42%,transparent 48%) 0 0/25px 9px repeat-x;pointer-events:none}
+.cine-filmstrip:before{top:2px}.cine-filmstrip:after{bottom:2px}
 .cine-filmstrip-window{overflow:hidden;width:100%;mask-image:linear-gradient(90deg,transparent,#000 2%,#000 98%,transparent)}
-.cine-filmstrip-track{display:flex;align-items:center;gap:8px;width:max-content;animation:cineFilmstripMove 34s linear infinite!important;will-change:transform}
+.cine-filmstrip-track{display:flex;align-items:center;gap:8px;width:max-content;animation:cineFilmstripMove var(--cine-filmstrip-duration,34s) linear infinite!important;will-change:transform}
 .cine-filmstrip:hover .cine-filmstrip-track{animation-play-state:paused!important}
-.cine-filmstrip-item{display:block;width:clamp(118px,14vw,178px);height:84px;flex:none;overflow:hidden;border:1px solid #d6b15e75;border-radius:4px;background:#09090b}
+.cine-filmstrip-item{display:block;width:clamp(118px,14vw,178px);height:78px;flex:none;overflow:hidden;border:1px solid #d6b15e75;border-radius:2px;background:#09090b}
 .cine-filmstrip-item img{display:block;width:100%;height:100%;object-fit:cover}
 @keyframes cineFilmstripMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media(max-width:760px){.cinema-quote{padding:6px 12px!important}.cine-filmstrip{margin-top:1px;padding:13px 0}.cine-filmstrip-item{width:132px;height:76px}}
+@media(max-width:760px){.cinema-quote{padding:4px 12px!important}.cine-filmstrip{padding:13px 0}.cine-filmstrip-item{width:132px;height:70px}}
 /* Refletores CinePrime: camada independente aplicada sobre qualquer capa. */
 .cinema-intro>.topbar,.cinema-intro>.hero{position:relative;z-index:4}
 .searchlight-overlay{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none;isolation:isolate}
@@ -462,6 +462,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
    <div class="field"><label for="backgroundColor">Cor do fundo</label><input id="backgroundColor" type="color" value="#0b0b0d"></div>
    <div class="field full"><label for="wallpaperUrl">Imagem de fundo atrás do título CinePrime (URL da imagem)</label><input id="wallpaperUrl" type="url" placeholder="https://.../imagem.jpg"><div class="help">Você pode trocar a imagem quando quiser. Ex.: uma imagem temática inspirada em O Iluminado, Scarface ou Poltergeist. Use um endereço direto de imagem.</div></div>
    <div class="field full"><label for="carouselFilmTitle">Filme relacionado ao papel de parede</label><input id="carouselFilmTitle" type="text" maxlength="120" placeholder="Ex.: Rocky Balboa"><div class="help">Este nome identifica a coleção de imagens que aparece na faixa de película abaixo da frase de efeito.</div><button type="button" class="btn" id="manageCarouselBtn" style="margin-top:9px">🎞 Gerenciar imagens do carrossel (até 20)</button></div>
+    <div class="field full"><label for="carouselSpeed">Velocidade do carrossel de imagens</label><select id="carouselSpeed"><option value="slow">Lenta</option><option value="medium">Média</option><option value="fast">Rápida</option></select><div class="help">Ajuste a velocidade da faixa de imagens. A alteração será salva junto com a aparência.</div></div>
    
    <div class="field full"><label><input id="wallpaper3dEnabled" type="checkbox" style="width:auto;vertical-align:middle;margin-right:8px">Ativar efeito 3D automático no papel de parede</label><div class="help">O CinePrime tentará analisar a imagem escolhida e separar visualmente primeiro plano e fundo. A análise é feita no navegador; imagens sem profundidade clara recebem um efeito suave de paralaxe. Respeita a preferência por movimento reduzido.</div><div id="wallpaperDepthStatus" class="help" role="status" aria-live="polite">A análise de profundidade será iniciada ao aplicar a imagem.</div></div>
    <div class="field full neon-control-panel" style="border:1px solid var(--cine-accent,#d6b15e);border-radius:14px;padding:16px;background:rgba(255,255,255,.045)">
@@ -598,7 +599,7 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 let films=[],activeFormat='Todos',editId=null,currentUser=null,customOrder=[],isVisitor=false,bulkCandidates=[],passwordRecoveryMode=false,showSagaGallery=false;
 const $=id=>document.getElementById(id);
 const SETTINGS_KEY='cineprimeVisualSettingsV1';
-const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',wallpaperUrl:'https://images2.alphacoders.com/112/thumb-1920-1122046.jpg',frameBorderColor:'#b99a58',frameTextColor:'#3b3020',frameBgColor:'#f3eee3',genrePrefix:'',order:[],quoteText:'',quoteFont:"'Cinzel',Georgia,serif",quoteColor:'#ffffff',quoteSize:'24px',wallpaperX:50,wallpaperY:38,wallpaperZoom:100,wallpaperFit:'cover',statOpacity:48,searchlightIntensity:85,searchlightColorLeft:'#00e5ff',searchlightColorRight:'#ff00cc',searchlightRainbow:false};
+const DEFAULT_SETTINGS={theme:'cinema',background:'gradient',accent:'#d6b15e',page:'#0b0b0d',columns:'5',wallpaperUrl:'https://images2.alphacoders.com/112/thumb-1920-1122046.jpg',frameBorderColor:'#b99a58',frameTextColor:'#3b3020',frameBgColor:'#f3eee3',genrePrefix:'',order:[],quoteText:'',quoteFont:"'Cinzel',Georgia,serif",quoteColor:'#ffffff',quoteSize:'24px',wallpaperX:50,wallpaperY:38,wallpaperZoom:100,wallpaperFit:'cover',carouselSpeed:'medium',statOpacity:48,searchlightIntensity:85,searchlightColorLeft:'#00e5ff',searchlightColorRight:'#ff00cc',searchlightRainbow:false};
 function normalizeWallpaperSettings(settings={}){const normalized={...settings};const oldWallpaper='https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=2000&q=85';if(!String(normalized.wallpaperUrl||'').trim()||normalized.wallpaperUrl===oldWallpaper){normalized.wallpaperUrl=DEFAULT_SETTINGS.wallpaperUrl;normalized.wallpaperFit='cover';normalized.wallpaperZoom=100;}return normalized;}
 function readSettings(){try{return {...DEFAULT_SETTINGS,...normalizeWallpaperSettings(JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}'))}}catch{return {...DEFAULT_SETTINGS}}}
 let visualSettings=readSettings();
@@ -636,7 +637,7 @@ document.querySelectorAll('.neon-preset').forEach(btn=>btn.addEventListener('cli
 function openSettings(){
  $('themeChoice').value=visualSettings.theme;$('backgroundChoice').value=visualSettings.background;
  $('accentChoice').value=visualSettings.accent;$('backgroundColor').value=visualSettings.page;
- $('columnsChoice').value=visualSettings.columns;$('searchlightIntensity').value=visualSettings.searchlightIntensity??85;$('searchlightColorLeft').value=visualSettings.searchlightColorLeft||'#00e5ff';$('searchlightColorRight').value=visualSettings.searchlightColorRight||'#ff00cc';updateNeonPreview();$('wallpaperUrl').value=visualSettings.wallpaperUrl||'';$('carouselFilmTitle').value=visualSettings.carouselFilmTitle||'';$('wallpaper3dEnabled').checked=visualSettings.wallpaper3dEnabled!==false;$('wallpaperFit').value=visualSettings.wallpaperFit||'cover';$('quoteText').value=visualSettings.quoteText||'';$('quoteFont').value=visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont;$('quoteColor').value=visualSettings.quoteColor||'#ffffff';$('quoteSize').value=visualSettings.quoteSize||'24px';$('wallpaperX').value=visualSettings.wallpaperX??50;$('wallpaperY').value=visualSettings.wallpaperY??38;$('wallpaperZoom').value=visualSettings.wallpaperZoom??100;$('statOpacity').value=visualSettings.statOpacity??48;$('opacityCount').textContent=$('statOpacity').value;$('quoteCount').textContent=$('quoteText').value.length;$('zoomCount').textContent=$('wallpaperZoom').value;$('frameBorderColor').value=visualSettings.frameBorderColor||DEFAULT_SETTINGS.frameBorderColor;$('frameTextColor').value=visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor;$('frameBgColor').value=visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor;$('genrePrefix').value=visualSettings.genrePrefix||'';$('settingsDialog').showModal();updateWallpaperPreview();
+ $('columnsChoice').value=visualSettings.columns;$('searchlightIntensity').value=visualSettings.searchlightIntensity??85;$('searchlightColorLeft').value=visualSettings.searchlightColorLeft||'#00e5ff';$('searchlightColorRight').value=visualSettings.searchlightColorRight||'#ff00cc';updateNeonPreview();$('wallpaperUrl').value=visualSettings.wallpaperUrl||'';$('carouselFilmTitle').value=visualSettings.carouselFilmTitle||'';$('carouselSpeed').value=visualSettings.carouselSpeed||'medium';$('wallpaper3dEnabled').checked=visualSettings.wallpaper3dEnabled!==false;$('wallpaperFit').value=visualSettings.wallpaperFit||'cover';$('quoteText').value=visualSettings.quoteText||'';$('quoteFont').value=visualSettings.quoteFont||DEFAULT_SETTINGS.quoteFont;$('quoteColor').value=visualSettings.quoteColor||'#ffffff';$('quoteSize').value=visualSettings.quoteSize||'24px';$('wallpaperX').value=visualSettings.wallpaperX??50;$('wallpaperY').value=visualSettings.wallpaperY??38;$('wallpaperZoom').value=visualSettings.wallpaperZoom??100;$('statOpacity').value=visualSettings.statOpacity??48;$('opacityCount').textContent=$('statOpacity').value;$('quoteCount').textContent=$('quoteText').value.length;$('zoomCount').textContent=$('wallpaperZoom').value;$('frameBorderColor').value=visualSettings.frameBorderColor||DEFAULT_SETTINGS.frameBorderColor;$('frameTextColor').value=visualSettings.frameTextColor||DEFAULT_SETTINGS.frameTextColor;$('frameBgColor').value=visualSettings.frameBgColor||DEFAULT_SETTINGS.frameBgColor;$('genrePrefix').value=visualSettings.genrePrefix||'';$('settingsDialog').showModal();updateWallpaperPreview();
 }
 // Prévia interativa do papel de parede: alterações ficam em rascunho até salvar.
 const wallpaperPreview=$('wallpaperEditorPreview');
@@ -717,7 +718,7 @@ $('settingsBtn').addEventListener('click',openSettings);
 $('closeSettings').onclick=()=>$('settingsDialog').close();
 $('resetSettings').onclick=async()=>{visualSettings={...DEFAULT_SETTINGS,order:[]};await saveSettings();openSettings();toast('Configurações padrão restauradas.')};
 $('settingsForm').addEventListener('submit',async e=>{
- e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value,wallpaperUrl:$('wallpaperUrl').value.trim(),carouselFilmTitle:$('carouselFilmTitle').value.trim(),wallpaper3dEnabled:$('wallpaper3dEnabled').checked,searchlightIntensity:Number($('searchlightIntensity').value),searchlightColorLeft:$('searchlightColorLeft').value,searchlightColorRight:$('searchlightColorRight').value,searchlightRainbow:!!visualSettings.searchlightRainbow,quoteText:$('quoteText').value.slice(0,350),quoteFont:$('quoteFont').value,quoteColor:$('quoteColor').value,quoteSize:$('quoteSize').value,wallpaperX:Number($('wallpaperX').value),wallpaperY:Number($('wallpaperY').value),wallpaperZoom:Number($('wallpaperZoom').value),wallpaperFit:$('wallpaperFit').value,statOpacity:Number($('statOpacity').value),frameBorderColor:$('frameBorderColor').value,frameTextColor:$('frameTextColor').value,frameBgColor:$('frameBgColor').value,genrePrefix:$('genrePrefix').value.trim()};
+ e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value,wallpaperUrl:$('wallpaperUrl').value.trim(),carouselFilmTitle:$('carouselFilmTitle').value.trim(),carouselSpeed:$('carouselSpeed').value,wallpaper3dEnabled:$('wallpaper3dEnabled').checked,searchlightIntensity:Number($('searchlightIntensity').value),searchlightColorLeft:$('searchlightColorLeft').value,searchlightColorRight:$('searchlightColorRight').value,searchlightRainbow:!!visualSettings.searchlightRainbow,quoteText:$('quoteText').value.slice(0,350),quoteFont:$('quoteFont').value,quoteColor:$('quoteColor').value,quoteSize:$('quoteSize').value,wallpaperX:Number($('wallpaperX').value),wallpaperY:Number($('wallpaperY').value),wallpaperZoom:Number($('wallpaperZoom').value),wallpaperFit:$('wallpaperFit').value,statOpacity:Number($('statOpacity').value),frameBorderColor:$('frameBorderColor').value,frameTextColor:$('frameTextColor').value,frameBgColor:$('frameBgColor').value,genrePrefix:$('genrePrefix').value.trim()};
  const cloudSaved=await saveSettings();await loadCarouselImages();render();$('settingsDialog').close();toast(cloudSaved?'Aparência salva na nuvem.':'Aparência aplicada neste navegador; configure a tabela no Supabase para sincronizar.');
 });
 // Aprimoramento local de imagens com Real-ESRGAN x2 (ONNX Runtime Web).
@@ -1396,7 +1397,7 @@ function renderFilmstrip(){
  if(!wrap||!track)return;
  if(!carouselImages.length){wrap.hidden=true;track.innerHTML='';return}
  const cards=carouselImages.map((item,i)=>'<div class="cine-filmstrip-item"><img loading="lazy" src="'+escAttr(item.publicUrl)+'" alt="'+escAttr(item.film_title||visualSettings.carouselFilmTitle||'Cena do filme')+' · imagem '+(i+1)+'"></div>').join('');
- track.innerHTML=cards+cards;wrap.hidden=false;
+ track.innerHTML=cards+cards;const speedMap={slow:'55s',medium:'34s',fast:'20s'};wrap.style.setProperty('--cine-filmstrip-duration',speedMap[visualSettings.carouselSpeed]||'34s');wrap.hidden=false;
 }
 async function loadCarouselImages(){
  const key=carouselKey(visualSettings.carouselFilmTitle||'');
@@ -1422,20 +1423,21 @@ function renderCarouselManager(){
  list.querySelectorAll('[data-carousel-delete]').forEach(btn=>btn.addEventListener('click',()=>deleteCarouselImage(Number(btn.dataset.carouselDelete))));
 }
 async function storeCarouselFile(file,sourceUrl=''){
- if(!currentUser)throw new Error('Entre como administrador para enviar imagens.');
- if(carouselImages.length>=20)throw new Error('Este filme já possui 20 imagens.');
- if(!file||!/^image\/(jpeg|png|webp|avif)$/.test(file.type))throw new Error('Formato inválido. Use JPG, PNG, WEBP ou AVIF.');
- if(file.size>8*1024*1024)throw new Error('A imagem ultrapassa o limite de 8 MB.');
- const ext=({ 'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/avif':'avif'})[file.type]||'jpg';
- const path=currentUser.id+'/'+carouselManagerFilmKey+'/'+Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
- $('carouselManagerStatus').textContent='Enviando imagem para a nuvem...';
- const {error:uploadError}=await db.storage.from(CAROUSEL_BUCKET).upload(path,file,{cacheControl:'31536000',contentType:file.type,upsert:false});
- if(uploadError)throw uploadError;
- const position=carouselImages.length?Math.max(...carouselImages.map(x=>Number(x.position)||0))+1:0;
- const {error:insertError}=await db.from('cineprime_carousel_images').insert({owner_id:currentUser.id,wallpaper_key:carouselManagerFilmKey,film_title:$('carouselManagerFilm').value,storage_path:path,source_url:sourceUrl||null,position});
- if(insertError){await db.storage.from(CAROUSEL_BUCKET).remove([path]);throw insertError}
- await loadCarouselImages();renderCarouselManager();
- $('carouselManagerStatus').textContent='Imagem salva permanentemente na nuvem e disponível nos seus outros navegadores.';
+  if(!currentUser)throw new Error('Entre como administrador para enviar imagens.');
+  if(!file||!/^image\/(jpeg|png|webp|avif)$/.test(file.type))throw new Error('Formato inválido. Use JPG, PNG, WEBP ou AVIF.');
+  if(file.size>8*1024*1024)throw new Error('A imagem ultrapassa o limite de 8 MB.');
+  const {count,error:countError}=await db.from('cineprime_carousel_images').select('id',{count:'exact',head:true}).eq('wallpaper_key',carouselManagerFilmKey);
+  if(countError)throw new Error('Não foi possível conferir o total de imagens: '+countError.message);
+  if(Number(count||0)>=20)throw new Error('Este filme já possui 20 imagens. Remova uma para adicionar outra.');
+  const ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/avif':'avif'})[file.type]||'jpg';
+  const path=currentUser.id+'/'+carouselManagerFilmKey+'/'+Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
+  $('carouselManagerStatus').textContent='Enviando imagem '+(Number(count||0)+1)+' de 20 para a nuvem...';
+  const {error:uploadError}=await db.storage.from(CAROUSEL_BUCKET).upload(path,file,{cacheControl:'31536000',contentType:file.type,upsert:false});
+  if(uploadError)throw uploadError;
+  const {error:insertError}=await db.from('cineprime_carousel_images').insert({owner_id:currentUser.id,wallpaper_key:carouselManagerFilmKey,film_title:$('carouselManagerFilm').value,storage_path:path,source_url:sourceUrl||null,position:Number(count||0)});
+  if(insertError){await db.storage.from(CAROUSEL_BUCKET).remove([path]);throw insertError}
+  await loadCarouselImages();renderCarouselManager();
+  $('carouselManagerStatus').textContent='Imagem '+carouselImages.length+' de 20 salva permanentemente na nuvem.';
 }
 async function deleteCarouselImage(id){
  const item=carouselImages.find(x=>Number(x.id)===id);if(!item)return;
@@ -1476,10 +1478,12 @@ $('manageCarouselBtn').addEventListener('click',()=>openCarouselManager());
 $('closeCarouselManager').addEventListener('click',()=>$('carouselManagerDialog').close());
 $('closeCarouselManagerBottom').addEventListener('click',()=>$('carouselManagerDialog').close());
 $('carouselImageFiles').addEventListener('change',async e=>{
- const files=[...e.target.files||[]];for(const file of files){if(carouselImages.length>=20){$('carouselManagerStatus').textContent='Limite de 20 imagens atingido.';break}try{await storeCarouselFile(file)}catch(err){$('carouselManagerStatus').textContent=err.message;break}}
- e.target.value='';
-});
-$('importCarouselUrl').addEventListener('click',async()=>{try{await importCarouselUrl($('carouselImageUrl').value.trim());$('carouselImageUrl').value=''}catch(e){$('carouselManagerStatus').textContent=e.message}});
+  const files=[...e.target.files||[]];let added=0;
+  for(const file of files){try{await storeCarouselFile(file);added++}catch(err){$('carouselManagerStatus').textContent=(added?'Foram adicionadas '+added+' imagem(ns). ':'')+err.message;break}}
+  if(added&&carouselImages.length<20)$('carouselManagerStatus').textContent='Concluído: '+carouselImages.length+' de 20 imagens cadastradas.';
+  e.target.value='';
+ });
+ $('importCarouselUrl').addEventListener('click',async()=>{try{await importCarouselUrl($('carouselImageUrl').value.trim());$('carouselImageUrl').value=''}catch(e){$('carouselManagerStatus').textContent=e.message}});
 $('searchCarouselTmdb').addEventListener('click',async()=>{const button=$('searchCarouselTmdb');button.disabled=true;button.textContent='Buscando...';$('carouselManagerStatus').textContent='Conectando ao TMDB e procurando imagens...';try{await searchCarouselTmdbImages()}catch(e){$('carouselManagerStatus').textContent='Não foi possível concluir a busca: '+(e?.message||'erro desconhecido')}finally{button.disabled=false;button.textContent='Buscar imagens'}});
 
 $('tmdbKey').value=getTmdbKey();
