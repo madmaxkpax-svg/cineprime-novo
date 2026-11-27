@@ -132,6 +132,7 @@ body.theme-blue .film,body.theme-blue .stat,body.theme-burgundy .film,body.theme
 }
 .cinema-intro .topbar:before{background:linear-gradient(90deg,#10151b65 0%,#10151b25 65%,#10151b20 100%)}
 .cinema-intro .hero{position:relative;flex:1 1 auto;padding-top:78px;padding-bottom:48px;min-height:165px}
+.cineprime-signature{display:inline-block;margin-top:8px;color:#e7c56f;font-family:"Brush Script MT","Segoe Script","URW Chancery L",cursive;font-size:clamp(30px,3.3vw,44px);font-style:italic;font-weight:500;line-height:1.15;letter-spacing:.4px;text-shadow:0 2px 9px #000d,0 0 18px #d6b15e35;transform:rotate(-3deg);transform-origin:left center;white-space:nowrap}
 .cinema-intro .stat{background:rgba(18,20,27,var(--cine-stat-opacity,.38));backdrop-filter:blur(5px);border-color:#ffffff35;box-shadow:0 8px 24px #0003}
 @media(max-width:760px){
   .cinema-intro{padding:10px 10px 16px;border-radius:16px;background-position:center center;min-height:560px}
@@ -383,7 +384,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
  <div class="brand"><div class="brandmark"><img src="./cineprime-favicon-oficial.ico" alt="Logo CinePrime"></div><div><h1><span style="color:var(--gold)">CINEPRIME</span></h1><div class="sub">Arquivo pessoal de cinema</div></div></div>
  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span id="signedInAs" style="color:var(--muted);font-size:12px"></span><button class="btn" id="settingsBtn" type="button">⚙ Aparência</button><button class="btn" id="logoutBtn" type="button">Sair</button><button class="btn" id="importListBtn" type="button">＋ Importar lista</button><button class="btn primary" id="addTop">＋ Adicionar filme</button></div>
 </header>
-<section class="hero"><div><div class="eyebrow">SUA COLEÇÃO. SUA HISTÓRIA.</div></div></section>
+<section class="hero"><div><div class="cineprime-signature" aria-label="Assinatura de Marco Montanet">Marco Montanet</div></div></section>
 <div id="cinemaQuote" class="cinema-quote" aria-label="Frase de impacto" hidden><div class="cinema-quote__track"><span class="cinema-quote__item"></span><span class="cinema-quote__item" aria-hidden="true"></span></div></div>
 <div id="cineprimeFilmstrip" class="cine-filmstrip" aria-label="Imagens do filme em destaque" hidden>
  <div class="cine-filmstrip-window"><div id="cineprimeFilmstripTrack" class="cine-filmstrip-track"></div></div>
