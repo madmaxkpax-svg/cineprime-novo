@@ -750,7 +750,7 @@ $('closeSettings').onclick=()=>$('settingsDialog').close();
 $('resetSettings').onclick=async()=>{visualSettings={...DEFAULT_SETTINGS,order:[]};await saveSettings();openSettings();toast('Configurações padrão restauradas.')};
 $('settingsForm').addEventListener('submit',async e=>{
  e.preventDefault();visualSettings={...visualSettings,theme:$('themeChoice').value,background:$('backgroundChoice').value,accent:$('accentChoice').value,page:$('backgroundColor').value,columns:$('columnsChoice').value,wallpaperUrl:$('wallpaperUrl').value.trim(),carouselFilmTitle:$('carouselFilmTitle').value.trim(),carouselSpeed:$('carouselSpeed').value,signatureSize:Number($('signatureSize').value),signatureColor:$('signatureColor').value,signatureX:Number($('signatureX').value),signatureY:Number($('signatureY').value),wallpaper3dEnabled:$('wallpaper3dEnabled').checked,searchlightIntensity:Number($('searchlightIntensity').value),searchlightColorLeft:$('searchlightColorLeft').value,searchlightColorRight:$('searchlightColorRight').value,searchlightRainbow:!!visualSettings.searchlightRainbow,quoteText:$('quoteText').value.slice(0,350),quoteFont:$('quoteFont').value,quoteColor:$('quoteColor').value,quoteSize:$('quoteSize').value,wallpaperX:Number($('wallpaperX').value),wallpaperY:Number($('wallpaperY').value),wallpaperZoom:Number($('wallpaperZoom').value),wallpaperFit:$('wallpaperFit').value,statOpacity:Number($('statOpacity').value),frameBorderColor:$('frameBorderColor').value,frameTextColor:$('frameTextColor').value,frameBgColor:$('frameBgColor').value,genrePrefix:$('genrePrefix').value.trim()};
- const cloudSaved=await saveSettings();await loadCarouselImages();render();$('settingsDialog').close();toast(cloudSaved?'Aparência salva na nuvem.':'Aparência aplicada neste navegador; configure a tabela no Supabase para sincronizar.');
+ const cloudSaved=await saveSettings();await loadCarouselImages();await cineMusicLoadPlaylist();render();$('settingsDialog').close();toast(cloudSaved?'Aparência salva na nuvem.':'Aparência aplicada neste navegador; configure a tabela no Supabase para sincronizar.');
 });
 // Aprimoramento local de imagens com Real-ESRGAN x2 (ONNX Runtime Web).
 let aiUpscaleInputImage=null,aiUpscaleOutputBlob=null,aiUpscaleOutputUrl=null,aiUpscaleSession=null,aiUpscaleRuntimePromise=null;
@@ -891,11 +891,113 @@ function setAuthView(signedIn){
   document.body.classList.remove('cine-visitor');
  }
 }
+
+/* Playlist musical por papel de parede — links YouTube cadastrados pelo administrador. */
+let cineMusicTracks=[],cineMusicIndex=0,cineMusicPlayer=null,cineMusicApiPromise=null,cineMusicCurrentKey='';
+function cineMusicVideoId(url){try{const u=new URL(url);if(u.hostname==='youtu.be')return u.pathname.split('/').filter(Boolean)[0]||'';if(u.searchParams.get('v'))return u.searchParams.get('v');const m=u.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/);return m?.[1]||''}catch{return''}}
+function cineMusicCurrentFilm(){return String(visualSettings.carouselFilmTitle||'').trim()}
+function cineMusicRender(){
+ const title=cineMusicCurrentFilm(),player=$('cineMusicPlayer');
+ player.hidden=!title;
+ $('cineMusicFilm').textContent=title?'TRILHA SONORA · '+title:'Trilha sonora do filme';
+ $('cineMusicManage').hidden=!currentUser||isVisitor;
+ const track=cineMusicTracks[cineMusicIndex];
+ $('cineMusicTitle').textContent=track?track.track_title:'Nenhuma música cadastrada';
+ $('cineMusicState').textContent=track?(cineMusicTracks.length+' faixa(s) na programação · desligado'):'Adicione músicas à playlist deste filme nas configurações.';
+ $('cineMusicOpen').hidden=!track;$('cineMusicOpen').href=track?.youtube_url||'#';
+ $('cineMusicPrev').disabled=!track||cineMusicTracks.length<2;
+ $('cineMusicNext').disabled=!track||cineMusicTracks.length<2;
+ $('cineMusicPlay').disabled=!track;
+ $('cineMusicPlay').textContent='▶';$('cineMusicPlay').setAttribute('aria-label','Reproduzir');
+}
+async function cineMusicLoadPlaylist(){
+ const title=cineMusicCurrentFilm(),key=norm(title);
+ cineMusicCurrentKey=key;cineMusicTracks=[];cineMusicIndex=0;
+ if(!title){cineMusicRender();return}
+ const {data,error}=await db.from('cineprime_music_tracks').select('id,film_title,track_title,youtube_url,position').eq('wallpaper_key',key).order('position',{ascending:true}).order('created_at',{ascending:true});
+ if(error){console.warn('Playlist musical indisponível:',error.message);$('cineMusicState').textContent='Não foi possível carregar a playlist.';cineMusicRender();return}
+ cineMusicTracks=data||[];cineMusicRender();
+}
+function cineMusicRenderManager(){
+ const list=$('cineMusicManagerList');
+ if(!cineMusicTracks.length){list.innerHTML='<div class="help">Nenhuma música cadastrada para este filme.</div>';return}
+ list.innerHTML=cineMusicTracks.map((t,i)=>'<div style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:9px"><div style="min-width:0;flex:1"><strong style="font-size:12px">'+esc(t.track_title)+'</strong><div class="help">Faixa '+(i+1)+' · <a href="'+escAttr(t.youtube_url)+'" target="_blank" rel="noopener noreferrer">Abrir no YouTube</a></div></div><button type="button" class="btn mini" data-music-delete="'+escAttr(t.id)+'">Excluir</button></div>').join('');
+ list.querySelectorAll('[data-music-delete]').forEach(btn=>btn.addEventListener('click',async()=>{
+  if(!currentUser||isVisitor)return;
+  if(!confirm('Excluir esta música da playlist?'))return;
+  const {error}=await db.from('cineprime_music_tracks').delete().eq('id',btn.dataset.musicDelete).eq('owner_id',currentUser.id);
+  if(error){$('cineMusicManagerStatus').textContent='Não foi possível excluir: '+error.message;return}
+  await cineMusicLoadPlaylist();cineMusicRenderManager();$('cineMusicManagerStatus').textContent='Música removida.';
+ }));
+}
+function cineMusicOpenManager(){
+ if(!currentUser||isVisitor){toast('Somente o administrador pode editar a playlist.');return}
+ const title=cineMusicCurrentFilm();
+ if(!title){toast('Informe primeiro o filme relacionado ao papel de parede em Aparência.');return}
+ $('cineMusicManagerFilm').value=title;$('cineMusicTrackName').value='';$('cineMusicTrackUrl').value='';$('cineMusicManagerStatus').textContent='';
+ cineMusicRenderManager();$('cineMusicManagerDialog').showModal();
+}
+async function cineMusicAddTrack(){
+ if(!currentUser||isVisitor)return;
+ const title=cineMusicCurrentFilm(),trackTitle=$('cineMusicTrackName').value.trim(),url=$('cineMusicTrackUrl').value.trim(),videoId=cineMusicVideoId(url);
+ if(!title){$('cineMusicManagerStatus').textContent='Defina o filme relacionado ao papel de parede.';return}
+ if(!trackTitle){$('cineMusicManagerStatus').textContent='Informe o nome da música.';return}
+ if(!videoId){$('cineMusicManagerStatus').textContent='Cole um link válido do YouTube.';return}
+ $('cineMusicAdd').disabled=true;$('cineMusicManagerStatus').textContent='Salvando na nuvem...';
+ const {error}=await db.from('cineprime_music_tracks').insert({owner_id:currentUser.id,wallpaper_key:norm(title),film_title:title,track_title:trackTitle,youtube_url:url,position:cineMusicTracks.length});
+ $('cineMusicAdd').disabled=false;
+ if(error){$('cineMusicManagerStatus').textContent='Não foi possível salvar: '+error.message;return}
+ $('cineMusicTrackName').value='';$('cineMusicTrackUrl').value='';
+ await cineMusicLoadPlaylist();cineMusicRenderManager();$('cineMusicManagerStatus').textContent='Música adicionada à programação de '+title+'.';
+}
+function cineMusicLoadApi(){
+ if(window.YT?.Player)return Promise.resolve();
+ if(cineMusicApiPromise)return cineMusicApiPromise;
+ cineMusicApiPromise=new Promise((resolve,reject)=>{
+  const previous=window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady=()=>{if(typeof previous==='function')previous();resolve()};
+  const script=document.createElement('script');script.src='https://www.youtube.com/iframe_api';script.onerror=()=>reject(new Error('Não foi possível carregar o player do YouTube.'));
+  document.head.appendChild(script);
+  setTimeout(()=>{if(window.YT?.Player)resolve();},12000);
+ });
+ return cineMusicApiPromise;
+}
+async function cineMusicPlay(){
+ const track=cineMusicTracks[cineMusicIndex];if(!track)return;
+ const videoId=cineMusicVideoId(track.youtube_url);
+ $('cineMusicState').textContent='Conectando ao YouTube...';$('cineMusicOpen').hidden=false;
+ try{
+  await cineMusicLoadApi();
+  if(!cineMusicPlayer){
+   cineMusicPlayer=new YT.Player('cineMusicYoutube',{height:'200',width:'200',videoId:videoId,playerVars:{autoplay:1,controls:0,playsinline:1,rel:0,iv_load_policy:3},events:{
+    onReady:event=>{event.target.playVideo();$('cineMusicState').textContent='Reproduzindo';$('cineMusicPlay').textContent='Ⅱ';},
+    onStateChange:event=>{if(event.data===YT.PlayerState.PLAYING){$('cineMusicState').textContent='Reproduzindo · '+cineMusicTracks[cineMusicIndex]?.track_title;$('cineMusicPlay').textContent='Ⅱ';}else if(event.data===YT.PlayerState.PAUSED){$('cineMusicState').textContent='Pausado';$('cineMusicPlay').textContent='▶';}else if(event.data===YT.PlayerState.ENDED){cineMusicNext(true)}},
+    onError:()=>{$('cineMusicState').textContent='Este vídeo não permite reprodução incorporada. Use “Abrir no YouTube”.';$('cineMusicOpen').hidden=false;}
+   }});
+  }else{cineMusicPlayer.loadVideoById(videoId);$('cineMusicState').textContent='Reproduzindo';$('cineMusicPlay').textContent='Ⅱ';}
+ }catch(error){$('cineMusicState').textContent=error.message+' Use “Abrir no YouTube”.';}
+}
+function cineMusicPauseToggle(){
+ if(!cineMusicPlayer){cineMusicPlay();return}
+ try{const state=cineMusicPlayer.getPlayerState();if(state===YT.PlayerState.PLAYING){cineMusicPlayer.pauseVideo();$('cineMusicState').textContent='Pausado';$('cineMusicPlay').textContent='▶';}else{cineMusicPlayer.playVideo();$('cineMusicState').textContent='Reproduzindo';$('cineMusicPlay').textContent='Ⅱ';}}catch{cineMusicPlay()}
+}
+function cineMusicStop(){if(cineMusicPlayer)try{cineMusicPlayer.stopVideo()}catch{}$('cineMusicState').textContent='Parado';$('cineMusicPlay').textContent='▶';}
+function cineMusicNext(autoplay=false){if(!cineMusicTracks.length)return;cineMusicIndex=(cineMusicIndex+1)%cineMusicTracks.length;cineMusicRender();if(autoplay||cineMusicPlayer)cineMusicPlay()}
+function cineMusicPrev(){if(!cineMusicTracks.length)return;try{if(cineMusicPlayer&&cineMusicPlayer.getCurrentTime()>4){cineMusicPlayer.seekTo(0,true);return}}catch{}cineMusicIndex=(cineMusicIndex-1+cineMusicTracks.length)%cineMusicTracks.length;cineMusicRender();if(cineMusicPlayer)cineMusicPlay()}
+$('cineMusicPlay').addEventListener('click',cineMusicPauseToggle);
+$('cineMusicStop').addEventListener('click',cineMusicStop);
+$('cineMusicNext').addEventListener('click',()=>cineMusicNext(true));
+$('cineMusicPrev').addEventListener('click',cineMusicPrev);
+$('cineMusicManage').addEventListener('click',cineMusicOpenManager);
+$('cineMusicManageFromSettings').addEventListener('click',()=>{cineMusicOpenManager()});
+$('cineMusicManagerClose').addEventListener('click',()=>$('cineMusicManagerDialog').close());
+$('cineMusicAdd').addEventListener('click',cineMusicAddTrack);
+
 async function refreshSession(){
  const {data,error}=await db.auth.getSession();if(error)throw error;
  currentUser=data.session?.user||null;isVisitor=false;if(!passwordRecoveryMode)setAuthView(!!currentUser);
  if(currentUser){
-  try{await loadVisualSettings();await loadFilms();await loadGuide();await loadCarouselImages()}
+  try{await loadVisualSettings();await loadFilms();await loadGuide();await loadCarouselImages();await cineMusicLoadPlaylist()}
   catch(e){console.error(e);toast('Não foi possível carregar os filmes: '+(e.message||'verifique as políticas de acesso.'))}
  }
 }
@@ -904,7 +1006,7 @@ $('loginForm').addEventListener('submit',async e=>{
  try{
   const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});
   if(error)throw error;currentUser=data.user;isVisitor=false;setAuthView(true);
-  $('authMessage').textContent='';await loadVisualSettings();await loadFilms();await loadGuide();await loadCarouselImages();toast('Login realizado.');
+  $('authMessage').textContent='';await loadVisualSettings();await loadFilms();await loadGuide();await loadCarouselImages();await cineMusicLoadPlaylist();toast('Login realizado.');
  }catch(err){$('authMessage').textContent='Não foi possível entrar. Confira o e-mail e a senha. '+(err.message||'');}
  finally{$('loginButton').disabled=false}
 });
