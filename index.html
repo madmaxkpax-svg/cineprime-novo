@@ -338,7 +338,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 @media(max-width:480px){.guide-toolbar{grid-template-columns:1fr 1fr}.guide-row{gap:10px}.guide-synopsis{font-size:12px}.guide-actions button{flex:1}}
 
 
-#cineMusicPlayer{position:absolute!important;z-index:20!important;top:-132px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(390px,calc(100% - 32px));display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #d6b15e88;border-radius:14px;background:linear-gradient(135deg,#111318ed,#08090bea);box-shadow:0 8px 26px #0009;backdrop-filter:blur(9px);color:#f5f0e7}
+#cineMusicPlayer{position:absolute!important;z-index:20!important;top:8px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(390px,calc(100% - 32px));display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid #d6b15e88;border-radius:14px;background:linear-gradient(135deg,#111318ed,#08090bea);box-shadow:0 8px 26px #0009;backdrop-filter:blur(9px);color:#f5f0e7}
 #cineMusicPlayer[hidden]{display:none!important}
 #cineMusicPlayer .cine-music-avatar{width:64px;height:72px;flex:none;object-fit:cover;object-position:center 38%;border-radius:9px;border:1px solid #d6b15e99}
 #cineMusicPlayer .cine-music-info{min-width:0;flex:1}
@@ -900,8 +900,8 @@ function cineMusicVideoId(url){try{const u=new URL(url);if(u.hostname==='youtu.b
 function cineMusicCurrentFilm(){return String(visualSettings.carouselFilmTitle||'').trim()}
 function cineMusicRender(){
  const title=cineMusicCurrentFilm(),player=$('cineMusicPlayer');
- player.hidden=!title;
- $('cineMusicFilm').textContent=title?'TRILHA SONORA · '+title:'Trilha sonora do filme';
+ player.hidden=false;
+ $('cineMusicFilm').textContent=title?'TRILHA SONORA · '+title:'TRILHA SONORA · CINEPRIME';
  $('cineMusicManage').hidden=!currentUser||isVisitor;
  const track=cineMusicTracks[cineMusicIndex];
  $('cineMusicTitle').textContent=track?track.track_title:'Nenhuma música cadastrada';
