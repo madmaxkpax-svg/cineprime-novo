@@ -394,7 +394,7 @@ body.cine-tv .resource-link{min-height:48px;font-size:14px}
 @media(max-width:600px){#cineMusicPlayer{top:8px!important;left:12px!important;right:auto!important;bottom:auto!important;width:calc(100vw - 24px)!important;max-width:calc(100vw - 24px)!important}}
 
 /* Player musical integrado: imagem temática em repouso e vídeo no mesmo espaço ao reproduzir. */
-#cineMusicPlayer{width:670px!important;max-width:calc(100vw - 68px)!important;min-height:150px!important;align-items:center!important;gap:10px!important;left:34px!important;top:16px!important;padding:7px 9px!important}
+#cineMusicPlayer{width:var(--cine-music-width,670px)!important;max-width:calc(100vw - 68px)!important;min-height:150px!important;align-items:center!important;gap:10px!important;left:34px!important;top:16px!important;padding:7px 9px!important}
 #cineMusicPlayer .cine-music-info{flex:1 1 0!important;min-width:0!important}
 #cineMusicPlayer .cine-music-avatar{width:88px!important;height:132px!important;flex:0 0 88px!important}
 #cineMusicPlayer .cine-music-visual{position:relative;flex:0 0 260px;width:260px;height:146px;overflow:hidden;border:1px solid #d6b15e99;border-radius:9px;background:#08090b}
@@ -1068,10 +1068,10 @@ $('cineMusicPrev').addEventListener('click',cineMusicPrev);
 (function setupCineMusicWindow(){
  const panel=$('cineMusicPlayer'),handle=$('cineMusicFilm');
  if(!panel||!handle)return;
- let width=470,pos={top:12,left:50};
- function apply(){width=470;panel.style.setProperty('--cine-music-width',width+'px');panel.style.top='12px';panel.style.bottom='auto';panel.style.left='50px';panel.style.right='auto';panel.style.setProperty('--cine-music-video','140px');try{localStorage.setItem('cineprime_music_window',JSON.stringify({width,position:'header-top-left'}))}catch{}}
- $('cineMusicSmaller').addEventListener('click',()=>{width=430;panel.style.width='430px';apply();});
- $('cineMusicLarger').addEventListener('click',()=>{width=470;panel.style.width='470px';apply();});
+ let width=670,pos={top:12,left:34};
+ function apply(){panel.style.setProperty('--cine-music-width',width+'px');panel.style.top='16px';panel.style.bottom='auto';panel.style.left='34px';panel.style.right='auto';panel.style.setProperty('--cine-music-video','260px');try{localStorage.setItem('cineprime_music_window',JSON.stringify({width,position:'header-top-left'}))}catch{}}
+ $('cineMusicSmaller').addEventListener('click',()=>{width=620;apply();});
+ $('cineMusicLarger').addEventListener('click',()=>{width=670;apply();});
  let drag=null;
  handle.addEventListener('pointerdown',e=>{if(e.target.closest('button,a'))return;const r=panel.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,top:r.top,right:innerWidth-r.right};panel.classList.add('cine-music-dragging');handle.setPointerCapture?.(e.pointerId);e.preventDefault()});
  handle.addEventListener('pointermove',e=>{if(!drag)return;pos.top=drag.top+(e.clientY-drag.y);pos.right=drag.right-(e.clientX-drag.x);apply()});
